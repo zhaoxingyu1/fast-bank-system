@@ -85,3 +85,10 @@
             <artifactId>seata-spring-boot-starter</artifactId>
             <version>${seata.version}</version>
         </dependency>
+
+# AMQP依赖，包含RabbitMQ
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
