@@ -12,7 +12,7 @@ spring:
 
 logging:
   level:
-    cn.itcast: debug
+    com.seckill: debug
   pattern:
     dateformat: HH:mm:ss:SSS
 mybatis-plus:

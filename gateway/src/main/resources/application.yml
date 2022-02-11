@@ -2,7 +2,7 @@ server:
   port: 10010
 logging:
   level:
-    cn.itcast: debug
+    com.seckill: debug
   pattern:
     dateformat: MM-dd HH:mm:ss:SSS
 spring:
