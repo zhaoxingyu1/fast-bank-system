@@ -8,11 +8,10 @@
     <artifactId>fast-bank-system</artifactId>
     <version>0.0.1</version>
     <modules>
+        <module>common</module>
+        <module>gateway</module>
         <module>userservice</module>
         <module>orderservice</module>
-        <module>gateway</module>
-        <module>common</module>
-        <module>product</module>
         <module>productservice</module>
     </modules>
     <packaging>pom</packaging>
