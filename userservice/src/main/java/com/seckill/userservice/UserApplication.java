@@ -1,4 +1,4 @@
-package com.seckill;
+package com.seckill.userservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
