@@ -1,4 +1,4 @@
-package com.seckill.orderservice.service;
+package com.seckill.productservice.service;
 
 import org.springframework.stereotype.Service;
 

@@ -12,6 +12,8 @@
         <module>orderservice</module>
         <module>gateway</module>
         <module>common</module>
+        <module>product</module>
+        <module>productservice</module>
     </modules>
     <packaging>pom</packaging>
 

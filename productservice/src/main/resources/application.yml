@@ -1,0 +1,21 @@
+server:
+  port: 9003
+
+spring:
+  application:
+    name: productservice
+  datasource:
+    url: jdbc:mysql://rm-8vbu4rkgv70eqp2y50o.mysql.zhangbei.rds.aliyuncs.com:3306/fast_bank_system?useSSL=false
+    username: zxy
+    password: zxy-twip&$87$^&grEhrWE94%$^234
+    driver-class-name: com.mysql.jdbc.Driver
+
+logging:
+  level:
+    com.seckill: debug
+  pattern:
+    dateformat: HH:mm:ss:SSS
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  type-aliases-package: com.seckill.productservice.entity

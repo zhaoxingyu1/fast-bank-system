@@ -1,4 +1,4 @@
-package com.seckill.orderservice.entity;
+package com.seckill.productservice.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;

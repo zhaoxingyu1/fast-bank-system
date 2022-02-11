@@ -1,8 +1,8 @@
-package com.seckill.orderservice.dao;
+package com.seckill.productservice.dao;
 
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.seckill.orderservice.entity.FinancialProductEntity;
+import com.seckill.productservice.entity.FinancialProductEntity;
 
 public interface FinancialProductDao extends BaseMapper<FinancialProductEntity> {
 
