@@ -1,4 +1,4 @@
-package com.seckill.userservice;
+package com.seckill.orderservice;
 
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
@@ -6,15 +6,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * @author zxy
- * @Classname UserApplication
- * @Date 2022/2/10 19:55
+ * @Classname OrderApplication
+ * @Date 2022/2/11 13:08
  */
-@MapperScan("com.seckill.userservice.dao")
+@MapperScan("com.seckill.orderservice.dao")
 @SpringBootApplication
-public class UserApplication {
-
+public class OrderApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(UserApplication.class, args);
+        SpringApplication.run(OrderApplication.class, args);
     }
 }
