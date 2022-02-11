@@ -31,6 +31,8 @@
         <mysql.version>5.1.47</mysql.version>
         <naocs.version>2.2.5.RELEASE</naocs.version>
         <spring-cloud.version>Hoxton.SR10</spring-cloud.version>
+        <fastjson.version>1.2.71</fastjson.version>
+        <mybatis-plus.version>3.4.2</mybatis-plus.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -69,6 +71,17 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-amqp</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
+            </dependency>
+            <!--mybatis-plus-->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>${mybatis-plus.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
