@@ -29,7 +29,7 @@ public class LoanProductService implements ILoanProductService {
     }
 
     @Override
-    public boolean deleteLoanProduct(int loanProductId) {
+    public boolean deleteLoanProduct(long loanProductId) {
         int i = loanProductDao.deleteById(loanProductId);
         if(i == 0){
             return false;
@@ -49,7 +49,7 @@ public class LoanProductService implements ILoanProductService {
     }
 
     @Override
-    public LoanProductEntity findLoanProductById(int loanProductId) {
+    public LoanProductEntity findLoanProductById(long loanProductId) {
         return loanProductDao.selectById(loanProductId);
     }
 

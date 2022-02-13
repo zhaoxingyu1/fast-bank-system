@@ -13,13 +13,13 @@ public interface IFinancialProductService{
     boolean addFinancialProduct(FinancialProductEntity financialProductEntity);
 
     //删除理财产品（根据ID）
-    boolean deleteFinancialProduct(int financialProductId);
+    boolean deleteFinancialProduct(long financialProductId);
 
     //更新理财产品
     boolean updateFinancialProduct(FinancialProductEntity financialProductEntity);
 
     //查找理财产品（根据ID）
-    FinancialProductEntity findFinancialProductById(int financialProductId);
+    FinancialProductEntity findFinancialProductById(long financialProductId);
 
     //查找所有理财产品
     List<FinancialProductEntity> findAll();

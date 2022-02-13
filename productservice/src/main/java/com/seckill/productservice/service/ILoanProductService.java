@@ -14,13 +14,13 @@ public interface ILoanProductService{
     boolean addLoanProduct(LoanProductEntity loanProductEntity);
 
     //删除贷款产品
-    boolean deleteLoanProduct(int loanProductId);
+    boolean deleteLoanProduct(long loanProductId);
 
     //更新贷款产品
     boolean updateLoanProduct(LoanProductEntity loanProductEntity);
 
     //查找贷款产品（根据ID）
-    LoanProductEntity findLoanProductById(int loanProductId);
+    LoanProductEntity findLoanProductById(long loanProductId);
 
     //查找贷款产品（所有）
     List<LoanProductEntity> findAll();

@@ -34,7 +34,7 @@ public class FinancialProductService implements IFinancialProductService {
     }
 
     @Override
-    public boolean deleteFinancialProduct(int financialProductId) {
+    public boolean deleteFinancialProduct(long financialProductId) {
         int i = financialProductDao.deleteById(financialProductId);
         if(i == 0){
             return false;
@@ -55,7 +55,7 @@ public class FinancialProductService implements IFinancialProductService {
     }
 
     @Override
-    public FinancialProductEntity findFinancialProductById(int financialProductId) {
+    public FinancialProductEntity findFinancialProductById(long financialProductId) {
         return financialProductDao.selectById(financialProductId);
     }
 
