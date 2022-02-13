@@ -7,6 +7,6 @@ import org.springframework.stereotype.Controller;
  * @Classname OrderController
  * @Date 2022/2/11 14:14
  */
-@Controller("order")
+@Controller
 public class OrderController {
 }
