@@ -1,5 +1,6 @@
 package com.seckill.orderservice.entity;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
@@ -12,6 +13,7 @@ import lombok.Data;
 @TableName("order")
 public class OrderEntity {
 
+    @TableId
     private Long orderId;
     private Long UserId;
     private Long productId;
