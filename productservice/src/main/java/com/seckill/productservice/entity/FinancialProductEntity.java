@@ -1,5 +1,6 @@
 package com.seckill.productservice.entity;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
@@ -13,6 +14,7 @@ import java.math.BigDecimal;
 @Data
 @TableName("financial_product")
 public class FinancialProductEntity {
+    @TableId
     private Long financialProductId;
     private String financialProductName;
     private BigDecimal price;
