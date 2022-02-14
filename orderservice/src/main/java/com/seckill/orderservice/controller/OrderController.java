@@ -1,12 +1,15 @@
 package com.seckill.orderservice.controller;
 
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @author zxy
- * @Classname OrderController
- * @Date 2022/2/11 14:14
+ * @author : 陈征
+ * @date : 2022-02-14 19:13
  */
-@Controller
+
+@RestController
+@RequestMapping("/order")
 public class OrderController {
+
 }

@@ -10,9 +10,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @Date 2022/2/11 13:08
  */
 @MapperScan("com.seckill.orderservice.dao")
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.seckill.orderservice", "com.seckill.common.feign"})
 public class OrderApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(OrderApplication.class, args);
     }
