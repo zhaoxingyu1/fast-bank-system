@@ -23,4 +23,7 @@ public interface IFinancialProductService{
 
     //查找所有理财产品
     List<FinancialProductEntity> findAll();
+
+    //根据产品名称查询（模糊查询）
+    List<FinancialProductEntity> findProductByName(String financialProductName);
 }

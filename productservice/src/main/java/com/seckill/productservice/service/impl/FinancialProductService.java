@@ -1,9 +1,11 @@
 package com.seckill.productservice.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.seckill.productservice.dao.FinancialProductDao;
 import com.seckill.productservice.entity.FinancialProductEntity;
 import com.seckill.productservice.service.IFinancialProductService;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -62,5 +64,12 @@ public class FinancialProductService implements IFinancialProductService {
     @Override
     public List<FinancialProductEntity> findAll() {
         return financialProductDao.selectList(null);
+    }
+
+    @Override
+    public List<FinancialProductEntity> findProductByName(String financialProductName) {
+        QueryWrapper<FinancialProductEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.like(StringUtils.isNotBlank(financialProductName),"financial_product_name",financialProductName);
+        return financialProductDao.selectList(queryWrapper);
     }
 }

@@ -100,7 +100,7 @@ public class ProductController {
      * @param id 产品ID
      * @return LoanProductEntity 产品对象
      */
-    @GetMapping("/loan/find/{id}")
+    @GetMapping("/loan/findbyid/{id}")
     public LoanProductEntity findLoanProduct(@PathVariable("id")long id){
         return loanProductService.findLoanProductById(id);
     }
@@ -109,7 +109,7 @@ public class ProductController {
      * 查找所有financial产品
      * @return List<FinancialProductEntity> financial产品列表
      */
-    @GetMapping("/financial/findAll")
+    @GetMapping("/financial/findall")
     public List<FinancialProductEntity> findAllFinancialProduct(){
         return financialProductService.findAll();
     }
@@ -118,8 +118,28 @@ public class ProductController {
      * 查找所有loan产品
      * @return List<LoanProductEntity> loan产品列表
      */
-    @GetMapping("/loan/findAll")
+    @GetMapping("/loan/findall")
     public List<LoanProductEntity> findAllLoanProduct(){
         return loanProductService.findAll();
+    }
+
+    /**
+     * 名称模糊查询financial产品
+     * @param name 查询名
+     * @return List<FinancialProductEntity> financial产品列表
+     */
+    @GetMapping("/financial/findbyname/{name}")
+    public List<FinancialProductEntity> findFinancialProductByName(@PathVariable("name")String name){
+        return financialProductService.findProductByName(name);
+    }
+
+    /**
+     * 名称模糊查询loan产品
+     * @param name 查询名
+     * @return List<LoanProductEntity> loan产品列表
+     */
+    @GetMapping("/financial/loan/{name}")
+    public List<LoanProductEntity> findLoanProductByName(@PathVariable("name")String name){
+        return loanProductService.findProductByName(name);
     }
 }
