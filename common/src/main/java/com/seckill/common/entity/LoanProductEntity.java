@@ -3,6 +3,7 @@ package com.seckill.common.entity;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 
@@ -13,11 +14,9 @@ import java.math.BigDecimal;
  */
 @Data
 @TableName("loan_product")
-public class LoanProductEntity {
+@EqualsAndHashCode(callSuper = true)
+public class LoanProductEntity extends BaseProduct{
     @TableId
     private Long loanProductId;
     private String loanProductName;
-    private BigDecimal price;
-    private Integer stock;
-    private Long ctime;
 }
