@@ -1,6 +1,6 @@
 package com.seckill.productservice.service;
 
-import com.seckill.common.entity.LoanProductEntity;
+import com.seckill.common.entity.product.LoanProductEntity;
 
 import java.util.List;
 
