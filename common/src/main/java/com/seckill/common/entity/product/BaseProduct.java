@@ -1,4 +1,4 @@
-package com.seckill.common.entity;
+package com.seckill.common.entity.product;
 
 import lombok.Data;
 

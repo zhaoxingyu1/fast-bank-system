@@ -2,7 +2,7 @@ package com.seckill.productservice.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.seckill.productservice.dao.LoanProductDao;
-import com.seckill.common.entity.LoanProductEntity;
+import com.seckill.common.entity.product.LoanProductEntity;
 import com.seckill.productservice.service.ILoanProductService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
