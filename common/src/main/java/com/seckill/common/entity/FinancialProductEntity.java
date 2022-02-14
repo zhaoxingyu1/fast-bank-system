@@ -1,4 +1,4 @@
-package com.seckill.productservice.entity;
+package com.seckill.common.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;

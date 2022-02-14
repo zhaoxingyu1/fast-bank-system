@@ -1,7 +1,7 @@
 package com.seckill.productservice.controller;
 
-import com.seckill.productservice.entity.FinancialProductEntity;
-import com.seckill.productservice.entity.LoanProductEntity;
+import com.seckill.common.entity.FinancialProductEntity;
+import com.seckill.common.entity.LoanProductEntity;
 import com.seckill.productservice.service.IFinancialProductService;
 import com.seckill.productservice.service.ILoanProductService;
 import org.springframework.beans.factory.annotation.Autowired;

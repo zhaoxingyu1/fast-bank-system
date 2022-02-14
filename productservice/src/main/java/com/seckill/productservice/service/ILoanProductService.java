@@ -1,7 +1,6 @@
 package com.seckill.productservice.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.seckill.productservice.entity.LoanProductEntity;
+import com.seckill.common.entity.LoanProductEntity;
 
 import java.util.List;
 

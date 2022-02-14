@@ -40,7 +40,11 @@
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>com.seckill</groupId>
+            <artifactId>common</artifactId>
+            <version>0.0.1</version>
+        </dependency>
     </dependencies>
     <build>
         <finalName>app</finalName>
