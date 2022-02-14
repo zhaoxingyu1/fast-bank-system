@@ -1,4 +1,4 @@
-package com.seckill.common.entity;
+package com.seckill.common.entity.order;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -14,13 +14,13 @@ import com.seckill.common.entity.product.BaseProduct;
 public class OrderEntity {
     @TableId(type = IdType.ASSIGN_UUID)
     @TableField("order_id")
-    Long orderId;
+    String orderId;
 
     @TableField("user_id")
-    Long userId;
+    String userId;
 
     @TableField("product_id")
-    Long productId;
+    String productId;
 
     @TableField(fill = FieldFill.INSERT)
     Long ctime;

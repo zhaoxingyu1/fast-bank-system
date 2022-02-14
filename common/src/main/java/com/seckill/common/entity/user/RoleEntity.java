@@ -1,5 +1,6 @@
-package com.seckill.common.entity;
+package com.seckill.common.entity.user;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -13,7 +14,7 @@ import lombok.Data;
 @TableName("role")
 public class RoleEntity {
 
-    @TableId
-    private Long roleId;
+    @TableId(type = IdType.ASSIGN_UUID)
+    private String roleId;
     private String role;
 }

@@ -1,7 +1,7 @@
 package com.seckill.orderservice.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.seckill.common.entity.OrderEntity;
+import com.seckill.common.entity.order.OrderEntity;
 
 /**
  * @author : 陈征
