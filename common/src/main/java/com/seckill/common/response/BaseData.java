@@ -1,5 +1,6 @@
 package com.seckill.common.response;
 
+import com.seckill.common.enums.CodeEnum;
 import lombok.Getter;
 
 /**
@@ -9,7 +10,7 @@ import lombok.Getter;
 
 @Getter
 public abstract class BaseData {
-    protected int code = 200;
+    protected int code = CodeEnum.OK.value();
 
     protected String msg;
 
