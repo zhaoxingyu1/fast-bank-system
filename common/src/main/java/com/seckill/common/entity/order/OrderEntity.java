@@ -10,7 +10,7 @@ import lombok.Data;
  */
 
 @Data
-@TableName("order")
+@TableName("c_order")
 public class OrderEntity {
     @TableId(type = IdType.ASSIGN_UUID)
     String orderId;

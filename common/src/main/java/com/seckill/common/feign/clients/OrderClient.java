@@ -11,8 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 
 @FeignClient("orderservice")
-@RequestMapping("/order")
 public interface OrderClient {
-    @GetMapping("/getById")
+    @GetMapping("/order/getById")
     public Object getById(Long id);
 }
