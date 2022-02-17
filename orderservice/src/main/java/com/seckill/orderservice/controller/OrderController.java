@@ -2,11 +2,14 @@ package com.seckill.orderservice.controller;
 
 import com.seckill.common.entity.order.OrderEntity;
 import com.seckill.common.feign.FeignConsts;
+import com.seckill.common.response.BaseData;
 import com.seckill.common.response.DataFactory;
 import com.seckill.common.response.SimpleData;
+import com.seckill.orderservice.exception.DuplicateOrderException;
 import com.seckill.orderservice.exception.OrderNotFoundException;
 import com.seckill.orderservice.service.OrderService;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,6 +33,12 @@ public class OrderController {
         if (request.getHeader(FeignConsts.HEADER_NAME) != null) {
             return order;
         }
+        return DataFactory.success(SimpleData.class, "ok");
+    }
+
+    @PostMapping("/create")
+    public BaseData create(OrderEntity order) throws Exception {
+        orderService.create(order);
         return DataFactory.success(SimpleData.class, "ok");
     }
 }

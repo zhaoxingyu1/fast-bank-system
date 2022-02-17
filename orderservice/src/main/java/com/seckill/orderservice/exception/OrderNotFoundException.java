@@ -5,7 +5,8 @@ package com.seckill.orderservice.exception;
  * @date : 2022-02-15 19:48
  */
 
-public class OrderNotFoundException extends Exception{
+// 订单没找到时抛出的异常
+public class OrderNotFoundException extends Exception {
     public OrderNotFoundException(String message) {
         super(message);
     }
