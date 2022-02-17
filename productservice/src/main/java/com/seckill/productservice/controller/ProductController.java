@@ -6,10 +6,7 @@ import com.seckill.productservice.service.IFinancialProductService;
 import com.seckill.productservice.service.ILoanProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -31,18 +28,18 @@ public class ProductController {
     }
 
     /**
-     * 新增产品
+     * 根据类型新增一个新产品
      * @param type 产品类型
-     * @param object 产品对象
+     * @param financialProductEntity financial产品
+     * @param loanProductEntity loan产品
      * @return 布尔值 是否成功
      */
     @PostMapping("/{type}/create")
-    public Boolean createNewProduct(@PathVariable("type") String type, Object object){
-        if (type.equals("financial")){
-            FinancialProductEntity financialProductEntity = (FinancialProductEntity) object;
+    public Boolean createNewProduct(@PathVariable("type") String type,
+                                    FinancialProductEntity financialProductEntity,LoanProductEntity loanProductEntity){
+        if(financialProductEntity.getFinancialProductName() != null){
             return financialProductService.addFinancialProduct(financialProductEntity);
-        }else if (type.equals("loan")){
-            LoanProductEntity loanProductEntity = (LoanProductEntity) object;
+        }else if (loanProductEntity.getLoanProductName() != null){
             return loanProductService.addLoanProduct(loanProductEntity);
         }else{
             return false;
@@ -53,13 +50,16 @@ public class ProductController {
      * 根据ID和产品类型，删除产品
      * @param type 产品类型
      * @param id 产品ID
+     * @param financialProductEntity financial对象
+     * @param loanProductEntity loan对象
      * @return 布尔值 是否成功
      */
     @GetMapping("/{type}/delete/{id}")
-    public Boolean deleteProduct(@PathVariable("type") String type, @PathVariable("id") Long id){
-        if (type.equals("financial")){
+    public Boolean deleteProduct(@PathVariable("type") String type, @PathVariable("id") Long id,
+                                 FinancialProductEntity financialProductEntity,LoanProductEntity loanProductEntity){
+        if (financialProductEntity.getFinancialProductName() != null){
             return financialProductService.deleteFinancialProduct(id);
-        }else if (type.equals("loan")){
+        }else if (loanProductEntity.getLoanProductName() != null){
             return loanProductService.deleteLoanProduct(id);
         }else{
             return false;
@@ -69,16 +69,16 @@ public class ProductController {
     /**
      * 更新产品
      * @param type 产品类型
-     * @param object 产品对象
+     * @param financialProductEntity financial对象
+     * @param loanProductEntity loan对象
      * @return 布尔值 是否成功
      */
     @PostMapping("/{type}/update")
-    public Boolean updateProduct(@PathVariable("type") String type, Object object){
-        if (type.equals("financial")){
-            FinancialProductEntity financialProductEntity = (FinancialProductEntity) object;
+    public Boolean updateProduct(@PathVariable("type") String type,
+                                 FinancialProductEntity financialProductEntity,LoanProductEntity loanProductEntity){
+        if (financialProductEntity.getFinancialProductName() != null){
             return financialProductService.updateFinancialProduct(financialProductEntity);
-        }else if (type.equals("loan")){
-            LoanProductEntity loanProductEntity = (LoanProductEntity) object;
+        }else if (loanProductEntity.getLoanProductName() != null){
             return loanProductService.updateLoanProduct(loanProductEntity);
         }else{
             return false;
