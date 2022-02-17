@@ -20,7 +20,11 @@ public class ListData extends BaseData {
     }
 
     @Override
-    public void parse(Object entity) {
-        this.data.add(entity);
+    public void parse(Object data) {
+        if (data instanceof List) {
+            this.data.addAll((List) data);
+        } else {
+            this.data.add(data);
+        }
     }
 }

@@ -16,7 +16,7 @@ public class SimpleData extends BaseData {
     }
 
     @Override
-    public void parse(Object entity) {
-        this.data = entity;
+    public void parse(Object data) {
+        this.data = data;
     }
 }
