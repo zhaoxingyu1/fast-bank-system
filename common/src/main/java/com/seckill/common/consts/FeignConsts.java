@@ -1,4 +1,4 @@
-package com.seckill.common.feign;
+package com.seckill.common.consts;
 
 /**
  * @author : 陈征
