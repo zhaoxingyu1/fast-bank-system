@@ -1,7 +1,7 @@
 package com.seckill.orderservice.handler;
 
 import com.seckill.common.enums.CodeEnum;
-import com.seckill.common.feign.FeignConsts;
+import com.seckill.common.consts.FeignConsts;
 import com.seckill.common.response.DataFactory;
 import com.seckill.orderservice.exception.DuplicateOrderException;
 import com.seckill.orderservice.exception.ExhaustedStockException;

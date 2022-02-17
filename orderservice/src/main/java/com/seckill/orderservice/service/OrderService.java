@@ -1,5 +1,9 @@
 package com.seckill.orderservice.service;
 
+import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.seckill.common.consts.PageConst;
 import com.seckill.common.entity.order.OrderEntity;
 import com.seckill.orderservice.dao.OrderDao;
 import com.seckill.orderservice.exception.DuplicateOrderException;
@@ -30,15 +34,32 @@ public class OrderService {
     @Resource
     private OrderDao orderDao;
 
-    public OrderEntity getById(Long id) throws OrderNotFoundException {
+    public OrderEntity getById(String id) throws OrderNotFoundException {
         if (id == null) {
             throw new OrderNotFoundException("id 为空");
         }
-        final OrderEntity orderEntity = orderDao.selectById(id);
+        OrderEntity orderEntity = orderDao.selectById(id);
+//        todo 调用产品的getbyid
+
         if (orderEntity == null) {
             throw new OrderNotFoundException("未找到. id: " + id);
         }
         return orderEntity;
+    }
+
+    public Page<OrderEntity> getByUserId(String id, int page) throws Exception {
+        if (id == null) {
+            throw new OrderNotFoundException("id 为空");
+        }
+        QueryWrapper<OrderEntity> wrapper = new QueryWrapper<OrderEntity>()
+                .eq("user_id", id)
+                .orderByDesc("ctime");
+        Page<OrderEntity> res = orderDao.selectPage(new Page<>(page, PageConst.PageSize), wrapper);
+
+        for (OrderEntity entity : res.getRecords()) {
+//            todo 调用产品的getbyid
+        }
+        return res;
     }
 
     public void create(OrderEntity order) throws Exception {
