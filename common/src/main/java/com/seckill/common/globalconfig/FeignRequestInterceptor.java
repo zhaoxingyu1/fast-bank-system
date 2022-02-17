@@ -1,5 +1,6 @@
-package com.seckill.common.feign;
+package com.seckill.common.globalconfig;
 
+import com.seckill.common.consts.FeignConsts;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import org.springframework.context.annotation.Configuration;
