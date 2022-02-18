@@ -3,8 +3,7 @@ package com.seckill.productservice.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.seckill.productservice.dao.FinancialProductDao;
 import com.seckill.common.entity.product.FinancialProductEntity;
-import com.seckill.productservice.exception.AddProductionException;
-import com.seckill.productservice.exception.AlreadyExistsProductException;
+import com.seckill.productservice.exception.*;
 import com.seckill.productservice.service.IFinancialProductService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -35,7 +34,9 @@ public class FinancialProductService implements IFinancialProductService {
         // redis插入  产品ID：库存
         ValueOperations<String, Object> opsForValue = redis.opsForValue();
 
-        FinancialProductEntity i = financialProductDao.selectById(financialProductEntity.getFinancialProductId());
+        QueryWrapper<FinancialProductEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("financial_product_name",financialProductEntity.getFinancialProductName());
+        List<FinancialProductEntity> i = financialProductDao.selectList(queryWrapper);
         if(i == null){
             int insert = financialProductDao.insert(financialProductEntity);
             if (insert == 0){
@@ -50,23 +51,30 @@ public class FinancialProductService implements IFinancialProductService {
     }
 
     @Override
-    public boolean deleteFinancialProduct(long financialProductId) {
-        int i = financialProductDao.deleteById(financialProductId);
-        if(i == 0){
-            return false;
-        }else{
-            return true;
+    public void deleteFinancialProduct(long financialProductId) throws Exception{
+        FinancialProductEntity re = financialProductDao.selectById(financialProductId);
+        if (re != null){
+            int delete = financialProductDao.deleteById(financialProductId);
+            if(delete == 0){
+                throw new DeleteProductionException("删除产品失败");
+            }
+        }else {
+            throw new NotFindProductException("找不到指定产品");
         }
+
     }
 
     //更新产品信息
     @Override
-    public boolean updateFinancialProduct(FinancialProductEntity financialProductEntity) {
-        int i = financialProductDao.updateById(financialProductEntity);
-        if(i == 0){
-            return false;
+    public void updateFinancialProduct(FinancialProductEntity financialProductEntity) throws Exception {
+        FinancialProductEntity re = financialProductDao.selectById(financialProductEntity.getFinancialProductId());
+        if(re != null){
+            int update = financialProductDao.updateById(financialProductEntity);
+            if(update == 0){
+                throw new UpdateProductionException("更新产品信息失败");
+            }
         }else{
-            return true;
+            throw new NotFindProductException("找不到指定产品");
         }
     }
 

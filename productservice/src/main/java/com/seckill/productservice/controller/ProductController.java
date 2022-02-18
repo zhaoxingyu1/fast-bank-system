@@ -34,7 +34,6 @@ public class ProductController {
      * @param type 产品类型
      * @param financialProductEntity financial产品
      * @param loanProductEntity loan产品
-     * @return 布尔值 是否成功
      */
     @PostMapping("/{type}/create")
     public Object createNewProduct(@PathVariable("type") String type,
@@ -54,18 +53,17 @@ public class ProductController {
      * @param id 产品ID
      * @param financialProductEntity financial对象
      * @param loanProductEntity loan对象
-     * @return 布尔值 是否成功
      */
     @GetMapping("/{type}/delete/{id}")
-    public Boolean deleteProduct(@PathVariable("type") String type, @PathVariable("id") Long id,
-                                 FinancialProductEntity financialProductEntity,LoanProductEntity loanProductEntity){
+    public Object deleteProduct(@PathVariable("type") String type, @PathVariable("id") Long id,
+                                 FinancialProductEntity financialProductEntity,LoanProductEntity loanProductEntity)
+    throws Exception{
         if (financialProductEntity.getFinancialProductName() != null){
-            return financialProductService.deleteFinancialProduct(id);
+            financialProductService.deleteFinancialProduct(id);
         }else if (loanProductEntity.getLoanProductName() != null){
-            return loanProductService.deleteLoanProduct(id);
-        }else{
-            return false;
+            loanProductService.deleteLoanProduct(id);
         }
+        return DataFactory.success(SimpleData.class,"ok");
     }
 
     /**
@@ -73,18 +71,17 @@ public class ProductController {
      * @param type 产品类型
      * @param financialProductEntity financial对象
      * @param loanProductEntity loan对象
-     * @return 布尔值 是否成功
      */
     @PostMapping("/{type}/update")
-    public Boolean updateProduct(@PathVariable("type") String type,
-                                 FinancialProductEntity financialProductEntity,LoanProductEntity loanProductEntity){
+    public Object updateProduct(@PathVariable("type") String type,
+                                 FinancialProductEntity financialProductEntity,LoanProductEntity loanProductEntity)
+    throws Exception{
         if (financialProductEntity.getFinancialProductName() != null){
-            return financialProductService.updateFinancialProduct(financialProductEntity);
+            financialProductService.updateFinancialProduct(financialProductEntity);
         }else if (loanProductEntity.getLoanProductName() != null){
-            return loanProductService.updateLoanProduct(loanProductEntity);
-        }else{
-            return false;
+            loanProductService.updateLoanProduct(loanProductEntity);
         }
+        return DataFactory.success(SimpleData.class,"ok");
     }
 
     /**

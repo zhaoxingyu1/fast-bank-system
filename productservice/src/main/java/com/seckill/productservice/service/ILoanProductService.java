@@ -10,13 +10,13 @@ import java.util.List;
  */
 public interface ILoanProductService{
     //新增贷款产品
-    boolean addLoanProduct(LoanProductEntity loanProductEntity);
+    void addLoanProduct(LoanProductEntity loanProductEntity) throws Exception;
 
     //删除贷款产品
-    boolean deleteLoanProduct(long loanProductId);
+    void deleteLoanProduct(long loanProductId) throws Exception;
 
     //更新贷款产品
-    boolean updateLoanProduct(LoanProductEntity loanProductEntity);
+    void updateLoanProduct(LoanProductEntity loanProductEntity) throws Exception;
 
     //查找贷款产品（根据ID）
     LoanProductEntity findLoanProductById(long loanProductId);
