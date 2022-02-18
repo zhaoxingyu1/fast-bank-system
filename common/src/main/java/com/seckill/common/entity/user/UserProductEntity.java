@@ -5,18 +5,24 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 /**
  * @author zxy
- * @Classname CreditEntity
- * @Date 2022/2/14 22:44
+ * @Classname UserProductEntity
+ * @Date 2022/2/18 19:23
  */
 @Data
-@TableName("credit")
-public class CreditEntity {
+@TableName("user_product")
+public class UserProductEntity {
 
     @TableId(type = IdType.ASSIGN_UUID)
-    private String creditId;
+    private String userProductId;
     private String userId;
-    private Integer creditStatus;
+    private String productName;
+    private BigDecimal price;
+    private Integer buyState;
+    private Integer number;
     private Long mtime;
+
 }

@@ -20,6 +20,7 @@ public class UserEntity {
     private String password;
     private String roleId;
     private String userInfoId;
+    private String userProductId;
     private Long ctime;
     @TableField(exist = false)
     private RoleEntity userRole;

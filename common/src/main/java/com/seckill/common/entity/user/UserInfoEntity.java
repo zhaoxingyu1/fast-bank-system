@@ -1,6 +1,7 @@
 package com.seckill.common.entity.user;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -15,7 +16,6 @@ import lombok.Data;
 public class UserInfoEntity {
     @TableId(type = IdType.ASSIGN_UUID)
     private String userInfoId;
-    private String role;
     private String nickname;
     private String realName;
     private Integer age;
@@ -26,7 +26,9 @@ public class UserInfoEntity {
     private Integer workingState;
     private String bankCard;
     private Integer overdue;
-    private String creditId;
+    private Integer creditStatus;
     private Long ctime;
     private Long mtime;
+
+
 }

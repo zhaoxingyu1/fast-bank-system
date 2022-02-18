@@ -1,16 +1,15 @@
 package com.seckill.userservice.service;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.seckill.common.entity.user.CreditEntity;
 import com.seckill.common.entity.user.RoleEntity;
 import com.seckill.common.entity.user.UserEntity;
 import com.seckill.common.entity.user.UserInfoEntity;
-import com.seckill.userservice.dao.CreditDao;
+import com.seckill.common.entity.user.UserProductEntity;
 import com.seckill.userservice.dao.RoleDao;
 import com.seckill.userservice.dao.UserDao;
 import com.seckill.userservice.dao.UserInfoDao;
+import com.seckill.userservice.dao.UserProductDao;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,19 +31,19 @@ public class UserService {
     @Resource
     private RoleDao roleDao;
     @Resource
-    private CreditDao creditDao;
-
+    private UserProductDao userProductDao;
 
     @Transactional
     public Boolean insertUser(UserEntity user, UserInfoEntity userInfo, RoleEntity role) {
 
         try {
-            userDao.insert(user);
             userInfoDao.insert(userInfo);
             roleDao.insert(role);
-            CreditEntity creditEntity = new CreditEntity();
-            creditEntity.setUserId(user.getUserId());
-            creditDao.insert(creditEntity);
+
+            user.setUserInfoId(userInfo.getUserInfoId());
+            user.setRoleId(role.getRoleId());
+            userDao.insert(user);
+
         } catch (Exception e) {
             return false;
         }
@@ -57,32 +56,38 @@ public class UserService {
             UserEntity user = userDao.selectById(userId);
             String userInfoId = user.getUserInfoId();
             String roleId = user.getRoleId();
-
+            String userProductId = user.getUserProductId();
             UserInfoEntity userInfoEntity = userInfoDao.selectById(userInfoId);
-            String creditId = userInfoEntity.getCreditId();
 
+            int i = userDao.deleteById(userId);
 
-            userDao.deleteById(userId);
-            userInfoDao.deleteById(userInfoId);
-            roleDao.deleteById(roleId);
-            creditDao.deleteById(creditId);
+            int i1 = userInfoDao.deleteById(userInfoId);
 
-        }catch (Exception e){
+            int i2 = roleDao.deleteById(roleId);
+
+            int i3 = userProductDao.deleteById(userProductId);
+
+            if(i<1 && i1<1 && i2<1 && i3<1){
+                new Exception();
+            }
+
+        } catch (Exception e) {
             return false;
         }
         return true;
     }
 
+    @Transactional
     public Boolean updateUserById(UserEntity user) {
+
         int i = userDao.updateById(user);
-        if (i > 0) {
+        if(i>0){
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
-    public UserEntity selectUserById(String userId){
+    public UserEntity selectUserById(String userId) {
 
         UserEntity userEntity = userDao.selectById(userId);
 
@@ -97,15 +102,16 @@ public class UserService {
 
     /**
      * 分页获取全部用户
+     *
      * @param current
      * @param size
      * @return
      */
-    public Page<UserEntity> selectAllUser(Integer current,Integer size){
+    public Page<UserEntity> selectAllUser(Integer current, Integer size) {
 
         Page<UserEntity> page = new Page<>(current - 1, size);
 
-        Page<UserEntity> userEntityPage = userDao.selectPage(page,null);
+        Page<UserEntity> userEntityPage = userDao.selectPage(page, null);
 
         List<UserEntity> userEntities = userEntityPage.getRecords();
 
@@ -122,18 +128,19 @@ public class UserService {
     }
 
     /**
-     * 根据名字模糊查询
+     * 根据名字模糊查询用户
+     *
      * @return
      */
-    public Page<UserEntity> selectUserListByName(String name,Integer current,Integer size){
+    public Page<UserEntity> selectUserListByName(String name, Integer current, Integer size) {
 
         QueryWrapper<UserEntity> wrapper = new QueryWrapper<>();
         wrapper
-                .like("username",name);
+                .like("username", name);
 
         Page<UserEntity> page = new Page<>(current - 1, size);
 
-        Page<UserEntity> userEntityPage = userDao.selectPage(page,wrapper);
+        Page<UserEntity> userEntityPage = userDao.selectPage(page, wrapper);
 
         List<UserEntity> userEntities = userEntityPage.getRecords();
 
@@ -148,7 +155,6 @@ public class UserService {
 
         return userEntityPage;
     }
-
 
 
 }
