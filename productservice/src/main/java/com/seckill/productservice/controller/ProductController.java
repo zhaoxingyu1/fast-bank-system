@@ -2,6 +2,8 @@ package com.seckill.productservice.controller;
 
 import com.seckill.common.entity.product.FinancialProductEntity;
 import com.seckill.common.entity.product.LoanProductEntity;
+import com.seckill.common.response.DataFactory;
+import com.seckill.common.response.SimpleData;
 import com.seckill.productservice.service.IFinancialProductService;
 import com.seckill.productservice.service.ILoanProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,15 +37,15 @@ public class ProductController {
      * @return 布尔值 是否成功
      */
     @PostMapping("/{type}/create")
-    public Boolean createNewProduct(@PathVariable("type") String type,
-                                    FinancialProductEntity financialProductEntity,LoanProductEntity loanProductEntity){
+    public Object createNewProduct(@PathVariable("type") String type,
+                                   FinancialProductEntity financialProductEntity,LoanProductEntity loanProductEntity)
+    throws Exception{
         if(financialProductEntity.getFinancialProductName() != null){
-            return financialProductService.addFinancialProduct(financialProductEntity);
+            financialProductService.addFinancialProduct(financialProductEntity);
         }else if (loanProductEntity.getLoanProductName() != null){
-            return loanProductService.addLoanProduct(loanProductEntity);
-        }else{
-            return false;
+            loanProductService.addLoanProduct(loanProductEntity);
         }
+        return DataFactory.success(SimpleData.class,"ok");
     }
 
     /**
