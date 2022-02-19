@@ -29,7 +29,7 @@ public class LoanProductService implements ILoanProductService {
         QueryWrapper<LoanProductEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("loan_product_name",loanProductEntity.getLoanProductName());
         List<LoanProductEntity> i = loanProductDao.selectList(queryWrapper);
-        if(i == null){
+        if(i.size() == 0){
             int insert = loanProductDao.insert(loanProductEntity);
             if (insert == 0){
                 throw new AddProductionException("添加产品失败");
