@@ -26,7 +26,8 @@ public class ProductController {
     private final ILoanProductService loanProductService;
 
     @Autowired
-    public ProductController(IFinancialProductService financialProductService, ILoanProductService loanProductService) {
+    public ProductController(IFinancialProductService financialProductService,
+                             ILoanProductService loanProductService) {
         this.financialProductService = financialProductService;
         this.loanProductService = loanProductService;
     }
@@ -39,7 +40,8 @@ public class ProductController {
      */
     @PostMapping("/{type}/create")
     public Object createNewProduct(@PathVariable("type") String type,
-                                   FinancialProductEntity financialProductEntity,LoanProductEntity loanProductEntity)
+                                   FinancialProductEntity financialProductEntity,
+                                   LoanProductEntity loanProductEntity)
     throws Exception{
         if(financialProductEntity.getFinancialProductName() != null){
             financialProductService.addFinancialProduct(financialProductEntity);
@@ -57,8 +59,10 @@ public class ProductController {
      * @param loanProductEntity loan对象
      */
     @GetMapping("/{type}/delete/{id}")
-    public Object deleteProduct(@PathVariable("type") String type, @PathVariable("id") Long id,
-                                 FinancialProductEntity financialProductEntity,LoanProductEntity loanProductEntity)
+    public Object deleteProduct(@PathVariable("type") String type,
+                                @PathVariable("id") Long id,
+                                FinancialProductEntity financialProductEntity,
+                                LoanProductEntity loanProductEntity)
     throws Exception{
         if (financialProductEntity.getFinancialProductName() != null){
             financialProductService.deleteFinancialProduct(id);
@@ -76,7 +80,8 @@ public class ProductController {
      */
     @PostMapping("/{type}/update")
     public Object updateProduct(@PathVariable("type") String type,
-                                 FinancialProductEntity financialProductEntity,LoanProductEntity loanProductEntity)
+                                FinancialProductEntity financialProductEntity,
+                                LoanProductEntity loanProductEntity)
     throws Exception{
         if (financialProductEntity.getFinancialProductName() != null){
             financialProductService.updateFinancialProduct(financialProductEntity);
@@ -87,12 +92,14 @@ public class ProductController {
     }
 
     /**
-     * 根据ID查找financial产品
+     * 根据ID查找产品
      * @param id 产品ID
-     * @return FinancialProductEntity 产品对象
+     * @param type 产品类型
+     * @return 对象 数据（单个实体）
      */
     @GetMapping("/{type}/find/{id}")
-    public Object findFinancialProduct(@PathVariable("id")long id, @PathVariable("type") String type){
+    public Object findFinancialProduct(@PathVariable("id")long id,
+                                       @PathVariable("type") String type){
         if(type.equals("financial")){
             return DataFactory.success(SimpleData.class, "ok").parseData(financialProductService.findFinancialProductById(id));
         }else if(type.equals("loan")){
@@ -102,8 +109,9 @@ public class ProductController {
     }
 
     /**
-     * 查找所有financial产品
-     * @return List<FinancialProductEntity> financial产品列表
+     * 查找所有产品
+     * @param type 产品类型
+     * @return 对象 数据（列表）
      */
     @GetMapping("/{type}/findAll")
     public Object findAllFinancialProduct(@PathVariable("type") String type){
@@ -117,9 +125,10 @@ public class ProductController {
 
 
     /**
-     * 名称模糊查询financial产品
-     * @param name 查询名
-     * @return List<FinancialProductEntity> financial产品列表
+     * 名称模糊查询产品
+     * @param name 产品名称
+     * @param type 产品类型
+     * @return 对象 数据（列表）
      */
     @GetMapping("/{type}/findByName/{name}")
     public Object findFinancialProductByName(@PathVariable("name")String name,
