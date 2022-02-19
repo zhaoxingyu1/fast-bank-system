@@ -5,9 +5,7 @@ import com.seckill.common.entity.order.OrderEntity;
 import com.seckill.common.consts.FeignConsts;
 import com.seckill.common.response.BaseData;
 import com.seckill.common.response.DataFactory;
-import com.seckill.common.response.ListData;
 import com.seckill.common.response.SimpleData;
-import com.seckill.orderservice.exception.OrderNotFoundException;
 import com.seckill.orderservice.service.OrderService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,7 +27,7 @@ public class OrderController {
     private OrderService orderService;
 
     @GetMapping("/getById")
-    public Object getById(HttpServletRequest request, String id) throws OrderNotFoundException {
+    public Object getById(HttpServletRequest request, String id) throws Exception {
         final OrderEntity order = orderService.getById(id);
         if (request.getHeader(FeignConsts.HEADER_NAME) != null) {
             return order;

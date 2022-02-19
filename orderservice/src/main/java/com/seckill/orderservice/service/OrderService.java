@@ -1,14 +1,13 @@
 package com.seckill.orderservice.service;
 
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.seckill.common.consts.PageConst;
+import com.seckill.common.consts.RabbitConsts;
 import com.seckill.common.entity.order.OrderEntity;
+import com.seckill.common.exception.ForbiddenException;
+import com.seckill.common.exception.NotFoundException;
 import com.seckill.orderservice.dao.OrderDao;
-import com.seckill.orderservice.exception.DuplicateOrderException;
-import com.seckill.orderservice.exception.ExhaustedStockException;
-import com.seckill.orderservice.exception.OrderNotFoundException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -34,22 +33,22 @@ public class OrderService {
     @Resource
     private OrderDao orderDao;
 
-    public OrderEntity getById(String id) throws OrderNotFoundException {
+    public OrderEntity getById(String id) throws Exception {
         if (id == null) {
-            throw new OrderNotFoundException("id 为空");
+            throw new NotFoundException("id 为空");
         }
         OrderEntity orderEntity = orderDao.selectById(id);
 //        todo 调用产品的getbyid
 
         if (orderEntity == null) {
-            throw new OrderNotFoundException("未找到. id: " + id);
+            throw new NotFoundException("未找到. id: " + id);
         }
         return orderEntity;
     }
 
     public Page<OrderEntity> getByUserId(String id, int page) throws Exception {
         if (id == null) {
-            throw new OrderNotFoundException("id 为空");
+            throw new NotFoundException("id 为空");
         }
         QueryWrapper<OrderEntity> wrapper = new QueryWrapper<OrderEntity>()
                 .eq("user_id", id)
@@ -63,14 +62,17 @@ public class OrderService {
     }
 
     public void create(OrderEntity order) throws Exception {
+//        todo 查询产品是否开始抢购
         ValueOperations<String, Object> ops = redis.opsForValue();
         if (ops.get(order.getUserId()) != null) {
-            throw new DuplicateOrderException("不能重复下单");
+            throw new ForbiddenException("不能重复下单");
         }
         Long decrement = ops.decrement(order.getProductId());
         if (decrement < 0) {
             ops.increment(order.getProductId());
-            throw new ExhaustedStockException("商品已卖完或者超出抢购期限");
+            throw new ForbiddenException("商品已卖完或者超出抢购期限");
         }
+//        给mq发库存减少的消息
+        rabbit.convertAndSend(RabbitConsts.PRODUCT_DECREASE_QUEUE, order.getProductId());
     }
 }
