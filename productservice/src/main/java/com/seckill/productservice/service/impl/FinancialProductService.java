@@ -37,7 +37,7 @@ public class FinancialProductService implements IFinancialProductService {
         QueryWrapper<FinancialProductEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("financial_product_name",financialProductEntity.getFinancialProductName());
         List<FinancialProductEntity> i = financialProductDao.selectList(queryWrapper);
-        if(i == null){
+        if(i.size() == 0){
             int insert = financialProductDao.insert(financialProductEntity);
             if (insert == 0){
                 throw new AddProductionException("添加产品失败");

@@ -2,7 +2,9 @@ package com.seckill.productservice.controller;
 
 import com.seckill.common.entity.product.FinancialProductEntity;
 import com.seckill.common.entity.product.LoanProductEntity;
+import com.seckill.common.enums.CodeEnum;
 import com.seckill.common.response.DataFactory;
+import com.seckill.common.response.ListData;
 import com.seckill.common.response.SimpleData;
 import com.seckill.productservice.service.IFinancialProductService;
 import com.seckill.productservice.service.ILoanProductService;
@@ -17,7 +19,7 @@ import java.util.List;
  * @Classname OrderController
  * @Date 2022/2/13 19:33
  */
-@Controller
+@RestController
 @RequestMapping("/product")
 public class ProductController {
     private final IFinancialProductService financialProductService;
@@ -89,56 +91,44 @@ public class ProductController {
      * @param id 产品ID
      * @return FinancialProductEntity 产品对象
      */
-    @GetMapping("/financial/find/{id}")
-    public FinancialProductEntity findFinancialProduct(@PathVariable("id")long id){
-        return financialProductService.findFinancialProductById(id);
-    }
-
-    /**
-     * 根据ID查找loan产品
-     * @param id 产品ID
-     * @return LoanProductEntity 产品对象
-     */
-    @GetMapping("/loan/findById/{id}")
-    public LoanProductEntity findLoanProduct(@PathVariable("id")long id){
-        return loanProductService.findLoanProductById(id);
+    @GetMapping("/{type}/find/{id}")
+    public Object findFinancialProduct(@PathVariable("id")long id, @PathVariable("type") String type){
+        if(type.equals("financial")){
+            return DataFactory.success(SimpleData.class, "ok").parseData(financialProductService.findFinancialProductById(id));
+        }else if(type.equals("loan")){
+            return DataFactory.success(SimpleData.class, "ok").parseData(loanProductService.findLoanProductById(id));
+        }
+        return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现了未知错误");
     }
 
     /**
      * 查找所有financial产品
      * @return List<FinancialProductEntity> financial产品列表
      */
-    @GetMapping("/financial/findAll")
-    public List<FinancialProductEntity> findAllFinancialProduct(){
-        return financialProductService.findAll();
+    @GetMapping("/{type}/findAll")
+    public Object findAllFinancialProduct(@PathVariable("type") String type){
+        if(type.equals("financial")){
+            return DataFactory.success(ListData.class, "ok").parseData(financialProductService.findAll());
+        }else if(type.equals("loan")){
+            return DataFactory.success(ListData.class, "ok").parseData(loanProductService.findAll());
+        }
+        return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现了未知错误");
     }
 
-    /**
-     * 查找所有loan产品
-     * @return List<LoanProductEntity> loan产品列表
-     */
-    @GetMapping("/loan/findAll")
-    public List<LoanProductEntity> findAllLoanProduct(){
-        return loanProductService.findAll();
-    }
 
     /**
      * 名称模糊查询financial产品
      * @param name 查询名
      * @return List<FinancialProductEntity> financial产品列表
      */
-    @GetMapping("/financial/findByName/{name}")
-    public List<FinancialProductEntity> findFinancialProductByName(@PathVariable("name")String name){
-        return financialProductService.findProductByName(name);
-    }
-
-    /**
-     * 名称模糊查询loan产品
-     * @param name 查询名
-     * @return List<LoanProductEntity> loan产品列表
-     */
-    @GetMapping("/financial/loan/{name}")
-    public List<LoanProductEntity> findLoanProductByName(@PathVariable("name")String name){
-        return loanProductService.findProductByName(name);
+    @GetMapping("/{type}/findByName/{name}")
+    public Object findFinancialProductByName(@PathVariable("name")String name,
+                                             @PathVariable("type") String type){
+        if(type.equals("financial")){
+            return DataFactory.success(ListData.class, "ok").parseData(financialProductService.findProductByName(name));
+        }else if(type.equals("loan")){
+            return DataFactory.success(ListData.class, "ok").parseData(loanProductService.findProductByName(name));
+        }
+        return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现了未知错误");
     }
 }
