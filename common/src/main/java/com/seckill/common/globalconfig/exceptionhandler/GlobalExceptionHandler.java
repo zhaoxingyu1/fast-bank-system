@@ -27,28 +27,12 @@ public class GlobalExceptionHandler {
         if (request.getHeader(FeignConsts.HEADER_NAME) != null) {
             return null;
         }
-        return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "未知错误");
-    }
-
-    @ResponseBody
-    @ExceptionHandler({NotFoundException.class})
-    private Object orderNotfound(HttpServletRequest request, Exception e) {
-        log.error(e.getClass().toString());
-        e.printStackTrace();
-        if (request.getHeader(FeignConsts.HEADER_NAME) != null) {
-            return null;
+        CodeEnum code = CodeEnum.INTERNAL_ERROR;
+        if (e instanceof ForbiddenException) {
+            code = CodeEnum.FORBIDDEN;
+        } else if (e instanceof NotFoundException) {
+            code = CodeEnum.NOT_FOUND;
         }
-        return DataFactory.fail(CodeEnum.NOT_FOUND, e.getMessage());
-    }
-
-    @ResponseBody
-    @ExceptionHandler({ForbiddenException.class})
-    private Object orderForbidden(HttpServletRequest request, Exception e) {
-        log.error(e.getClass().toString());
-        e.printStackTrace();
-        if (request.getHeader(FeignConsts.HEADER_NAME) != null) {
-            return null;
-        }
-        return DataFactory.fail(CodeEnum.FORBIDDEN, e.getMessage());
+        return DataFactory.fail(code, e.getMessage());
     }
 }
