@@ -1,9 +1,10 @@
 package com.seckill.productservice.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.seckill.common.exception.DatabaseOperationException;
+import com.seckill.common.exception.NotFoundException;
 import com.seckill.productservice.dao.LoanProductDao;
 import com.seckill.common.entity.product.LoanProductEntity;
-import com.seckill.productservice.exception.*;
 import com.seckill.productservice.service.ILoanProductService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -30,15 +31,17 @@ public class LoanProductService implements ILoanProductService {
         queryWrapper.eq("loan_product_name",loanProductEntity.getLoanProductName());
         List<LoanProductEntity> i = loanProductDao.selectList(queryWrapper);
         if(i.size() == 0){
+            long nowTime = System.currentTimeMillis();
+            loanProductEntity.setCtime(nowTime);
             int insert = loanProductDao.insert(loanProductEntity);
             if (insert == 0){
-                throw new AddProductionException("添加产品失败");
+                throw new DatabaseOperationException("添加产品失败");
             }else{
                 Integer count = loanProductEntity.getStock();
                 opsForValue.set(loanProductEntity.getLoanProductId(),count);
             }
         }else {
-            throw new AlreadyExistsProductException("产品已存在，无需重复添加");
+            throw new DatabaseOperationException("产品已存在，无需重复添加");
         }
     }
 
@@ -48,10 +51,10 @@ public class LoanProductService implements ILoanProductService {
         if(re != null){
             int delete = loanProductDao.deleteById(loanProductId);
             if(delete == 0){
-                throw new DeleteProductionException("删除产品失败");
+                throw new DatabaseOperationException("删除产品失败");
             }
         }else{
-            throw new NotFindProductException("找不到指定产品");
+            throw new NotFoundException("找不到指定产品");
         }
     }
 
@@ -61,10 +64,10 @@ public class LoanProductService implements ILoanProductService {
         if(re != null){
             int delete = loanProductDao.updateById(loanProductEntity);
             if(delete == 0){
-                throw new UpdateProductionException("更新产品失败");
+                throw new DatabaseOperationException("更新产品失败");
             }
         }else{
-            throw new NotFindProductException("找不到指定产品");
+            throw new NotFoundException("找不到指定产品");
         }
 
     }

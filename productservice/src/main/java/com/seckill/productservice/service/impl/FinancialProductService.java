@@ -1,9 +1,10 @@
 package com.seckill.productservice.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.seckill.common.exception.DatabaseOperationException;
+import com.seckill.common.exception.NotFoundException;
 import com.seckill.productservice.dao.FinancialProductDao;
 import com.seckill.common.entity.product.FinancialProductEntity;
-import com.seckill.productservice.exception.*;
 import com.seckill.productservice.service.IFinancialProductService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -38,15 +39,17 @@ public class FinancialProductService implements IFinancialProductService {
         queryWrapper.eq("financial_product_name",financialProductEntity.getFinancialProductName());
         List<FinancialProductEntity> i = financialProductDao.selectList(queryWrapper);
         if(i.size() == 0){
+            long nowTime = System.currentTimeMillis();
+            financialProductEntity.setCtime(nowTime);
             int insert = financialProductDao.insert(financialProductEntity);
             if (insert == 0){
-                throw new AddProductionException("添加产品失败");
+                throw new DatabaseOperationException("添加产品失败");
             }else{
                 Integer count = financialProductEntity.getStock();
                 opsForValue.set(financialProductEntity.getFinancialProductId(),count);
             }
         }else{
-            throw new AlreadyExistsProductException("产品已存在，无需重复添加");
+            throw new DatabaseOperationException("产品已存在，无需重复添加");
         }
     }
 
@@ -56,10 +59,10 @@ public class FinancialProductService implements IFinancialProductService {
         if (re != null){
             int delete = financialProductDao.deleteById(financialProductId);
             if(delete == 0){
-                throw new DeleteProductionException("删除产品失败");
+                throw new DatabaseOperationException("删除产品失败");
             }
         }else {
-            throw new NotFindProductException("找不到指定产品");
+            throw new NotFoundException("找不到指定产品");
         }
 
     }
@@ -71,10 +74,10 @@ public class FinancialProductService implements IFinancialProductService {
         if(re != null){
             int update = financialProductDao.updateById(financialProductEntity);
             if(update == 0){
-                throw new UpdateProductionException("更新产品信息失败");
+                throw new DatabaseOperationException("更新产品信息失败");
             }
         }else{
-            throw new NotFindProductException("找不到指定产品");
+            throw new NotFoundException("找不到指定产品");
         }
     }
 

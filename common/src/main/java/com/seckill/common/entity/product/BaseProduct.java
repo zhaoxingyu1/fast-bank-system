@@ -13,4 +13,6 @@ public class BaseProduct {
     private BigDecimal price;
     private Integer stock;
     private Long ctime;
+    private Long startTime;
+    private Long endTime;
 }
