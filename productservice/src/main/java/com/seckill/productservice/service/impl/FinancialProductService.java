@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author zxy
@@ -32,21 +33,20 @@ public class FinancialProductService implements IFinancialProductService {
 
     @Override
     public void addFinancialProduct(FinancialProductEntity financialProductEntity) throws Exception{
-        // redis插入  产品ID：库存
-        ValueOperations<String, Object> opsForValue = redis.opsForValue();
-
         QueryWrapper<FinancialProductEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("financial_product_name",financialProductEntity.getFinancialProductName());
         List<FinancialProductEntity> i = financialProductDao.selectList(queryWrapper);
         if(i.size() == 0){
-            long nowTime = System.currentTimeMillis();
-            financialProductEntity.setCtime(nowTime);
             int insert = financialProductDao.insert(financialProductEntity);
             if (insert == 0){
                 throw new DatabaseOperationException("添加产品失败");
             }else{
+                // redis插入  产品ID：库存
+                ValueOperations<String, Object> opsForValue = redis.opsForValue();
                 Integer count = financialProductEntity.getStock();
+                long conTime = financialProductEntity.getEndTime() - financialProductEntity.getStartTime();
                 opsForValue.set(financialProductEntity.getFinancialProductId(),count);
+                redis.expire(financialProductEntity.getFinancialProductId(), conTime, TimeUnit.MILLISECONDS);
             }
         }else{
             throw new DatabaseOperationException("产品已存在，无需重复添加");
@@ -60,6 +60,9 @@ public class FinancialProductService implements IFinancialProductService {
             int delete = financialProductDao.deleteById(financialProductId);
             if(delete == 0){
                 throw new DatabaseOperationException("删除产品失败");
+            } else {
+                //redis 删除
+                redis.delete(String.valueOf(financialProductId));
             }
         }else {
             throw new NotFoundException("找不到指定产品");

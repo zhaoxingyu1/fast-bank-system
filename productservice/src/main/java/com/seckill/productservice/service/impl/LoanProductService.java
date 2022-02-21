@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class LoanProductService implements ILoanProductService {
@@ -24,21 +25,20 @@ public class LoanProductService implements ILoanProductService {
 
     @Override
     public void addLoanProduct(LoanProductEntity loanProductEntity) throws Exception{
-        // redis插入  产品ID：库存
-        ValueOperations<String, Object> opsForValue = redis.opsForValue();
-
         QueryWrapper<LoanProductEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("loan_product_name",loanProductEntity.getLoanProductName());
         List<LoanProductEntity> i = loanProductDao.selectList(queryWrapper);
         if(i.size() == 0){
-            long nowTime = System.currentTimeMillis();
-            loanProductEntity.setCtime(nowTime);
             int insert = loanProductDao.insert(loanProductEntity);
             if (insert == 0){
                 throw new DatabaseOperationException("添加产品失败");
             }else{
+                // redis插入  产品ID：库存
+                ValueOperations<String, Object> opsForValue = redis.opsForValue();
+                long conTime = loanProductEntity.getEndTime() - loanProductEntity.getStartTime();
                 Integer count = loanProductEntity.getStock();
                 opsForValue.set(loanProductEntity.getLoanProductId(),count);
+                redis.expire(loanProductEntity.getLoanProductId(),conTime, TimeUnit.MILLISECONDS);
             }
         }else {
             throw new DatabaseOperationException("产品已存在，无需重复添加");
@@ -52,6 +52,9 @@ public class LoanProductService implements ILoanProductService {
             int delete = loanProductDao.deleteById(loanProductId);
             if(delete == 0){
                 throw new DatabaseOperationException("删除产品失败");
+            }else{
+                //redis 删除
+                redis.delete(String.valueOf(loanProductId));
             }
         }else{
             throw new NotFoundException("找不到指定产品");
