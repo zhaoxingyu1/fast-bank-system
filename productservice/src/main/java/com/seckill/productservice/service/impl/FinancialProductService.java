@@ -1,9 +1,10 @@
 package com.seckill.productservice.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.seckill.common.exception.DatabaseOperationException;
+import com.seckill.common.exception.NotFoundException;
 import com.seckill.productservice.dao.FinancialProductDao;
 import com.seckill.common.entity.product.FinancialProductEntity;
-import com.seckill.productservice.exception.*;
 import com.seckill.productservice.service.IFinancialProductService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author zxy
@@ -31,22 +33,23 @@ public class FinancialProductService implements IFinancialProductService {
 
     @Override
     public void addFinancialProduct(FinancialProductEntity financialProductEntity) throws Exception{
-        // redis插入  产品ID：库存
-        ValueOperations<String, Object> opsForValue = redis.opsForValue();
-
         QueryWrapper<FinancialProductEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("financial_product_name",financialProductEntity.getFinancialProductName());
         List<FinancialProductEntity> i = financialProductDao.selectList(queryWrapper);
         if(i.size() == 0){
             int insert = financialProductDao.insert(financialProductEntity);
             if (insert == 0){
-                throw new AddProductionException("添加产品失败");
+                throw new DatabaseOperationException("添加产品失败");
             }else{
+                // redis插入  产品ID：库存
+                ValueOperations<String, Object> opsForValue = redis.opsForValue();
                 Integer count = financialProductEntity.getStock();
+                long conTime = financialProductEntity.getEndTime() - financialProductEntity.getStartTime();
                 opsForValue.set(financialProductEntity.getFinancialProductId(),count);
+                redis.expire(financialProductEntity.getFinancialProductId(), conTime, TimeUnit.MILLISECONDS);
             }
         }else{
-            throw new AlreadyExistsProductException("产品已存在，无需重复添加");
+            throw new DatabaseOperationException("产品已存在，无需重复添加");
         }
     }
 
@@ -56,10 +59,13 @@ public class FinancialProductService implements IFinancialProductService {
         if (re != null){
             int delete = financialProductDao.deleteById(financialProductId);
             if(delete == 0){
-                throw new DeleteProductionException("删除产品失败");
+                throw new DatabaseOperationException("删除产品失败");
+            } else {
+                //redis 删除
+                redis.delete(String.valueOf(financialProductId));
             }
         }else {
-            throw new NotFindProductException("找不到指定产品");
+            throw new NotFoundException("找不到指定产品");
         }
 
     }
@@ -71,10 +77,10 @@ public class FinancialProductService implements IFinancialProductService {
         if(re != null){
             int update = financialProductDao.updateById(financialProductEntity);
             if(update == 0){
-                throw new UpdateProductionException("更新产品信息失败");
+                throw new DatabaseOperationException("更新产品信息失败");
             }
         }else{
-            throw new NotFindProductException("找不到指定产品");
+            throw new NotFoundException("找不到指定产品");
         }
     }
 
