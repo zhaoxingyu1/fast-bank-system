@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author : 陈征
@@ -55,9 +58,8 @@ public class OrderService {
                 .orderByDesc("ctime");
         Page<OrderEntity> res = orderDao.selectPage(new Page<>(page, PageConst.PageSize), wrapper);
 
-        for (OrderEntity entity : res.getRecords()) {
-//            todo 调用产品的getbyid
-        }
+        List<String> ids = res.getRecords().stream().map(OrderEntity::getProductId).collect(Collectors.toList());
+        // todo 调用产品的 getProductsBatch 方法要求根据 id 的 List 查出对应的所有产品
         return res;
     }
 
@@ -68,11 +70,10 @@ public class OrderService {
             throw new ForbiddenException("不能重复下单");
         }
         Long decrement = ops.decrement(order.getProductId());
+        assert decrement != null;
         if (decrement < 0) {
             ops.increment(order.getProductId());
             throw new ForbiddenException("商品已卖完或者超出抢购期限");
         }
-//        给mq发库存减少的消息
-        rabbit.convertAndSend(RabbitConsts.PRODUCT_DECREASE_QUEUE, order.getProductId());
     }
 }
