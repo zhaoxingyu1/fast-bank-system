@@ -46,7 +46,7 @@ public class LoanProductService implements ILoanProductService {
     }
 
     @Override
-    public void deleteLoanProduct(long loanProductId) throws Exception{
+    public void deleteLoanProduct(String loanProductId) throws Exception{
         LoanProductEntity re = loanProductDao.selectById(loanProductId);
         if(re != null){
             int delete = loanProductDao.deleteById(loanProductId);
@@ -68,6 +68,10 @@ public class LoanProductService implements ILoanProductService {
             int delete = loanProductDao.updateById(loanProductEntity);
             if(delete == 0){
                 throw new DatabaseOperationException("更新产品失败");
+            }else {
+                ValueOperations<String, Object> opsForValue = redis.opsForValue();
+                Integer stock = loanProductEntity.getStock();
+                opsForValue.set(loanProductEntity.getLoanProductId(),stock);
             }
         }else{
             throw new NotFoundException("找不到指定产品");
@@ -76,7 +80,7 @@ public class LoanProductService implements ILoanProductService {
     }
 
     @Override
-    public LoanProductEntity findLoanProductById(long loanProductId) {
+    public LoanProductEntity findLoanProductById(String loanProductId) {
         return loanProductDao.selectById(loanProductId);
     }
 

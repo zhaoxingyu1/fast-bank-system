@@ -54,7 +54,7 @@ public class FinancialProductService implements IFinancialProductService {
     }
 
     @Override
-    public void deleteFinancialProduct(long financialProductId) throws Exception{
+    public void deleteFinancialProduct(String financialProductId) throws Exception{
         FinancialProductEntity re = financialProductDao.selectById(financialProductId);
         if (re != null){
             int delete = financialProductDao.deleteById(financialProductId);
@@ -78,6 +78,10 @@ public class FinancialProductService implements IFinancialProductService {
             int update = financialProductDao.updateById(financialProductEntity);
             if(update == 0){
                 throw new DatabaseOperationException("更新产品信息失败");
+            }else{
+                ValueOperations<String, Object> opsForValue = redis.opsForValue();
+                Integer stock = financialProductEntity.getStock();
+                opsForValue.set(financialProductEntity.getFinancialProductId(),stock);
             }
         }else{
             throw new NotFoundException("找不到指定产品");
@@ -85,7 +89,7 @@ public class FinancialProductService implements IFinancialProductService {
     }
 
     @Override
-    public FinancialProductEntity findFinancialProductById(long financialProductId) {
+    public FinancialProductEntity findFinancialProductById(String financialProductId) {
         return financialProductDao.selectById(financialProductId);
     }
 

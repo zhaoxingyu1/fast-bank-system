@@ -13,13 +13,13 @@ public interface ILoanProductService{
     void addLoanProduct(LoanProductEntity loanProductEntity) throws Exception;
 
     //删除贷款产品
-    void deleteLoanProduct(long loanProductId) throws Exception;
+    void deleteLoanProduct(String loanProductId) throws Exception;
 
     //更新贷款产品
     void updateLoanProduct(LoanProductEntity loanProductEntity) throws Exception;
 
     //查找贷款产品（根据ID）
-    LoanProductEntity findLoanProductById(long loanProductId);
+    LoanProductEntity findLoanProductById(String loanProductId);
 
     //查找贷款产品（所有）
     List<LoanProductEntity> findAll();

@@ -1,5 +1,7 @@
 package com.seckill.common.entity.product;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -12,7 +14,10 @@ import java.math.BigDecimal;
 public class BaseProduct {
     private BigDecimal price;
     private Integer stock;
+
+    @TableField(fill = FieldFill.INSERT)
     private Long ctime;
+
     private Long startTime;
     private Long endTime;
 }

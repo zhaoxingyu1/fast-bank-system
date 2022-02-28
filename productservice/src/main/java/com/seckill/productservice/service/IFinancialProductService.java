@@ -13,13 +13,13 @@ public interface IFinancialProductService{
     void addFinancialProduct(FinancialProductEntity financialProductEntity) throws Exception;
 
     //删除理财产品（根据ID）
-    void deleteFinancialProduct(long financialProductId) throws Exception;
+    void deleteFinancialProduct(String financialProductId) throws Exception;
 
     //更新理财产品
     void updateFinancialProduct(FinancialProductEntity financialProductEntity) throws Exception;
 
     //查找理财产品（根据ID）
-    FinancialProductEntity findFinancialProductById(long financialProductId);
+    FinancialProductEntity findFinancialProductById(String financialProductId);
 
     //查找所有理财产品
     List<FinancialProductEntity> findAll();

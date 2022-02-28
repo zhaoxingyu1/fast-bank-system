@@ -54,20 +54,18 @@ public class ProductController {
     /**
      * 根据ID和产品类型，删除产品
      * @param type 产品类型
-     * @param id 产品ID
      * @param financialProductEntity financial对象
      * @param loanProductEntity loan对象
      */
-    @GetMapping("/{type}/delete/{id}")
+    @PostMapping("/{type}/delete")
     public Object deleteProduct(@PathVariable("type") String type,
-                                @PathVariable("id") Long id,
                                 FinancialProductEntity financialProductEntity,
                                 LoanProductEntity loanProductEntity)
     throws Exception{
         if (financialProductEntity.getFinancialProductName() != null){
-            financialProductService.deleteFinancialProduct(id);
+            financialProductService.deleteFinancialProduct(financialProductEntity.getFinancialProductId());
         }else if (loanProductEntity.getLoanProductName() != null){
-            loanProductService.deleteLoanProduct(id);
+            loanProductService.deleteLoanProduct(loanProductEntity.getLoanProductId());
         }
         return DataFactory.success(SimpleData.class,"ok");
     }
@@ -98,7 +96,7 @@ public class ProductController {
      * @return 对象 数据（单个实体）
      */
     @GetMapping("/{type}/find/{id}")
-    public Object findFinancialProduct(@PathVariable("id")long id,
+    public Object findFinancialProduct(@PathVariable("id")String id,
                                        @PathVariable("type") String type){
         if(type.equals("financial")){
             return DataFactory.success(SimpleData.class, "ok").parseData(financialProductService.findFinancialProductById(id));
