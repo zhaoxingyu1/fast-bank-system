@@ -11,7 +11,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  * @Date 2022/2/11 18:40
  */
 @MapperScan("com.seckill.productservice.dao")
-@EnableFeignClients(basePackages = "com.seckill.common.feign")
+@EnableFeignClients(basePackages = "com.seckill.common.feign" )
 @SpringBootApplication(scanBasePackages = {"com.seckill.productservice", "com.seckill.common.globalconfig"})
 public class ProductApplication {
 

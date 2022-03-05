@@ -3,6 +3,7 @@ package com.seckill.userservice;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
  * @author zxy
@@ -10,7 +11,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @Date 2022/2/10 19:55
  */
 @MapperScan("com.seckill.userservice.dao")
-@SpringBootApplication
+@EnableFeignClients(basePackages = {"com.seckill.common.feign"} )
+@SpringBootApplication(scanBasePackages = {"com.seckill.userservice","com.seckill.common.globalconfig"} )
 public class UserApplication {
 
 

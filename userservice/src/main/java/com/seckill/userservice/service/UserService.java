@@ -6,6 +6,7 @@ import com.seckill.common.entity.user.RoleEntity;
 import com.seckill.common.entity.user.UserEntity;
 import com.seckill.common.entity.user.UserInfoEntity;
 import com.seckill.common.entity.user.UserProductEntity;
+import com.seckill.common.exception.DatabaseOperationException;
 import com.seckill.userservice.dao.RoleDao;
 import com.seckill.userservice.dao.UserDao;
 import com.seckill.userservice.dao.UserInfoDao;
@@ -33,46 +34,43 @@ public class UserService {
     @Resource
     private UserProductDao userProductDao;
 
+    // 待修改
     @Transactional
-    public Boolean insertUser(UserEntity user, UserInfoEntity userInfo, RoleEntity role) {
+    public Boolean insertUser(UserEntity user, UserInfoEntity userInfo, RoleEntity role) throws Exception {
 
-        try {
-            userInfoDao.insert(userInfo);
-            roleDao.insert(role);
 
-            user.setUserInfoId(userInfo.getUserInfoId());
-            user.setRoleId(role.getRoleId());
-            userDao.insert(user);
+        int i = userInfoDao.insert(userInfo);
+        int i1 = roleDao.insert(role);
 
-        } catch (Exception e) {
-            return false;
+        user.setUserInfoId(userInfo.getUserInfoId());
+        user.setRoleId(role.getRoleId());
+
+        int i2 = userDao.insert(user);
+
+        if (i < 1 && i1 < 1 && i2 < 1) {
+            new DatabaseOperationException("插入失败");
         }
         return true;
     }
 
-    @Transactional
-    public Boolean deleteUserById(String userId) {
-        try {
-            UserEntity user = userDao.selectById(userId);
-            String userInfoId = user.getUserInfoId();
-            String roleId = user.getRoleId();
-            String userProductId = user.getUserProductId();
-            UserInfoEntity userInfoEntity = userInfoDao.selectById(userInfoId);
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean deleteUserById(String userId) throws Exception {
 
-            int i = userDao.deleteById(userId);
+        UserEntity user = userDao.selectById(userId);
+        String userInfoId = user.getUserInfoId();
+        String roleId = user.getRoleId();
+        String userProductId = user.getUserProductId();
 
-            int i1 = userInfoDao.deleteById(userInfoId);
+        int i = userDao.deleteById(userId);
 
-            int i2 = roleDao.deleteById(roleId);
+        int i1 = userInfoDao.deleteById(userInfoId);
 
-            int i3 = userProductDao.deleteById(userProductId);
+        int i2 = roleDao.deleteById(roleId);
 
-            if(i<1 && i1<1 && i2<1 && i3<1){
-                new Exception();
-            }
+        int i3 = userProductDao.deleteById(userProductId);
 
-        } catch (Exception e) {
-            return false;
+        if (i < 1 && i1 < 1 && i2 < 1 && i3 < 1) {
+            new DatabaseOperationException("删除失败");
         }
         return true;
     }
@@ -81,7 +79,7 @@ public class UserService {
     public Boolean updateUserById(UserEntity user) {
 
         int i = userDao.updateById(user);
-        if(i>0){
+        if (i > 0) {
             return true;
         }
         return false;

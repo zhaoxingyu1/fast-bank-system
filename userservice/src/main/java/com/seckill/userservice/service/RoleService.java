@@ -7,6 +7,7 @@ import com.seckill.userservice.dao.RoleDao;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.beans.Transient;
 import java.util.UUID;
 
 /**
@@ -30,6 +31,7 @@ public class RoleService {
             return false;
         }
     }
+
 
     public Boolean deleteRoleById(String roleId){
         int i = roleDao.deleteById(roleId);

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.seckill.common.entity.user.UserEntity;
 import com.seckill.common.entity.user.UserProductEntity;
 import com.seckill.userservice.dao.UserProductDao;
+import org.apache.tomcat.util.http.parser.Host;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -54,7 +55,7 @@ public class UserProductService {
 
 
     /**
-     * 分页查询用户拥有的所有产品
+     * 分页查询用户预约的所有产品
      * @param current
      * @param size
      * @return
@@ -73,7 +74,7 @@ public class UserProductService {
     }
 
     /**
-     * 根据名字分页查询模糊查询用户拥有的产品
+     * 根据用户id分页查询模糊查询用户预约的产品
      * @param current
      * @param size
      * @return
@@ -93,7 +94,7 @@ public class UserProductService {
     }
 
     /**
-     * 根据用户状态查看预约或者购买的产品
+     * 用户查看预约产品
      * @param current
      * @param size
      * @return
@@ -108,8 +109,10 @@ public class UserProductService {
         Page<UserProductEntity> page = new Page<>(current - 1, size);
         Page<UserProductEntity> userEntityPage = userProductDao.selectPage(page, wrapper);
 
+        
         return userEntityPage;
     }
+
 
 
 }

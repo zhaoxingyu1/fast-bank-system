@@ -34,7 +34,7 @@ public class UserController {
 
 
     @PostMapping("/createUser")
-    public Object createUser(HttpServletRequest request,UserEntity user, UserInfoEntity userInfo, RoleEntity role){
+    public Object createUser(HttpServletRequest request,UserEntity user, UserInfoEntity userInfo, RoleEntity role)throws Exception{
 
         String header = request.getHeader("占位");
 
@@ -51,7 +51,7 @@ public class UserController {
     }
 
     @GetMapping("/deleteUserById")
-    public Object deleteUserById(HttpServletRequest request,String userId){
+    public Object deleteUserById(HttpServletRequest request,String userId)throws Exception{
 
         String header = request.getHeader("占位");
 

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 /**
@@ -16,13 +17,18 @@ import java.math.BigDecimal;
 @TableName("user_product")
 public class UserProductEntity {
 
+    @NotNull(message = "id不能为空")
     @TableId(type = IdType.ASSIGN_UUID)
     private String userProductId;
+
+    @NotNull(message = "id不能为空")
     private String userId;
+
+    @NotNull(message = "产品名字不能为空")
     private String productName;
+
     private BigDecimal price;
-    private Integer buyState;
-    private Integer number;
+    private Integer bookingStatus;
     private Long mtime;
 
 }
