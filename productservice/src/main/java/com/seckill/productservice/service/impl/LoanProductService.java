@@ -10,12 +10,14 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@Transactional
 public class LoanProductService implements ILoanProductService {
     @Resource
     private LoanProductDao loanProductDao;
