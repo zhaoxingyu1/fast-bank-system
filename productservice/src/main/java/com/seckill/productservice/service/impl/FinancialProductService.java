@@ -30,24 +30,23 @@ public class FinancialProductService implements IFinancialProductService {
     @Resource
     private RedisTemplate<String, Object> redis;
 
-
+    /**
+     *
+     * @param financialProductEntity
+     * @throws Exception
+     */
     @Override
     public void addFinancialProduct(FinancialProductEntity financialProductEntity) throws Exception{
         QueryWrapper<FinancialProductEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("financial_product_name",financialProductEntity.getFinancialProductName());
         List<FinancialProductEntity> i = financialProductDao.selectList(queryWrapper);
         if(i.size() == 0){
-            int insert = financialProductDao.insert(financialProductEntity);
-            if (insert == 0){
-                throw new DatabaseOperationException("添加产品失败");
-            }else{
-                // redis插入  产品ID：库存
-                ValueOperations<String, Object> opsForValue = redis.opsForValue();
-                Integer count = financialProductEntity.getStock();
-                long conTime = financialProductEntity.getEndTime() - financialProductEntity.getStartTime();
-                opsForValue.set(financialProductEntity.getFinancialProductId(),count);
-                redis.expire(financialProductEntity.getFinancialProductId(), conTime, TimeUnit.MILLISECONDS);
-            }
+            // redis插入  产品ID：库存
+            ValueOperations<String, Object> opsForValue = redis.opsForValue();
+            Integer count = financialProductEntity.getStock();
+            long conTime = financialProductEntity.getEndTime() - financialProductEntity.getStartTime();
+            opsForValue.set(financialProductEntity.getFinancialProductId(),count);
+            opsForValue.set("Boy♂Next♂Door" + financialProductEntity.getFinancialProductId(),count,conTime, TimeUnit.MILLISECONDS);
         }else{
             throw new DatabaseOperationException("产品已存在，无需重复添加");
         }
