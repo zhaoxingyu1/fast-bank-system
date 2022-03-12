@@ -8,12 +8,12 @@ import com.seckill.common.enums.CodeEnum;
  */
 
 public class DataFactory {
-    public static BaseData success(Class<? extends BaseData> dataClass, String msg) {
+    public static <T extends BaseData> T success(Class<T> dataClass, String msg) {
         try {
             return dataClass.getConstructor(String.class).newInstance(msg);
         } catch (Exception e) {
             e.printStackTrace();
-            return fail(CodeEnum.INTERNAL_ERROR, "未知错误");
+            return null;
         }
     }
 

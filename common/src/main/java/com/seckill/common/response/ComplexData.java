@@ -1,5 +1,6 @@
 package com.seckill.common.response;
 
+import com.alibaba.fastjson.JSONObject;
 import lombok.Getter;
 
 import java.util.HashMap;
@@ -27,5 +28,10 @@ public class ComplexData extends BaseData {
         }
         String keyName = keyClass[keyClass.length - 1].split("Entity")[0];
         this.data.put(keyName.substring(0, 1).toLowerCase() + keyName.substring(1), entity);
+    }
+
+    public ComplexData parseData(String key, Object val) {
+        data.put(key, val);
+        return this;
     }
 }
