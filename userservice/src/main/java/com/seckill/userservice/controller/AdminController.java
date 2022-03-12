@@ -3,8 +3,10 @@ package com.seckill.userservice.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.seckill.common.entity.user.RoleEntity;
 import com.seckill.common.entity.user.UserEntity;
+import com.seckill.common.enums.CodeEnum;
 import com.seckill.common.response.ComplexData;
 import com.seckill.common.response.DataFactory;
+import com.seckill.common.response.SimpleData;
 import com.seckill.userservice.jwt.JwtTokenManager;
 import com.seckill.userservice.service.RoleService;
 import com.seckill.userservice.service.UserInfoService;
@@ -58,9 +60,8 @@ public class AdminController {
         // 分页查询的用户
         List<UserEntity> userEntityList = userEntityPage.getRecords();
 
-        return DataFactory.success(ComplexData.class, "ok").parseData(total, pages, userEntityList);
+        return DataFactory.success(ComplexData.class, "ok").parseData("total",total).parseData("pages",pages).parseData(userEntityList);
 
-//        return null;
     }
 
     @GetMapping("/selectUserListByName")
@@ -76,15 +77,7 @@ public class AdminController {
         // 分页查询的用户
         List<UserEntity> userEntityList = userEntityPage.getRecords();
 
-
-        if (header.equals("feign")) {
-            //feign调用
-
-        } else {
-            //前端调用
-
-        }
-        return null;
+        return DataFactory.success(ComplexData.class, "ok").parseData("total",total).parseData("pages",pages).parseData(userEntityList);
     }
 
     /**
@@ -106,9 +99,11 @@ public class AdminController {
 
         Boolean bool = roleService.updateUserRoleById(roleEntity);
 
+        if(!bool){
+            return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"修改失败，未知错误");
+        }
 
-
-        return null;
+        return DataFactory.success(SimpleData.class,"ok");
     }
 
 }

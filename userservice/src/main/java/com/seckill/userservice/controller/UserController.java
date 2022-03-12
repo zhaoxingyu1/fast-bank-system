@@ -186,6 +186,7 @@ public class UserController {
 
         UserEntity userEntity = userService.selectUserById(userId);
 
+
         return DataFactory.success(SimpleData.class, "ok").parseData(userEntity);
     }
 
