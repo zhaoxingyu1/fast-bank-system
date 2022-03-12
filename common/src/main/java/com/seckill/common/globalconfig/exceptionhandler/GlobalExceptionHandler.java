@@ -6,6 +6,7 @@ import com.seckill.common.exception.ForbiddenException;
 import com.seckill.common.exception.NotFoundException;
 import com.seckill.common.response.DataFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authz.AuthorizationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -32,7 +33,11 @@ public class GlobalExceptionHandler {
             code = CodeEnum.FORBIDDEN;
         } else if (e instanceof NotFoundException) {
             code = CodeEnum.NOT_FOUND;
+        }else if(e instanceof AuthorizationException){
+            code = CodeEnum.UNAUTHORIZED;
         }
         return DataFactory.fail(code, e.getMessage());
     }
+
+
 }

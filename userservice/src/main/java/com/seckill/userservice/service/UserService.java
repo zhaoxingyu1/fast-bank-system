@@ -156,15 +156,12 @@ public class UserService {
 
     public UserEntity selectUserByUsername(String name) {
         QueryWrapper<UserEntity> wrapper = new QueryWrapper<>();
+
         wrapper
                 .eq("username", name);
         UserEntity userEntity = userDao.selectOne(wrapper);
 
-
-        UserInfoEntity userInfoEntity = userInfoDao.selectById(userEntity.getUserInfoId());
         RoleEntity roleEntity = roleDao.selectById(userEntity.getRoleId());
-
-        userEntity.setUserInfo(userInfoEntity);
         userEntity.setUserRole(roleEntity);
 
         return userEntity;

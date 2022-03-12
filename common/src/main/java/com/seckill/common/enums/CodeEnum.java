@@ -9,8 +9,8 @@ public enum CodeEnum {
     INTERNAL_ERROR(500),
     OK(200),
     NOT_FOUND(404),
-    FORBIDDEN(403);
-
+    FORBIDDEN(403),
+    UNAUTHORIZED(401);
 
     private final Integer code;
 

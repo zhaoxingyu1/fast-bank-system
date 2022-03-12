@@ -37,6 +37,12 @@
         <rabbit.version>2.3.9.RELEASE</rabbit.version>
         <redis.version>2.3.9.RELEASE</redis.version>
         <feign.version>2.2.7.RELEASE</feign.version>
+        <!--shiro-->
+        <shiro.version>1.3.2</shiro.version>
+        <!--redisson版本-->
+        <redisson.version>3.5.0</redisson.version>
+        <!--jwt版本-->
+        <jwt.version>3.8.1</jwt.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -81,6 +87,46 @@
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>${mybatis-plus.version}</version>
+            </dependency>
+            <!-- SECURITY begin -->
+            <dependency>
+                <groupId>org.apache.shiro</groupId>
+                <artifactId>shiro-core</artifactId>
+                <version>${shiro.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.shiro</groupId>
+                <artifactId>shiro-spring</artifactId>
+                <version>${shiro.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.shiro</groupId>
+                <artifactId>shiro-web</artifactId>
+                <version>${shiro.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.shiro</groupId>
+                <artifactId>shiro-ehcache</artifactId>
+                <version>${shiro.version}</version>
+            </dependency>
+            <!-- SECURITY end -->
+            <!--redis缓存客户端-->
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson</artifactId>
+                <version>${redisson.version}</version>
+            </dependency>
+            <!--JWT-->
+            <dependency>
+                <groupId>com.auth0</groupId>
+                <artifactId>java-jwt</artifactId>
+                <version>${jwt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt</artifactId>
+                <version>0.9.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

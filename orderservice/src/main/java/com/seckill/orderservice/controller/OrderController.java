@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/order")
-public class OrderController {
+public class  OrderController {
     @Resource
     private OrderService orderService;
 

@@ -1,31 +1,43 @@
 package com.seckill.userservice.controller;
 
+import com.alibaba.fastjson.JSONObject;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.seckill.common.consts.HeaderConsts;
 import com.seckill.common.entity.user.RoleEntity;
 import com.seckill.common.entity.user.UserEntity;
 import com.seckill.common.entity.user.UserInfoEntity;
+import com.seckill.common.enums.CodeEnum;
+import com.seckill.common.response.ComplexData;
+import com.seckill.common.response.DataFactory;
+import com.seckill.common.response.SimpleData;
+import com.seckill.common.utils.DigestsUtil;
+import com.seckill.common.utils.EmptyUtil;
+import com.seckill.common.utils.ShiroUtil;
 import com.seckill.userservice.dao.UserDao;
+import com.seckill.userservice.jwt.JwtTokenManager;
 import com.seckill.userservice.service.RoleService;
 import com.seckill.userservice.service.UserInfoService;
 import com.seckill.userservice.service.UserService;
+import io.jsonwebtoken.Claims;
 import org.apache.catalina.User;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.apache.shiro.authz.annotation.RequiresUser;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author zxy
@@ -42,63 +54,57 @@ public class UserController {
     private UserService userService;
     @Resource
     private RoleService roleService;
+    @Resource(name = "jwtTokenManager")
+    private JwtTokenManager jwtTokenManager;
+
 
     @PostMapping("/login")
     public Object userLogin(@RequestParam("username") String username, @RequestParam("password") String password) {
 
-        UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(username, password);
-
-        Subject subject = SecurityUtils.getSubject();
+        String jwtToken = null;
         try {
+            UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(username, password);
+
+            Subject subject = SecurityUtils.getSubject();
             subject.login(usernamePasswordToken);
-        }catch (UnknownAccountException e){
+            //登录完成之后需要颁发令牌
+            String sessionId = ShiroUtil.getShiroSessionId();
+
+            UserEntity user = userService.selectUserByUsername(username);
+
+            Map<String, Object> claims = new HashMap<>();
+            claims.put("shiroUser", JSONObject.toJSONString(user));
+
+            jwtToken = jwtTokenManager.issuedToken("system", subject.getSession().getTimeout(), sessionId, claims);
+
+
+        } catch (UnknownAccountException e) {
             //用户名错误
-        }catch (IncorrectCredentialsException e){
+            return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "用户名错误");
+        } catch (IncorrectCredentialsException e) {
             // 密码错误
-
+            return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "密码错误");
+        } catch (Exception e) {
+            // 登录异常 请联系管理员
+            return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "未知错误，请联系管理员");
         }
-        // 登录成功 将信息存进session
-        UserEntity user = userService.selectUserByUsername(username);
-        // 缓存用户信息
-        Session session = subject.getSession(true);
-        session.setAttribute("user", user);
-        // 缓存角色
 
-        String role = user.getUserRole().getRole();
-        Set<String> roleList = new HashSet<>();
-        roleList.add(role);
-
-        session.setAttribute("role", roleList);
-
-//        // 缓存权限
-//        Set<String> permissionList = userService.findPermission(username);
-//        session.setAttribute("permission", permissionList);
-
-
-        return "登录成功";
+        return DataFactory.success(SimpleData.class, "登录成功").parseData(jwtToken);
     }
 
 
     // 注销
+    @RequiresAuthentication
     @GetMapping("/logout")
-//    @RequiresPermissions("admin")
-    public String userLogout(){
-
-        System.out.println(123);
+    public String userLogout() {
         Subject subject = SecurityUtils.getSubject();
-        boolean bool = subject.hasRole("admin");
-
-        if(!bool){
-            System.out.println("hhh");
-        }
-
-        System.err.println(subject.getSession().getAttribute("role"));
         subject.logout();
         return "登出成功";
     }
 
     /**
      * 注册
+     *
      * @param request
      * @param user
      * @param userInfo
@@ -106,55 +112,66 @@ public class UserController {
      * @return
      * @throws Exception
      */
-    @PostMapping("/createUser")
+    @PostMapping("/registerUser")
     public Object createUser(HttpServletRequest request, UserEntity user, UserInfoEntity userInfo, RoleEntity role) throws Exception {
 
-        String header = request.getHeader("占位");
+
+        user.setPassword(DigestsUtil.sha1(user.getPassword()));
 
         Boolean bool = userService.insertUser(user, userInfo, role);
 
-        if (header.equals("feign")) {
-            //feign调用
 
-        } else {
-            //前端调用
-
+        if (!bool) {
+            return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "注册失败,出现未知错误");
         }
-        return null;
+
+        return DataFactory.success(SimpleData.class, "注册成功");
+
     }
 
+    @RequiresRoles(value = "admin")
     @GetMapping("/deleteUserById")
     public Object deleteUserById(HttpServletRequest request, String userId) throws Exception {
 
-        String header = request.getHeader("占位");
-
         Boolean bool = userService.deleteUserById(userId);
 
-        if (header.equals("feign")) {
-            //feign调用
-
-        } else {
-            //前端调用
-
+        if (!bool) {
+            return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "删除失败,出现未知错误");
         }
-        return null;
+
+        return DataFactory.success(SimpleData.class, "删除用户成功");
     }
 
+
     @PostMapping("/updateUserById")
-    public Object updateUserById(HttpServletRequest request, UserEntity user) {
+    public Object updateUserById(HttpServletRequest request, @RequestParam(required = false) String username, @RequestParam(required = false) String password) {
 
-        String header = request.getHeader("占位");
+        // 通过jwt获取用户id进行删除
+        String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
+        try {
 
-        Boolean bool = userService.updateUserById(user);
+            jwtTokenManager.isVerifyToken(jwtToken);
+            Claims claims = jwtTokenManager.decodeToken(jwtToken);
+            UserEntity user = (UserEntity) claims.get("shiroUser");
+            user.setUsername(username);
+            user.setPassword(DigestsUtil.sha1(password));
 
-        if (header.equals("feign")) {
-            //feign调用
+            Boolean bool = userService.updateUserById(user);
+            if (!bool) {
+                return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "修改失败,出现未知错误");
+            }
+            // 更新令牌
+            Map<String, Object> claimsNew = new HashMap<>();
+            claimsNew.put("shiroUser", JSONObject.toJSONString(user));
+            jwtToken = jwtTokenManager.issuedToken("system", ShiroUtil.getShiroSession().getTimeout(), ShiroUtil.getShiroSessionId(), claimsNew);
 
-        } else {
-            //前端调用
-
+        } catch (JWTVerificationException e) {
+            return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "头部信息和荷载信息被篡改或者校验令牌已过期");
+        } catch (Exception e) {
+            return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "修改失败,出现未知错误");
         }
-        return null;
+
+        return DataFactory.success(SimpleData.class, "修改用户成功").parseData(jwtToken);
     }
 
     /**
@@ -167,101 +184,12 @@ public class UserController {
     @GetMapping("/selectUserById")
     public Object selectUserById(HttpServletRequest request, String userId) {
 
-        String header = request.getHeader("占位");
-
         UserEntity userEntity = userService.selectUserById(userId);
 
-        if (header.equals("feign")) {
-            //feign调用
-
-        } else {
-            //前端调用
-
-        }
-        return null;
+        return DataFactory.success(SimpleData.class, "ok").parseData(userEntity);
     }
 
-    /**
-     * 分页查询全部用户
-     *
-     * @param request
-     * @return
-     */
-    @GetMapping("/selectAllUser")
-    public Object selectAllUser(HttpServletRequest request, Integer current, Integer size) {
-        String header = request.getHeader("占位");
 
-        Page<UserEntity> userEntityPage = userService.selectAllUser(current, size);
-
-        //总条数
-        long total = userEntityPage.getTotal();
-        //总页数
-        long pages = userEntityPage.getPages();
-        // 分页查询的用户
-        List<UserEntity> userEntityList = userEntityPage.getRecords();
-
-
-        if (header.equals("feign")) {
-            //feign调用
-
-        } else {
-            //前端调用
-
-        }
-        return null;
-    }
-
-    @GetMapping("/selectUserListByName")
-    public Object selectUserListByName(HttpServletRequest request, String name, Integer current, Integer size) {
-        String header = request.getHeader("占位");
-
-        Page<UserEntity> userEntityPage = userService.selectUserListByName(name, current, size);
-
-        //总条数
-        long total = userEntityPage.getTotal();
-        //总页数
-        long pages = userEntityPage.getPages();
-        // 分页查询的用户
-        List<UserEntity> userEntityList = userEntityPage.getRecords();
-
-
-        if (header.equals("feign")) {
-            //feign调用
-
-        } else {
-            //前端调用
-
-        }
-        return null;
-    }
-
-    /**
-     * 分割 role表
-     * =======================================================================================
-     */
-
-    @PostMapping("/updateUserRole")
-    public Object updateUserRole(HttpServletRequest request, String userId, String role) {
-
-        String header = request.getHeader("占位");
-        UserEntity userEntity = userService.selectUserById(userId);
-        RoleEntity roleEntity = new RoleEntity();
-
-        String roleId = userEntity.getRoleId();
-        roleEntity.setRoleId(roleId);
-        roleEntity.setRole(role);
-
-        Boolean bool = roleService.updateUserRoleById(roleEntity);
-        if (header.equals("feign")) {
-            //feign调用
-
-        } else {
-            //前端调用
-
-        }
-        return null;
-
-    }
 
 
     /*
