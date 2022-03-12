@@ -26,4 +26,7 @@ public interface IFinancialProductService{
 
     //根据产品名称查询（模糊查询）
     List<FinancialProductEntity> findProductByName(String financialProductName);
+
+    //分页查询产品
+    List<FinancialProductEntity> getProductById(int page);
 }

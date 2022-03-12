@@ -1,6 +1,8 @@
 package com.seckill.productservice.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.seckill.common.consts.PageConst;
 import com.seckill.common.exception.DatabaseOperationException;
 import com.seckill.common.exception.NotFoundException;
 import com.seckill.productservice.dao.FinancialProductDao;
@@ -49,7 +51,7 @@ public class FinancialProductService implements IFinancialProductService {
             opsForValue.set("pre" + financialProductEntity.getFinancialProductId(),count);
             System.out.println(financialProductEntity.getFinancialProductId());
             opsForValue.set(financialProductEntity.getFinancialProductId(),count,conTime, TimeUnit.MILLISECONDS);
-            //todo 只改了一个
+            //todo 计划新增产品时，计算当前时间与抢购时间的间隔，使用队列延时加入至队列
         }else{
             throw new DatabaseOperationException("产品已存在，无需重复添加");
         }
@@ -105,5 +107,12 @@ public class FinancialProductService implements IFinancialProductService {
         QueryWrapper<FinancialProductEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.like(StringUtils.isNotBlank(financialProductName),"financial_product_name",financialProductName);
         return financialProductDao.selectList(queryWrapper);
+    }
+
+    @Override
+    public List<FinancialProductEntity> getProductById(int page) {
+        Page<FinancialProductEntity> objectPage = new Page<>(page, PageConst.PageSize);
+        financialProductDao.selectPage(objectPage, null);
+        return objectPage.getRecords();
     }
 }

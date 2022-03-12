@@ -1,6 +1,8 @@
 package com.seckill.productservice.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.seckill.common.consts.PageConst;
 import com.seckill.common.exception.DatabaseOperationException;
 import com.seckill.common.exception.NotFoundException;
 import com.seckill.productservice.dao.LoanProductDao;
@@ -41,6 +43,7 @@ public class LoanProductService implements ILoanProductService {
                 Integer count = loanProductEntity.getStock();
                 opsForValue.set(loanProductEntity.getLoanProductId(),count);
                 redis.expire(loanProductEntity.getLoanProductId(),conTime, TimeUnit.MILLISECONDS);
+                //todo 计划新增产品时，计算当前时间与抢购时间的间隔，使用队列延时加入至队列
             }
         }else {
             throw new DatabaseOperationException("产品已存在，无需重复添加");
@@ -96,5 +99,12 @@ public class LoanProductService implements ILoanProductService {
         QueryWrapper<LoanProductEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.like(StringUtils.isNotBlank(loanProductName),"loan_product_name",loanProductName);
         return loanProductDao.selectList(queryWrapper);
+    }
+
+    @Override
+    public List<LoanProductEntity> getProductById(int page) {
+        Page<LoanProductEntity> objectPage = new Page<>(page, PageConst.PageSize);
+        loanProductDao.selectPage(objectPage, null);
+        return objectPage.getRecords();
     }
 }

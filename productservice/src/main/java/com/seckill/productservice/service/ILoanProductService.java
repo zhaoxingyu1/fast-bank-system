@@ -26,4 +26,7 @@ public interface ILoanProductService{
 
     //根据产品名称查询（模糊查询）
     List<LoanProductEntity> findProductByName(String loanProductName);
+
+    //分页查询
+    List<LoanProductEntity> getProductById(int page);
 }

@@ -1,5 +1,6 @@
 package com.seckill.productservice.controller;
 
+import com.seckill.common.consts.FeignConsts;
 import com.seckill.common.entity.product.FinancialProductEntity;
 import com.seckill.common.entity.product.LoanProductEntity;
 import com.seckill.common.enums.CodeEnum;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -97,11 +99,21 @@ public class ProductController {
      */
     @GetMapping("/{type}/find/{id}")
     public Object findFinancialProduct(@PathVariable("id")String id,
-                                       @PathVariable("type") String type){
-        if(type.equals("financial")){
-            return DataFactory.success(SimpleData.class, "ok").parseData(financialProductService.findFinancialProductById(id));
-        }else if(type.equals("loan")){
-            return DataFactory.success(SimpleData.class, "ok").parseData(loanProductService.findLoanProductById(id));
+                                       @PathVariable("type") String type,
+                                       HttpServletRequest request){
+
+        if (request.getHeader(FeignConsts.HEADER_NAME) != null){
+            if(type.equals("financial")){
+                return financialProductService.findFinancialProductById(id);
+            }else if(type.equals("loan")){
+                return loanProductService.findLoanProductById(id);
+            }
+        }else{
+            if(type.equals("financial")){
+                return DataFactory.success(SimpleData.class, "ok").parseData(financialProductService.findFinancialProductById(id));
+            }else if(type.equals("loan")){
+                return DataFactory.success(SimpleData.class, "ok").parseData(loanProductService.findLoanProductById(id));
+            }
         }
         return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现了未知错误");
     }
@@ -112,11 +124,20 @@ public class ProductController {
      * @return 对象 数据（列表）
      */
     @GetMapping("/{type}/findAll")
-    public Object findAllFinancialProduct(@PathVariable("type") String type){
-        if(type.equals("financial")){
-            return DataFactory.success(ListData.class, "ok").parseData(financialProductService.findAll());
-        }else if(type.equals("loan")){
-            return DataFactory.success(ListData.class, "ok").parseData(loanProductService.findAll());
+    public Object findAllFinancialProduct(@PathVariable("type") String type,
+                                          HttpServletRequest request){
+        if (request.getHeader(FeignConsts.HEADER_NAME) != null){
+            if(type.equals("financial")){
+                return financialProductService.findAll();
+            }else if(type.equals("loan")){
+                return loanProductService.findAll();
+            }
+        }else{
+            if(type.equals("financial")){
+                return DataFactory.success(ListData.class, "ok").parseData(financialProductService.findAll());
+            }else if(type.equals("loan")){
+                return DataFactory.success(ListData.class, "ok").parseData(loanProductService.findAll());
+            }
         }
         return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现了未知错误");
     }
@@ -130,11 +151,48 @@ public class ProductController {
      */
     @GetMapping("/{type}/findByName/{name}")
     public Object findFinancialProductByName(@PathVariable("name")String name,
-                                             @PathVariable("type") String type){
-        if(type.equals("financial")){
-            return DataFactory.success(ListData.class, "ok").parseData(financialProductService.findProductByName(name));
-        }else if(type.equals("loan")){
-            return DataFactory.success(ListData.class, "ok").parseData(loanProductService.findProductByName(name));
+                                             @PathVariable("type") String type,
+                                             HttpServletRequest request){
+        if (request.getHeader(FeignConsts.HEADER_NAME) != null){
+            if(type.equals("financial")){
+                return financialProductService.findProductByName(name);
+            }else if(type.equals("loan")){
+                return loanProductService.findProductByName(name);
+            }
+        }else{
+            if(type.equals("financial")){
+                return DataFactory.success(ListData.class, "ok").parseData(financialProductService.findProductByName(name));
+            }else if(type.equals("loan")){
+                return DataFactory.success(ListData.class, "ok").parseData(loanProductService.findProductByName(name));
+            }
+        }
+        return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现了未知错误");
+    }
+
+    /**
+     * 产品的分页查询（对于所有产品）
+     * @param type 产品类型
+     * @param request req
+     * @param page 页数
+     * @return 返回数据或者对象
+     * @throws Exception 异常
+     */
+    @GetMapping("/{type}/findAllByPage")
+    public Object findAllByPage(@PathVariable("type") String type,
+                                HttpServletRequest request,
+                                int page) throws Exception{
+        if (request.getHeader(FeignConsts.HEADER_NAME) != null){
+            if(type.equals("financial")){
+                return financialProductService.getProductById(page);
+            }else if(type.equals("loan")){
+                return loanProductService.getProductById(page);
+            }
+        }else{
+            if(type.equals("financial")){
+                return DataFactory.success(ListData.class, "ok").parseData(financialProductService.getProductById(page));
+            }else if(type.equals("loan")){
+                return DataFactory.success(ListData.class, "ok").parseData(loanProductService.getProductById(page));
+            }
         }
         return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现了未知错误");
     }
