@@ -10,7 +10,7 @@ import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 测试redis键过期事件
+ * 测试redis键过期事件（测试用）
  * @Author: 七画一只妖
  * @Date: 2022/3/10 20:38
  */
