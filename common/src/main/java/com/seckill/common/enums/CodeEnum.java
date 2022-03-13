@@ -14,7 +14,7 @@ public enum CodeEnum {
 
     private final Integer code;
 
-    private CodeEnum(int code) {
+    CodeEnum(int code) {
         this.code = code;
     }
 

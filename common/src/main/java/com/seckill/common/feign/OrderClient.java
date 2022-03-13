@@ -2,7 +2,6 @@ package com.seckill.common.feign;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * @author : 陈征
@@ -13,5 +12,5 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @FeignClient("orderservice")
 public interface OrderClient {
     @GetMapping("/order/getById")
-    public Object getById(Long id);
+    Object getById(Long id);
 }

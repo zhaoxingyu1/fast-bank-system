@@ -19,6 +19,8 @@ public class OrderEntity {
 
     String productId;
 
+    String state;
+
     @TableField(fill = FieldFill.INSERT)
     Long ctime;
 

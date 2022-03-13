@@ -1,10 +1,12 @@
 package com.seckill.orderservice.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.seckill.common.consts.PageConst;
 import com.seckill.common.consts.RabbitConsts;
 import com.seckill.common.entity.order.OrderEntity;
+import com.seckill.common.enums.OrderStateEnum;
 import com.seckill.common.exception.ForbiddenException;
 import com.seckill.common.exception.NotFoundException;
 import com.seckill.orderservice.dao.OrderDao;
@@ -73,7 +75,16 @@ public class OrderService {
         assert decrement != null;
         if (decrement < 0) {
             ops.increment(order.getProductId());
-            throw new ForbiddenException("商品已卖完或者超出抢购期限");
+            throw new ForbiddenException("商品已卖完或者未在抢购期限内");
         }
+    }
+
+    public void updateState(String id, OrderStateEnum orderState) {
+        orderDao.update(
+                null,
+                new UpdateWrapper<OrderEntity>()
+                        .set("state", orderState)
+                        .eq("order_id", id)
+        );
     }
 }

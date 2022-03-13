@@ -3,6 +3,7 @@ package com.seckill.orderservice.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.seckill.common.entity.order.OrderEntity;
 import com.seckill.common.consts.FeignConsts;
+import com.seckill.common.enums.OrderStateEnum;
 import com.seckill.common.response.BaseData;
 import com.seckill.common.response.DataFactory;
 import com.seckill.common.response.SimpleData;
@@ -22,7 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/order")
-public class  OrderController {
+public class OrderController {
     @Resource
     private OrderService orderService;
 
@@ -36,17 +37,23 @@ public class  OrderController {
     }
 
     @GetMapping("/getByUser")
-    public Object getByUser(HttpServletRequest request, String id, int page) throws Exception {
+    public BaseData getByUser(String id, int page) throws Exception {
         Page<OrderEntity> entities = orderService.getByUserId(id, page);
-        if (request.getHeader(FeignConsts.HEADER_NAME) != null) {
-            return entities;
-        }
         return DataFactory.success(SimpleData.class, "ok").parseData(entities);
     }
 
     @PostMapping("/create")
     public BaseData create(OrderEntity order) throws Exception {
         orderService.create(order);
+        return DataFactory.success(SimpleData.class, "ok");
+    }
+
+    @PostMapping("/updateState")
+    public Object updateState(HttpServletRequest request, String id, String state) {
+        orderService.updateState(id, OrderStateEnum.valueOf(state));
+        if (request.getHeader(FeignConsts.HEADER_NAME) != null) {
+            return null;
+        }
         return DataFactory.success(SimpleData.class, "ok");
     }
 }
