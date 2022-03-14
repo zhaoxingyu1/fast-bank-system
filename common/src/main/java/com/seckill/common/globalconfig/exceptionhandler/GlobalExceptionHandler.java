@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author : 陈征
@@ -22,7 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 public class GlobalExceptionHandler {
     @ResponseBody
     @ExceptionHandler(Exception.class)
-    private Object baseException(HttpServletRequest request, Exception e) {
+    private Object baseException(HttpServletRequest request, HttpServletResponse response, Exception e) {
         log.error(e.getClass().toString());
         e.printStackTrace();
         if (request.getHeader(FeignConsts.HEADER_NAME) != null) {
@@ -33,9 +34,10 @@ public class GlobalExceptionHandler {
             code = CodeEnum.FORBIDDEN;
         } else if (e instanceof NotFoundException) {
             code = CodeEnum.NOT_FOUND;
-        }else if(e instanceof AuthorizationException){
+        } else if (e instanceof AuthorizationException) {
             code = CodeEnum.UNAUTHORIZED;
         }
+//        response.setStatus(code.value());
         return DataFactory.fail(code, e.getMessage());
     }
 
