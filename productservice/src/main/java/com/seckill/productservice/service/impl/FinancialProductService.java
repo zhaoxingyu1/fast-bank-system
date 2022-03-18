@@ -9,12 +9,18 @@ import com.seckill.productservice.dao.FinancialProductDao;
 import com.seckill.common.entity.product.FinancialProductEntity;
 import com.seckill.productservice.service.IFinancialProductService;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessagePostProcessor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -32,6 +38,9 @@ public class FinancialProductService implements IFinancialProductService {
     @Resource
     private RedisTemplate<String, Object> redis;
 
+    @Resource
+    private RabbitTemplate rabbitTemplate;
+
 
     @Override
     public void addFinancialProduct(FinancialProductEntity financialProductEntity) throws Exception{
@@ -40,18 +49,28 @@ public class FinancialProductService implements IFinancialProductService {
         queryWrapper.eq("financial_product_name",financialProductEntity.getFinancialProductName());
         List<FinancialProductEntity> i = financialProductDao.selectList(queryWrapper);
         if(i.size() == 0){
-            int insert = financialProductDao.insert(financialProductEntity);
-            System.out.println("临时插入成功");
+            // 插入数据库
+            financialProductDao.insert(financialProductEntity);
 
-            // redis插入  产品ID：库存
-            ValueOperations<String, Object> opsForValue = redis.opsForValue();
+            // 计算时间间隔
             Integer count = financialProductEntity.getStock();
             long conTime = financialProductEntity.getEndTime() - financialProductEntity.getStartTime();
-            //使用pre前缀标识这是没有过期的键
-            opsForValue.set("pre" + financialProductEntity.getFinancialProductId(),count);
-            System.out.println(financialProductEntity.getFinancialProductId());
-            opsForValue.set(financialProductEntity.getFinancialProductId(),count,conTime, TimeUnit.MILLISECONDS);
-            //todo 计划新增产品时，计算当前时间与抢购时间的间隔，使用队列延时加入至队列
+            // 获取ID值要重新查询出来
+            QueryWrapper<FinancialProductEntity> queryWrapper2 = new QueryWrapper<>();
+            queryWrapper2.eq("financial_product_name",financialProductEntity.getFinancialProductName());
+            FinancialProductEntity f = financialProductDao.selectOne(queryWrapper2);
+            // 构造消息
+            HashMap<String, Object> productMap = new HashMap<>();
+            productMap.put("product_id", f.getFinancialProductId());
+            productMap.put("count", count);
+            productMap.put("con_time", conTime);
+            // 发送消息至延时队列
+            rabbitTemplate.convertAndSend("delayProductQueue", productMap, message -> {
+                // todo 根据当前时间和产品开枪时间计算延时多少毫秒
+                message.getMessageProperties().setExpiration("10000");
+                return message;
+            });
+//            System.out.println("成功发送了消息：" + new Date());
         }else{
             throw new DatabaseOperationException("产品已存在，无需重复添加");
         }

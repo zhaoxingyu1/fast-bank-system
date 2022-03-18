@@ -1,2 +1,19 @@
 server:
   port: 0
+
+
+spring:
+  rabbitmq:
+    host: 39.99.225.61 # 主机名
+    port: 5672 # 端口
+    virtual-host: /bot # 虚拟主机
+    username: twip # 用户名
+    password: 82991400 # 密码
+    cache:
+      channel:
+        checkout-timeout: 3000000
+    template:
+      receive-timeout: 3000000
+    listener:
+      simple:
+        prefetch: 1
