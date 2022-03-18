@@ -25,6 +25,6 @@ public class TestController {
         ValueOperations<String, Object> ops = redis.opsForValue();
         ops.set("123", "456");
         // 设置需要过期的键，过期时间，时间单位
-        redis.expire("123", 10000L, TimeUnit.MILLISECONDS);
+        redis.expire("123", 5000L, TimeUnit.MILLISECONDS);
     }
 }

@@ -14,7 +14,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import javax.annotation.Resource;
 
 /**
- * @author : 陈征
+ * @author : 七画一只妖
  * @date : 2022-02-14 15:12
  */
 
@@ -28,6 +28,7 @@ public class RedisConfig {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
 
+        // 使用序列化
         template.setKeySerializer(new StringRedisSerializer());
         final Jackson2JsonRedisSerializer<Object> serializer = new Jackson2JsonRedisSerializer<>(Object.class);
         template.setValueSerializer(serializer);
@@ -43,6 +44,7 @@ public class RedisConfig {
 
     @Bean
     public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory redisConnectionFactory) {
+        // 消息订阅
         RedisMessageListenerContainer redisMessageListenerContainer = new RedisMessageListenerContainer();
         redisMessageListenerContainer.setConnectionFactory(redisConnectionFactory);
         redisMessageListenerContainer.addMessageListener(messageListener, channelTopic());
