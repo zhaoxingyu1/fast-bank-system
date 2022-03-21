@@ -8,5 +8,5 @@ package com.seckill.common.consts;
 public class HeaderConsts {
 
 
-     public static String JWT_TOKEN = "jwt_token" ;
+     public static String JWT_TOKEN = "Authorization" ;
 }

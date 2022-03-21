@@ -2,6 +2,7 @@ package com.seckill.userservice.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.seckill.common.consts.PageConst;
 import com.seckill.common.entity.user.RoleEntity;
 import com.seckill.common.entity.user.UserEntity;
 import com.seckill.common.entity.user.UserInfoEntity;
@@ -11,11 +12,19 @@ import com.seckill.userservice.dao.RoleDao;
 import com.seckill.userservice.dao.UserDao;
 import com.seckill.userservice.dao.UserInfoDao;
 import com.seckill.userservice.dao.UserProductDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author zxy
@@ -33,6 +42,15 @@ public class UserService {
     private RoleDao roleDao;
     @Resource
     private UserProductDao userProductDao;
+    @Autowired
+    private JavaMailSender mailSender;
+
+    @Value("${spring.mail.username}")
+    private String from;
+
+    @Resource
+    private RedisTemplate<String, Object> redis;
+
 
     // 待修改
     @Transactional
@@ -102,12 +120,11 @@ public class UserService {
      * 分页获取全部用户
      *
      * @param current
-     * @param size
      * @return
      */
-    public Page<UserEntity> selectAllUser(Integer current, Integer size) {
+    public Page<UserEntity> selectAllUser(Integer current) {
 
-        Page<UserEntity> page = new Page<>(current - 1, size);
+        Page<UserEntity> page = new Page<>(current - 1, PageConst.PageSize);
 
         Page<UserEntity> userEntityPage = userDao.selectPage(page, null);
 
@@ -130,13 +147,13 @@ public class UserService {
      *
      * @return
      */
-    public Page<UserEntity> selectUserListByName(String name, Integer current, Integer size) {
+    public Page<UserEntity> selectUserListByName(String name, Integer current) {
 
         QueryWrapper<UserEntity> wrapper = new QueryWrapper<>();
         wrapper
                 .like("username", name);
 
-        Page<UserEntity> page = new Page<>(current - 1, size);
+        Page<UserEntity> page = new Page<>(current - 1, PageConst.PageSize);
 
         Page<UserEntity> userEntityPage = userDao.selectPage(page, wrapper);
 
@@ -165,6 +182,33 @@ public class UserService {
         userEntity.setUserRole(roleEntity);
 
         return userEntity;
+    }
+
+
+    public void sendEmail(String email) throws MailException {
+
+        SimpleMailMessage message = new SimpleMailMessage();
+
+        message.setFrom("2429203557@qq.com");
+
+        message.setTo(email);
+
+        message.setSubject("注册验证码");
+        Integer code=0;
+        String text="你的注册验证码为：";
+        for(int i=1;i<=6;i++){
+            int random = (int)(Math.random()*10);
+            code =code*10 + random;
+        }
+        text=text+code+"，此验证码过期时间为5分钟，请在有效时间内使用";
+        message.setText(text);
+
+        mailSender.send(message);
+
+        // 5分钟的过期时间
+        ValueOperations<String, Object> opsForValue = redis.opsForValue();
+        opsForValue.set(email,code,5, TimeUnit.MINUTES);
+
     }
 
 
