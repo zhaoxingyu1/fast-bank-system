@@ -9,12 +9,14 @@ import com.seckill.productservice.dao.LoanProductDao;
 import com.seckill.common.entity.product.LoanProductEntity;
 import com.seckill.productservice.service.ILoanProductService;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -27,24 +29,38 @@ public class LoanProductService implements ILoanProductService {
     @Resource
     private RedisTemplate<String, Object> redis;
 
+    @Resource
+    private RabbitTemplate rabbitTemplate;
+
     @Override
     public void addLoanProduct(LoanProductEntity loanProductEntity) throws Exception{
         QueryWrapper<LoanProductEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("loan_product_name",loanProductEntity.getLoanProductName());
         List<LoanProductEntity> i = loanProductDao.selectList(queryWrapper);
         if(i.size() == 0){
-            int insert = loanProductDao.insert(loanProductEntity);
-            if (insert == 0){
-                throw new DatabaseOperationException("添加产品失败");
-            }else{
-                // redis插入  产品ID：库存
-                ValueOperations<String, Object> opsForValue = redis.opsForValue();
-                long conTime = loanProductEntity.getEndTime() - loanProductEntity.getStartTime();
-                Integer count = loanProductEntity.getStock();
-                opsForValue.set(loanProductEntity.getLoanProductId(),count);
-                redis.expire(loanProductEntity.getLoanProductId(),conTime, TimeUnit.MILLISECONDS);
-                //todo 计划新增产品时，计算当前时间与抢购时间的间隔，使用队列延时加入至队列
-            }
+            loanProductDao.insert(loanProductEntity);
+            //计算startTime和endTime的间隔
+            long interval = loanProductEntity.getStartTime() - loanProductEntity.getEndTime();
+            // 获取库存
+            Integer stock = loanProductEntity.getStock();
+
+            // 查询ID
+            QueryWrapper<LoanProductEntity> queryWrapper1 = new QueryWrapper<>();
+            queryWrapper1.eq("loan_product_name",loanProductEntity.getLoanProductName());
+            LoanProductEntity l = loanProductDao.selectOne(queryWrapper1);
+
+            // 构造消息，将id、count、interval放入map中
+            HashMap<Object, Object> productMap = new HashMap<>();
+            productMap.put("product_id", l.getLoanProductId());
+            productMap.put("count", stock);
+            productMap.put("con_time", interval);
+
+            // 将消息发送到延时队列delayProductQueue
+            rabbitTemplate.convertAndSend("delayProductQueue", productMap, message -> {
+                // todo 根据当前时间和产品开枪时间计算延时多少毫秒
+                message.getMessageProperties().setExpiration("10000");
+                return message;
+            });
         }else {
             throw new DatabaseOperationException("产品已存在，无需重复添加");
         }

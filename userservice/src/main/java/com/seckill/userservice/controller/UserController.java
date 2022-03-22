@@ -1,42 +1,34 @@
 package com.seckill.userservice.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.seckill.common.consts.HeaderConsts;
 import com.seckill.common.entity.user.RoleEntity;
 import com.seckill.common.entity.user.UserEntity;
 import com.seckill.common.entity.user.UserInfoEntity;
 import com.seckill.common.enums.CodeEnum;
-import com.seckill.common.response.ComplexData;
+import com.seckill.common.jwt.JwtToken;
+
+import com.seckill.common.jwt.TokenUtil;
 import com.seckill.common.response.DataFactory;
 import com.seckill.common.response.SimpleData;
-import com.seckill.common.utils.DigestsUtil;
-import com.seckill.common.utils.EmptyUtil;
-import com.seckill.common.utils.ShiroUtil;
-import com.seckill.userservice.dao.UserDao;
-import com.seckill.userservice.jwt.JwtTokenManager;
+
 import com.seckill.userservice.service.RoleService;
 import com.seckill.userservice.service.UserInfoService;
 import com.seckill.userservice.service.UserService;
 import io.jsonwebtoken.Claims;
-import org.apache.catalina.User;
-import org.apache.shiro.SecurityUtils;
+
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
-import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.apache.shiro.authz.annotation.RequiresRoles;
-import org.apache.shiro.authz.annotation.RequiresUser;
-import org.apache.shiro.session.Session;
-import org.apache.shiro.subject.Subject;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Controller;
+
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.mail.MailException;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
 /**
@@ -54,58 +46,81 @@ public class UserController {
     private UserService userService;
     @Resource
     private RoleService roleService;
-    @Resource(name = "jwtTokenManager")
-    private JwtTokenManager jwtTokenManager;
+    @Resource
+    private RedisTemplate<String, Object> redis;
+
+
+    @PostMapping("/sendEmail")
+    public Object sendEmail(String email){
+
+        try {
+            userService.sendEmail(email);
+        }catch (MailException e){
+
+            return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"验证码发送失败,请重试");
+        }
+        return DataFactory.success(SimpleData.class,"验证码发送成功,请注意查收");
+    }
 
 
     @PostMapping("/login")
-    public Object userLogin(@RequestParam("username") String username, @RequestParam("password") String password) {
+    public Object userLogin(HttpServletRequest request, HttpServletResponse response, @RequestParam("username") String username, @RequestParam("password") String password) {
 
         String jwtToken = null;
         try {
-            UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(username, password);
-
-            Subject subject = SecurityUtils.getSubject();
-            subject.login(usernamePasswordToken);
-            //登录完成之后需要颁发令牌
-            String sessionId = ShiroUtil.getShiroSessionId();
 
             UserEntity user = userService.selectUserByUsername(username);
 
-            Map<String, Object> claims = new HashMap<>();
-            claims.put("shiroUser", JSONObject.toJSONString(user));
+            if (user == null) {
+                new UnknownAccountException();
+            }
+            if (!user.getPassword().equals(DigestUtils.md5DigestAsHex(password.getBytes()))) {
+                new IncorrectCredentialsException();
+            }
 
-            jwtToken = jwtTokenManager.issuedToken("system", subject.getSession().getTimeout(), sessionId, claims);
+
+
+            JwtToken token = new JwtToken();
+
+            token= TokenUtil.convertJwtToken(user);
+
+            jwtToken = TokenUtil.issuedToken(token);
+
 
 
         } catch (UnknownAccountException e) {
             //用户名错误
-            return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "用户名错误");
+            return DataFactory.fail(CodeEnum.FORBIDDEN, "用户名错误");
         } catch (IncorrectCredentialsException e) {
             // 密码错误
-            return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "密码错误");
+            return DataFactory.fail(CodeEnum.FORBIDDEN, "密码错误");
         } catch (Exception e) {
             // 登录异常 请联系管理员
             return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "未知错误，请联系管理员");
         }
 
-        return DataFactory.success(SimpleData.class, "登录成功").parseData(jwtToken);
+        response.setHeader(HeaderConsts.JWT_TOKEN, jwtToken);
+        response.setHeader("Access-control-Expose-Headers", HeaderConsts.JWT_TOKEN);
+
+        return DataFactory.success(SimpleData.class, "登录成功");
     }
 
 
     // 注销
-    @RequiresAuthentication
+
     @GetMapping("/logout")
-    public String userLogout() {
-        Subject subject = SecurityUtils.getSubject();
-        subject.logout();
-        return "登出成功";
+    public Object userLogout(HttpServletResponse response) {
+
+        String jwtToken = "";
+        response.setHeader(HeaderConsts.JWT_TOKEN, jwtToken);
+        response.setHeader("Access-control-Expose-Headers", HeaderConsts.JWT_TOKEN);
+
+        return DataFactory.success(SimpleData.class, "登出成功");
     }
 
     /**
      * 注册
      *
-     * @param request
      * @param user
      * @param userInfo
      * @param role
@@ -113,13 +128,26 @@ public class UserController {
      * @throws Exception
      */
     @PostMapping("/registerUser")
-    public Object createUser(HttpServletRequest request, UserEntity user, UserInfoEntity userInfo, RoleEntity role) throws Exception {
+    public Object createUser(UserEntity user, UserInfoEntity userInfo, RoleEntity role,String emailCode) throws Exception {
 
 
-        user.setPassword(DigestsUtil.sha1(user.getPassword()));
+        ValueOperations<String, Object> opsForValue = redis.opsForValue();
 
+
+
+        Object code =opsForValue.get(userInfo.getEmail());
+        code = ""+code+"";
+        if (code==null || code.equals("") || !code.equals(emailCode)){
+            return DataFactory.fail(CodeEnum.FORBIDDEN,"验证码错误,或者验证码已过期");
+        }
+
+        if (userService.selectUserByUsername(user.getUsername())!=null){
+            return DataFactory.fail(CodeEnum.FORBIDDEN,"此用户名已经注册过");
+        }
+
+        user.setPassword(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()));
+//        DigestUtils.md5DigestAsHex(user.getPassword().getBytes());
         Boolean bool = userService.insertUser(user, userInfo, role);
-
 
         if (!bool) {
             return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "注册失败,出现未知错误");
@@ -129,9 +157,15 @@ public class UserController {
 
     }
 
-    @RequiresRoles(value = "admin")
+
     @GetMapping("/deleteUserById")
-    public Object deleteUserById(HttpServletRequest request, String userId) throws Exception {
+    public Object deleteUserById(HttpServletRequest request) throws Exception {
+
+        String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
+
+        JwtToken token = TokenUtil.decodeToken(jwtToken);
+
+        String userId = token.getUserId();
 
         Boolean bool = userService.deleteUserById(userId);
 
@@ -144,45 +178,54 @@ public class UserController {
 
 
     @PostMapping("/updateUserById")
-    public Object updateUserById(HttpServletRequest request, @RequestParam(required = false) String username, @RequestParam(required = false) String password) {
+    public Object updateUserById(HttpServletRequest request, HttpServletResponse response, @RequestParam(required = false) String username, @RequestParam(required = false) String password) {
 
         // 通过jwt获取用户id进行删除
         String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
         try {
 
-            jwtTokenManager.isVerifyToken(jwtToken);
-            Claims claims = jwtTokenManager.decodeToken(jwtToken);
-            UserEntity user = (UserEntity) claims.get("shiroUser");
+            JwtToken token = TokenUtil.decodeToken(jwtToken);
+
+            UserEntity user = new UserEntity();
+
+            user.setUserId(token.getUserId());
             user.setUsername(username);
-            user.setPassword(DigestsUtil.sha1(password));
+            user.setPassword(DigestUtils.md5DigestAsHex(password.getBytes()));
 
             Boolean bool = userService.updateUserById(user);
             if (!bool) {
                 return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "修改失败,出现未知错误");
             }
-            // 更新令牌
-            Map<String, Object> claimsNew = new HashMap<>();
-            claimsNew.put("shiroUser", JSONObject.toJSONString(user));
-            jwtToken = jwtTokenManager.issuedToken("system", ShiroUtil.getShiroSession().getTimeout(), ShiroUtil.getShiroSessionId(), claimsNew);
 
-        } catch (JWTVerificationException e) {
-            return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "头部信息和荷载信息被篡改或者校验令牌已过期");
+            // 更新令牌
+            //登录完成之后需要颁发令牌
+            // 将更新的用户名存进token
+            token.setUsername(username);
+            jwtToken = TokenUtil.issuedToken(token);
+
         } catch (Exception e) {
             return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "修改失败,出现未知错误");
         }
 
-        return DataFactory.success(SimpleData.class, "修改用户成功").parseData(jwtToken);
+        response.setHeader(HeaderConsts.JWT_TOKEN, jwtToken);
+        response.setHeader("Access-control-Expose-Headers", HeaderConsts.JWT_TOKEN);
+
+        return DataFactory.success(SimpleData.class, "修改用户成功");
     }
 
     /**
      * 根据id查询用户
      *
      * @param request
-     * @param userId
      * @return
      */
     @GetMapping("/selectUserById")
-    public Object selectUserById(HttpServletRequest request, String userId) {
+    public Object selectUserById(HttpServletRequest request) throws Exception {
+
+        String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
+        JwtToken token = TokenUtil.decodeToken(jwtToken);
+
+        String userId = token.getUserId();
 
         UserEntity userEntity = userService.selectUserById(userId);
 
@@ -191,45 +234,30 @@ public class UserController {
     }
 
 
-
-
-    /*
-        info表
-        ===========================================================
-     */
-
     /**
      * 修改用户信息
      *
      * @param request
-     * @param userId
      * @param userInfo
      * @return
      */
-    @PostMapping("/updateUserInfo")
-    public Object updateUserInfo(HttpServletRequest request, String userId, UserInfoEntity userInfo) {
-        String header = request.getHeader("占位");
-        UserEntity userEntity = userService.selectUserById(userId);
 
-        userInfo.setUserInfoId(userEntity.getUserInfoId());
+    @PostMapping("/updateUserInfo")
+    public Object updateUserInfo(HttpServletRequest request, UserInfoEntity userInfo) throws Exception {
+
+        String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
+
+        JwtToken token = TokenUtil.decodeToken(jwtToken);
+
+        userInfo.setUserInfoId(token.getUserInfoId());
         Boolean bool = userInfoService.updateUserInfo(userInfo);
 
-
-        if (header.equals("feign")) {
-            //feign调用
-
-        } else {
-            //前端调用
-
+        if (!bool) {
+            return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "修改失败,出现未知错误");
         }
-        return null;
+
+        return DataFactory.success(SimpleData.class, "ok");
     }
 
-    /*
-        用户产品表
-      ==============================================
-     */
-//    @PostMapping("/")
-//    public Object insertUserProduct(HttpServletRequest request,String userId,)
 
 }

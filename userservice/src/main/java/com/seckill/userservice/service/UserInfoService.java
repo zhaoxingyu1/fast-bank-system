@@ -2,6 +2,7 @@ package com.seckill.userservice.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.seckill.common.consts.PageConst;
 import com.seckill.common.entity.user.RoleEntity;
 import com.seckill.common.entity.user.UserEntity;
 import com.seckill.common.entity.user.UserInfoEntity;
@@ -43,12 +44,11 @@ public class UserInfoService {
      * 分页查询信用状态的的用户
      * @param creditStatus
      * @param current
-     * @param size
      * @return
      */
-    public Page<UserInfoEntity> selectUserInfoByCreditStatus(Integer creditStatus,Integer current, Integer size){
+    public Page<UserInfoEntity> selectUserInfoByCreditStatus(Integer creditStatus,Integer current){
 
-        Page<UserInfoEntity> page = new Page<>(current - 1, size);
+        Page<UserInfoEntity> page = new Page<>(current - 1, PageConst.PageSize);
 
         QueryWrapper<UserInfoEntity> wrapper = new QueryWrapper<>();
         wrapper
@@ -62,12 +62,12 @@ public class UserInfoService {
      * 根据真实名字查询个人信息
      * @return
      */
-    public Page<UserInfoEntity> selectUserListByRealName(String realName,Integer current,Integer size){
+    public Page<UserInfoEntity> selectUserListByRealName(String realName,Integer current){
 
         QueryWrapper<UserInfoEntity> wrapper = new QueryWrapper<>();
         wrapper
                 .eq("real_name",realName);
-        Page<UserInfoEntity> page = new Page<>(current - 1, size);
+        Page<UserInfoEntity> page = new Page<>(current - 1, PageConst.PageSize);
         Page<UserInfoEntity> userInfoEntityPage = userInfoDao.selectPage(page,wrapper);
 
         return userInfoEntityPage;
@@ -77,16 +77,17 @@ public class UserInfoService {
      * 根据用户名查询个人信息
      * @return
      */
-    public Page<UserInfoEntity> selectUserListByNickName(String nickname,Integer current,Integer size){
+    public Page<UserInfoEntity> selectUserListByNickName(String nickname,Integer current){
 
         QueryWrapper<UserInfoEntity> wrapper = new QueryWrapper<>();
         wrapper
                 .eq("nickname",nickname);
-        Page<UserInfoEntity> page = new Page<>(current - 1, size);
+        Page<UserInfoEntity> page = new Page<>(current - 1, PageConst.PageSize);
         Page<UserInfoEntity> userInfoEntityPage = userInfoDao.selectPage(page,wrapper);
 
         return userInfoEntityPage;
     }
+
 
 
 
