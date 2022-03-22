@@ -1,7 +1,10 @@
 package com.seckill.productservice.controller;
 
 import com.seckill.common.consts.FeignConsts;
+import com.seckill.common.consts.HeaderConsts;
 import com.seckill.common.enums.CodeEnum;
+import com.seckill.common.jwt.JwtToken;
+import com.seckill.common.jwt.TokenUtil;
 import com.seckill.common.response.DataFactory;
 import com.seckill.common.response.ListData;
 import com.seckill.common.response.SimpleData;
@@ -25,10 +28,15 @@ public class UserProductController {
 
     // todo 用户预约产品
     public Object userAppointProduct(HttpServletRequest request) throws Exception {
+        // 从Token中获取用户id
+        String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
+        JwtToken token = TokenUtil.decodeToken(jwtToken);
+        String userId = token.getUserId();
+
         if (request.getHeader(FeignConsts.HEADER_NAME) != null){
-            return userProductService.userAppointProduct(null, null, null);
+            return userProductService.userAppointProduct(userId, null, null);
         } else {
-            if(userProductService.userAppointProduct(null, null, null)){
+            if(userProductService.userAppointProduct(userId, null, null)){
                 return DataFactory.success(SimpleData.class,"ok");
             }else {
                 return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现了未知错误");
@@ -38,10 +46,14 @@ public class UserProductController {
 
     // todo 用户购买（秒杀）产品
     public Object userBuyProduct(HttpServletRequest request) throws Exception {
+        // 从Token中获取用户id
+        String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
+        JwtToken token = TokenUtil.decodeToken(jwtToken);
+        String userId = token.getUserId();
         if (request.getHeader(FeignConsts.HEADER_NAME) != null){
-            return userProductService.userBuyProduct(null, null, null);
+            return userProductService.userBuyProduct(userId, null, null);
         } else {
-            if(userProductService.userBuyProduct(null, null, null)){
+            if(userProductService.userBuyProduct(userId, null, null)){
                 return DataFactory.success(SimpleData.class,"ok");
             }else {
                 return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现了未知错误");
@@ -51,8 +63,12 @@ public class UserProductController {
 
     // todo 用户查看已预约的产品（按照时间排序）
     public Object userGetAppointment(HttpServletRequest request){
+        // 从Token中获取用户id
+        String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
+        JwtToken token = TokenUtil.decodeToken(jwtToken);
+        String userId = token.getUserId();
         if (request.getHeader(FeignConsts.HEADER_NAME) != null){
-            return userProductService.userGetAppointment(null);
+            return userProductService.userGetAppointment(userId);
         } else {
             return DataFactory.success(ListData.class, "ok").parseData(userProductService.userGetAppointment(null));
         }
