@@ -1,9 +1,11 @@
 package com.seckill.orderservice.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.seckill.common.consts.HeaderConsts;
 import com.seckill.common.entity.order.OrderEntity;
 import com.seckill.common.consts.FeignConsts;
 import com.seckill.common.enums.OrderStateEnum;
+import com.seckill.common.jwt.TokenUtil;
 import com.seckill.common.response.BaseData;
 import com.seckill.common.response.DataFactory;
 import com.seckill.common.response.SimpleData;
@@ -31,7 +33,8 @@ public class OrderController {
 
     @GetMapping("/getById")
     public Object getById(HttpServletRequest request, String id) throws Exception {
-        final OrderEntity order = orderService.getById(id);
+        final OrderEntity order = orderService.getById(request, id);
+
         if (request.getHeader(FeignConsts.HEADER_NAME) != null) {
             return order;
         }
@@ -39,13 +42,17 @@ public class OrderController {
     }
 
     @GetMapping("/getByUser")
-    public BaseData getByUser(String id, int page) throws Exception {
+    public BaseData getByUser(HttpServletRequest request, int page) throws Exception {
+        String id = TokenUtil.decodeToken(request.getHeader(HeaderConsts.JWT_TOKEN)).getUserId();
+
         Page<OrderEntity> entities = orderService.getByUserId(id, page);
         return DataFactory.success(SimpleData.class, "ok").parseData(entities);
     }
 
     @PostMapping("/create")
-    public BaseData create(OrderEntity order) throws Exception {
+    public BaseData create(HttpServletRequest request, OrderEntity order) throws Exception {
+        order.setUserId(TokenUtil.decodeToken(request.getHeader(HeaderConsts.JWT_TOKEN)).getUserId());
+
         orderService.create(order);
         return DataFactory.success(SimpleData.class, "ok");
     }

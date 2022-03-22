@@ -3,6 +3,7 @@ package com.seckill.orderservice.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.seckill.common.consts.HeaderConsts;
 import com.seckill.common.consts.PageConst;
 import com.seckill.common.consts.RabbitConsts;
 import com.seckill.common.consts.RedisConsts;
@@ -10,6 +11,7 @@ import com.seckill.common.entity.order.OrderEntity;
 import com.seckill.common.enums.OrderStateEnum;
 import com.seckill.common.exception.ForbiddenException;
 import com.seckill.common.exception.NotFoundException;
+import com.seckill.common.jwt.TokenUtil;
 import com.seckill.orderservice.dao.OrderDao;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -42,16 +45,19 @@ public class OrderService {
     @Resource
     private OrderDao orderDao;
 
-    public OrderEntity getById(String id) throws Exception {
+    public OrderEntity getById(HttpServletRequest request, String id) throws Exception {
         if (id == null) {
             throw new NotFoundException("id 为空");
         }
         OrderEntity orderEntity = orderDao.selectById(id);
+        if (orderEntity == null) {
+            throw new NotFoundException("未找到此订单");
+        }
+        if (!orderEntity.getUserId().equals(TokenUtil.decodeToken(request.getHeader(HeaderConsts.JWT_TOKEN)).getUserId())) {
+            throw new ForbiddenException("你就是歌姬吧");
+        }
 //        todo 调用产品的getbyid
 
-        if (orderEntity == null) {
-            throw new NotFoundException("未找到. id: " + id);
-        }
         return orderEntity;
     }
 

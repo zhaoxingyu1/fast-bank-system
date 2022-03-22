@@ -39,8 +39,8 @@ public class DataFactory {
 
             @Override
             public String toString() {
-                return "{\"code\"=" + code +
-                        ",\"msg\"=\"" + msg +
+                return "{\"code\":" + code +
+                        ",\"msg\":\"" + msg +
                         "\"}";
             }
         };
