@@ -5,11 +5,13 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.seckill.common.consts.PageConst;
 import com.seckill.common.consts.RabbitConsts;
+import com.seckill.common.consts.RedisConsts;
 import com.seckill.common.entity.order.OrderEntity;
 import com.seckill.common.enums.OrderStateEnum;
 import com.seckill.common.exception.ForbiddenException;
 import com.seckill.common.exception.NotFoundException;
 import com.seckill.orderservice.dao.OrderDao;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,6 +31,7 @@ import java.util.stream.Stream;
 
 @Service
 @Transactional
+@Slf4j
 public class OrderService {
     @Resource
     private RedisTemplate<String, Object> redis;
@@ -61,29 +65,61 @@ public class OrderService {
         Page<OrderEntity> res = orderDao.selectPage(new Page<>(page, PageConst.PageSize), wrapper);
 
         List<String> ids = res.getRecords().stream().map(OrderEntity::getProductId).collect(Collectors.toList());
-        // todo 调用产品的 getProductsBatch 方法要求根据 id 的 List 查出对应的所有产品
+        // todo 调用产品的 getProductsBatch 方法要求根据 id 的 List 查出对应的所有产品，以 List 形式返回
         return res;
     }
 
     public void create(OrderEntity order) throws Exception {
-//        todo 查询产品是否开始抢购
         ValueOperations<String, Object> ops = redis.opsForValue();
-        if (ops.get(order.getUserId()) != null) {
-            throw new ForbiddenException("不能重复下单");
+
+        OrderEntity entity = orderDao.selectOne(
+                new QueryWrapper<OrderEntity>()
+                        .eq("user_id", order.getUserId())
+                        .eq("product_id", order.getProductId())
+        );
+        if (entity != null) {
+            throw new ForbiddenException("不能对同一产品重复下单哦");
         }
+
         Long decrement = ops.decrement(order.getProductId());
         assert decrement != null;
         if (decrement < 0) {
             ops.increment(order.getProductId());
             throw new ForbiddenException("商品已卖完或者未在抢购期限内");
         }
+//         分布式锁
+        Boolean absent = ops.setIfAbsent(
+                order.getProductId(),
+                "KANO",
+                RedisConsts.ORDER_WAITING_TIME,
+                TimeUnit.MILLISECONDS
+        );
+        assert absent != null;
+        if (!absent) {
+            throw new NotFoundException("晚了一步");
+        }
+
+        order.setState(OrderStateEnum.PENDING.name());
+        orderDao.insert(order);
+
+        log.info("created order: " + order.getOrderId());
+        ops.set(
+                RedisConsts.ORDER_KEY_PREFIX_EXPIRED + order.getOrderId(),
+                "寄",
+                RedisConsts.ORDER_WAITING_TIME,
+                TimeUnit.MILLISECONDS
+        );
+//        解锁
+        redis.unlink(order.getProductId());
     }
 
     public void updateState(String id, OrderStateEnum orderState) {
+        log.info("update state: " + id);
+        redis.unlink(RedisConsts.ORDER_KEY_PREFIX_EXPIRED + id);
         orderDao.update(
                 null,
                 new UpdateWrapper<OrderEntity>()
-                        .set("state", orderState)
+                        .set("state", orderState.name())
                         .eq("order_id", id)
         );
     }

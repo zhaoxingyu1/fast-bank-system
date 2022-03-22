@@ -8,6 +8,7 @@ import com.seckill.common.response.BaseData;
 import com.seckill.common.response.DataFactory;
 import com.seckill.common.response.SimpleData;
 import com.seckill.orderservice.service.OrderService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/order")
+@Slf4j
 public class OrderController {
     @Resource
     private OrderService orderService;
@@ -52,6 +54,7 @@ public class OrderController {
     public Object updateState(HttpServletRequest request, String id, String state) {
         orderService.updateState(id, OrderStateEnum.valueOf(state));
         if (request.getHeader(FeignConsts.HEADER_NAME) != null) {
+            log.info("------------ feign 调用!");
             return null;
         }
         return DataFactory.success(SimpleData.class, "ok");
