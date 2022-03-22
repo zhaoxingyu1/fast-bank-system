@@ -1,3 +1,9 @@
 server:
   port: 0
-
+spring:
+  cloud:
+    sentinel:
+      transport:
+        dashboard: localhost:8080
+      log:
+        switch-pid: true

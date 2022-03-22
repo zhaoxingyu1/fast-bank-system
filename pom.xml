@@ -35,6 +35,7 @@
         <fastjson.version>1.2.71</fastjson.version>
         <mybatis-plus.version>3.4.2</mybatis-plus.version>
         <rabbit.version>2.3.9.RELEASE</rabbit.version>
+        <sentinel.version>2.2.7.RELEASE</sentinel.version>
         <redis.version>2.3.9.RELEASE</redis.version>
         <feign.version>2.2.7.RELEASE</feign.version>
         <!--shiro-->
