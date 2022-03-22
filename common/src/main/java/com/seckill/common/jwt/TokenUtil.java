@@ -33,10 +33,14 @@ public class TokenUtil {
         return token;
     }
 
-
+    /**
+     * 转换JwtToken对象
+     * @param user
+     * @return
+     */
     public static JwtToken convertJwtToken(UserEntity user){
 
-        JwtToken jwtToken = new JwtToken(user.getUserId(), user.getRoleId(), user.getUserInfoId(), user.getUsername(), user.getUserRole().getRole());
+        JwtToken jwtToken = new JwtToken(user.getUserId(), user.getRoleId(), user.getUserInfoId(), user.getUsername(), user.getUserRole().getRole(),user.getUserInfo().getCreditStatus());
 
 
         return jwtToken;

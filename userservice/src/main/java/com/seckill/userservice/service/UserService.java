@@ -178,7 +178,10 @@ public class UserService {
                 .eq("username", name);
         UserEntity userEntity = userDao.selectOne(wrapper);
 
+        UserInfoEntity userInfoEntity = userInfoDao.selectById(userEntity.getUserInfoId());
         RoleEntity roleEntity = roleDao.selectById(userEntity.getRoleId());
+
+        userEntity.setUserInfo(userInfoEntity);
         userEntity.setUserRole(roleEntity);
 
         return userEntity;
@@ -189,7 +192,7 @@ public class UserService {
 
         SimpleMailMessage message = new SimpleMailMessage();
 
-        message.setFrom("2429203557@qq.com");
+        message.setFrom(from);
 
         message.setTo(email);
 

@@ -19,12 +19,11 @@ public class JwtToken {
 
     private String roleId;
 
-//    private String userProductId;
-
     private String userInfoId;
 
     private String username;
     private String role;
 
+    private Integer creditStatus;
 
 }

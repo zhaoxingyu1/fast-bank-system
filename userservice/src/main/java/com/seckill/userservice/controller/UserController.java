@@ -1,6 +1,5 @@
 package com.seckill.userservice.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.seckill.common.consts.HeaderConsts;
 import com.seckill.common.entity.user.RoleEntity;
 import com.seckill.common.entity.user.UserEntity;
@@ -14,9 +13,9 @@ import com.seckill.common.response.SimpleData;
 
 import com.seckill.userservice.service.RoleService;
 import com.seckill.userservice.service.UserInfoService;
-import com.seckill.userservice.service.UserService;
-import io.jsonwebtoken.Claims;
 
+
+import com.seckill.userservice.service.UserService;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
 
@@ -29,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+
 
 /**
  * @author zxy
@@ -42,6 +41,7 @@ public class UserController {
 
     @Resource
     private UserInfoService userInfoService;
+
     @Resource
     private UserService userService;
     @Resource
