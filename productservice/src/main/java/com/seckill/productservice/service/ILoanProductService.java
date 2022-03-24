@@ -29,4 +29,6 @@ public interface ILoanProductService{
 
     //分页查询
     List<LoanProductEntity> getProductById(int page);
+
+    Object getProductsBatch(List<String> ids);
 }

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -122,5 +123,16 @@ public class LoanProductService implements ILoanProductService {
         Page<LoanProductEntity> objectPage = new Page<>(page, PageConst.PageSize);
         loanProductDao.selectPage(objectPage, null);
         return objectPage.getRecords();
+    }
+
+    @Override
+    public Object getProductsBatch(List<String> ids) {
+        //方法要求根据 id 的 List 查出对应的所有产品，以 List 形式返回
+        List<LoanProductEntity> list = new ArrayList<>();
+        for (String id : ids) {
+            LoanProductEntity loanProductEntity = loanProductDao.selectById(id);
+            list.add(loanProductEntity);
+        }
+        return list;
     }
 }

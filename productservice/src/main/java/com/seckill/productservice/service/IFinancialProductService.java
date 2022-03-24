@@ -29,4 +29,6 @@ public interface IFinancialProductService{
 
     //分页查询产品
     List<FinancialProductEntity> getProductById(int page);
+
+    Object getProductsBatch(List<String> ids);
 }

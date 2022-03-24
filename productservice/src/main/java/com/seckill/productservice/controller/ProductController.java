@@ -97,7 +97,7 @@ public class ProductController {
      * @param type 产品类型
      * @return 对象 数据（单个实体）
      */
-    @GetMapping("/{type}/find/{id}")
+    @GetMapping("/{type}/getbyid/{id}")
     public Object findFinancialProduct(@PathVariable("id")String id,
                                        @PathVariable("type") String type,
                                        HttpServletRequest request){
@@ -196,4 +196,25 @@ public class ProductController {
         }
         return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现了未知错误");
     }
+
+    @PostMapping("/{type}/getProductsBatch")
+    public Object getProductsBatch(@PathVariable("type") String type,
+                                   HttpServletRequest request,
+                                   @RequestBody List<String> ids) throws Exception{
+        if (request.getHeader(FeignConsts.HEADER_NAME) != null){
+            if(type.equals("financial")){
+                return financialProductService.getProductsBatch(ids);
+            }else if(type.equals("loan")){
+                return loanProductService.getProductsBatch(ids);
+            }
+        }else{
+            if(type.equals("financial")){
+                return DataFactory.success(ListData.class, "ok").parseData(financialProductService.getProductsBatch(ids));
+            }else if(type.equals("loan")){
+                return DataFactory.success(ListData.class, "ok").parseData(loanProductService.getProductsBatch(ids));
+            }
+        }
+        return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现了未知错误");
+    }
+
 }

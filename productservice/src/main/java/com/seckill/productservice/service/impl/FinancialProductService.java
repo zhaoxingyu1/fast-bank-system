@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -133,5 +134,16 @@ public class FinancialProductService implements IFinancialProductService {
         Page<FinancialProductEntity> objectPage = new Page<>(page, PageConst.PageSize);
         financialProductDao.selectPage(objectPage, null);
         return objectPage.getRecords();
+    }
+
+    @Override
+    public Object getProductsBatch(List<String> ids) {
+        //方法要求根据 id 的 List 查出对应的所有产品，以 List 形式返回
+        List<FinancialProductEntity> list = new ArrayList<>();
+        for (String id : ids) {
+            FinancialProductEntity financialProductEntity = financialProductDao.selectById(id);
+            list.add(financialProductEntity);
+        }
+        return list;
     }
 }
