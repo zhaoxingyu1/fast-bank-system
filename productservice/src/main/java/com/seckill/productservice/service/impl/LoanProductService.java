@@ -40,7 +40,7 @@ public class LoanProductService implements ILoanProductService {
         if(i.size() == 0){
             loanProductDao.insert(loanProductEntity);
             //计算startTime和endTime的间隔
-            long interval = loanProductEntity.getStartTime() - loanProductEntity.getEndTime();
+            long interval = loanProductEntity.getEndTime() - loanProductEntity.getStartTime();
             // 获取库存
             Integer stock = loanProductEntity.getStock();
 

@@ -29,9 +29,9 @@ public class ProductQueueListener {
         Long conTime = Long.valueOf(String.valueOf(map.get("con_time")));
 
         // 简单测试一下
-//        System.out.println("产品ID是：" + productId);
-//        System.out.println("产品库存是：" + count);
-//        System.out.println("缓存过期时间是" + conTime);
+        System.out.println("产品ID是：" + productId);
+        System.out.println("产品库存是：" + count);
+        System.out.println("缓存过期时间是" + conTime);
 
         // 推送至缓存
         ValueOperations<String, Object> opsForValue = redis.opsForValue();

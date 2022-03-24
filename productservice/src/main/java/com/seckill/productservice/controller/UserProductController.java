@@ -122,19 +122,19 @@ public class UserProductController {
     /**
      * 管理员取消某个人的对某个产品的预约
      * @param request 请求
-     * @param type 产品类型
+     * @param userId 用户ID
      * @param productId 产品ID
      * @return 布尔 是否成功
      * @throws Exception 异常
      */
-    @GetMapping("/adminCancelAppointment/{type}/{productId}")
+    @GetMapping("/adminCancelAppointment/{userId}/{productId}")
     public Object adminDeleteAppointByUserId(HttpServletRequest request,
-                                             @PathVariable("type") String type,
+                                             @PathVariable("userId") String userId,
                                              @PathVariable("productId") String productId) throws Exception {
         if (request.getHeader(FeignConsts.HEADER_NAME) != null){
-            return userProductService.adminDeleteAppointByUserId(productId, type);
+            return userProductService.adminDeleteAppointByUserId(productId, userId);
         } else {
-            if(userProductService.adminDeleteAppointByUserId(productId, type)){
+            if(userProductService.adminDeleteAppointByUserId(productId, userId)){
                 return DataFactory.success(SimpleData.class,"ok");
             }else {
                 return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现了未知错误");
