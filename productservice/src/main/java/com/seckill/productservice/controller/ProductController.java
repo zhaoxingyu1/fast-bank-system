@@ -3,17 +3,20 @@ package com.seckill.productservice.controller;
 import com.seckill.common.consts.FeignConsts;
 import com.seckill.common.entity.product.FinancialProductEntity;
 import com.seckill.common.entity.product.LoanProductEntity;
+import com.seckill.common.entity.product.ProductTypeEntity;
 import com.seckill.common.enums.CodeEnum;
 import com.seckill.common.response.DataFactory;
 import com.seckill.common.response.ListData;
 import com.seckill.common.response.SimpleData;
+import com.seckill.productservice.dao.ProductTypeDao;
 import com.seckill.productservice.service.IFinancialProductService;
 import com.seckill.productservice.service.ILoanProductService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,6 +36,9 @@ public class ProductController {
         this.financialProductService = financialProductService;
         this.loanProductService = loanProductService;
     }
+
+    @Resource
+    private ProductTypeDao productTypeDao;
 
     /**
      * 根据类型新增一个新产品
@@ -197,24 +203,28 @@ public class ProductController {
         return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现了未知错误");
     }
 
-    @PostMapping("/{type}/getProductsBatch")
-    public Object getProductsBatch(@PathVariable("type") String type,
-                                   HttpServletRequest request,
-                                   @RequestBody List<String> ids) throws Exception{
-        if (request.getHeader(FeignConsts.HEADER_NAME) != null){
-            if(type.equals("financial")){
-                return financialProductService.getProductsBatch(ids);
-            }else if(type.equals("loan")){
-                return loanProductService.getProductsBatch(ids);
-            }
-        }else{
-            if(type.equals("financial")){
-                return DataFactory.success(ListData.class, "ok").parseData(financialProductService.getProductsBatch(ids));
-            }else if(type.equals("loan")){
-                return DataFactory.success(ListData.class, "ok").parseData(loanProductService.getProductsBatch(ids));
+    /**
+     * 传入一个id的list，遍历这个list，根据对应的type，查询出对应的产品对象List
+     * @param ids 产品类型
+     * @return 对象 数据（列表）
+     */
+    // 传入一个id的list，遍历这个list，根据对应的type，查询出对应的产品对象List
+    @PostMapping("/getProductsBatch")
+    public Object getProductsBatch(HttpServletRequest request,
+                                   @RequestParam("ids") List<ProductTypeEntity> ids) throws Exception{
+        // 遍历ids，根据ProductTypeEntity中的type属性，查询出对应的产品
+        List<Object> flProducts = new ArrayList<>();
+        for (ProductTypeEntity productTypeEntity : ids) {
+            if(productTypeEntity.getType().equals("financial")){
+                flProducts.add(financialProductService.findFinancialProductById(productTypeEntity.getProductId()));
+            } else {
+                flProducts.add(loanProductService.findLoanProductById(productTypeEntity.getProductId()));
             }
         }
-        return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现了未知错误");
+        if (request.getHeader(FeignConsts.HEADER_NAME) != null){
+            return flProducts;
+        }else {
+            return DataFactory.success(ListData.class, "ok").parseData(flProducts);
+        }
     }
-
 }
