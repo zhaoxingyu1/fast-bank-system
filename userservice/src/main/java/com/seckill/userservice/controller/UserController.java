@@ -1,5 +1,6 @@
 package com.seckill.userservice.controller;
 
+import com.seckill.common.consts.FeignConsts;
 import com.seckill.common.consts.HeaderConsts;
 import com.seckill.common.entity.user.RoleEntity;
 import com.seckill.common.entity.user.UserEntity;
@@ -80,7 +81,7 @@ public class UserController {
 
 
 
-            JwtToken token = new JwtToken();
+            JwtToken token;
 
             token= TokenUtil.convertJwtToken(user);
 
@@ -178,30 +179,33 @@ public class UserController {
 
 
     @PostMapping("/updateUserById")
-    public Object updateUserById(HttpServletRequest request, HttpServletResponse response, @RequestParam(required = false) String username, @RequestParam(required = false) String password) {
+    public Object updateUserById(HttpServletRequest request, HttpServletResponse response,String oldPassword,String newPassword) {
 
         // 通过jwt获取用户id进行删除
         String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
         try {
 
+
             JwtToken token = TokenUtil.decodeToken(jwtToken);
 
-            UserEntity user = new UserEntity();
+            UserEntity user = userService.selectUserById(token.getUserId());
+
+            if(!user.getPassword().equals(oldPassword)){
+                return DataFactory.fail(CodeEnum.FORBIDDEN,"密码错误,请重新输入");
+            }
 
             user.setUserId(token.getUserId());
-            user.setUsername(username);
-            user.setPassword(DigestUtils.md5DigestAsHex(password.getBytes()));
+            user.setPassword(DigestUtils.md5DigestAsHex(newPassword.getBytes()));
 
             Boolean bool = userService.updateUserById(user);
             if (!bool) {
                 return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "修改失败,出现未知错误");
             }
 
-            // 更新令牌
-            //登录完成之后需要颁发令牌
-            // 将更新的用户名存进token
-            token.setUsername(username);
-            jwtToken = TokenUtil.issuedToken(token);
+//            // 更新令牌
+//            //登录完成之后需要颁发令牌
+//            // 将更新的用户名存进token
+//            jwtToken = TokenUtil.issuedToken(token);
 
         } catch (Exception e) {
             return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "修改失败,出现未知错误");
@@ -220,17 +224,18 @@ public class UserController {
      * @return
      */
     @GetMapping("/selectUserById")
-    public Object selectUserById(HttpServletRequest request) throws Exception {
+    public Object selectUserById(HttpServletRequest request,@RequestParam(required = false)String userId){
 
-        String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
-        JwtToken token = TokenUtil.decodeToken(jwtToken);
-
-        String userId = token.getUserId();
+        if(request.getHeader(FeignConsts.HEADER_NAME)==null){
+            String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
+            JwtToken token = TokenUtil.decodeToken(jwtToken);
+            String tokenUserId = token.getUserId();
+            UserEntity userEntity = userService.selectUserById(tokenUserId);
+            return DataFactory.success(SimpleData.class, "ok").parseData(userEntity);
+        }
 
         UserEntity userEntity = userService.selectUserById(userId);
-
-
-        return DataFactory.success(SimpleData.class, "ok").parseData(userEntity);
+        return userEntity;
     }
 
 
