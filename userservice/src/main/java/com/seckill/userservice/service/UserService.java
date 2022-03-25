@@ -77,7 +77,7 @@ public class UserService {
         UserEntity user = userDao.selectById(userId);
         String userInfoId = user.getUserInfoId();
         String roleId = user.getRoleId();
-        String userProductId = user.getUserProductId();
+
 
         int i = userDao.deleteById(userId);
 
@@ -85,9 +85,8 @@ public class UserService {
 
         int i2 = roleDao.deleteById(roleId);
 
-        int i3 = userProductDao.deleteById(userProductId);
 
-        if (i < 1 && i1 < 1 && i2 < 1 && i3 < 1) {
+        if (i < 1 && i1 < 1 && i2 < 1) {
             new DatabaseOperationException("删除失败");
         }
         return true;
@@ -177,6 +176,10 @@ public class UserService {
         wrapper
                 .eq("username", name);
         UserEntity userEntity = userDao.selectOne(wrapper);
+
+        if (userEntity==null){
+            return null;
+        }
 
         UserInfoEntity userInfoEntity = userInfoDao.selectById(userEntity.getUserInfoId());
         RoleEntity roleEntity = roleDao.selectById(userEntity.getRoleId());

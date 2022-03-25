@@ -34,8 +34,6 @@ public class UserEntity {
     @NotNull(message = "id不能为空")
     private String userInfoId;
 
-    @NotNull(message = "id不能为空")
-    private String userProductId;
     private Long ctime;
 
     @TableField(exist = false)
