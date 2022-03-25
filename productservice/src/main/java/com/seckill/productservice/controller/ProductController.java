@@ -100,28 +100,35 @@ public class ProductController {
     /**
      * 根据ID查找产品
      * @param id 产品ID
-     * @param type 产品类型
      * @return 对象 数据（单个实体）
      */
-    @GetMapping("/{type}/getbyid/{id}")
+    @GetMapping("/getbyid/{id}")
     public Object findFinancialProduct(@PathVariable("id")String id,
-                                       @PathVariable("type") String type,
                                        HttpServletRequest request){
+
+        String type;
+
+        //判断id是哪个类型的产品
+        FinancialProductEntity i = financialProductService.findFinancialProductById(id);
+        if (i != null){
+            type = "financial";
+        }else {
+            type = "loan";
+        }
 
         if (request.getHeader(FeignConsts.HEADER_NAME) != null){
             if(type.equals("financial")){
                 return financialProductService.findFinancialProductById(id);
-            }else if(type.equals("loan")){
+            }else {
                 return loanProductService.findLoanProductById(id);
             }
         }else{
             if(type.equals("financial")){
                 return DataFactory.success(SimpleData.class, "ok").parseData(financialProductService.findFinancialProductById(id));
-            }else if(type.equals("loan")){
+            }else {
                 return DataFactory.success(SimpleData.class, "ok").parseData(loanProductService.findLoanProductById(id));
             }
         }
-        return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现了未知错误");
     }
 
     /**
