@@ -40,8 +40,7 @@ public class UserService {
     private UserInfoDao userInfoDao;
     @Resource
     private RoleDao roleDao;
-    @Resource
-    private UserProductDao userProductDao;
+
     @Autowired
     private JavaMailSender mailSender;
 

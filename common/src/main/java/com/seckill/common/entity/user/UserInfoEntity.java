@@ -51,7 +51,7 @@ public class UserInfoEntity {
 
     @CreditCardNumber(message = "银行卡号错误")
     private String bankCard;
-    private Integer overdue;
+    private Integer overdueNumber;
     private Integer creditStatus;
     private Long ctime;
     private Long mtime;
