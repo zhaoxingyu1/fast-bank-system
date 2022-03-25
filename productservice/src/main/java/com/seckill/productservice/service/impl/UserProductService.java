@@ -42,7 +42,15 @@ public class UserProductService implements IUserProductService {
     public Boolean userAppointProduct(String userId, String type, String productId) throws Exception{
         if(type.equals("financial")){
             FinancialProductEntity financialProductEntity = financialProductDao.selectById(productId);
-            int insert = financialProductDao.insert(financialProductEntity);
+            // 更新状态
+            UserProductEntity i = new UserProductEntity();
+            i.setUserId(userId);
+            i.setUserProductId(financialProductEntity.getFinancialProductId());
+            i.setProductName(financialProductEntity.getFinancialProductName());
+            i.setMtime(System.currentTimeMillis());
+            i.setBookingStatus(1);
+            i.setPrice(financialProductEntity.getPrice());
+            int insert = userProductDao.insert(i);
             if (insert == 0){
                 throw new DatabaseOperationException("添加产品失败");
             }else{
@@ -50,7 +58,15 @@ public class UserProductService implements IUserProductService {
             }
         }else if(type.equals("loan")){
             LoanProductEntity loanProductEntity = loanProductDao.selectById(productId);
-            int insert = loanProductDao.insert(loanProductEntity);
+            // 更新状态
+            UserProductEntity i = new UserProductEntity();
+            i.setUserId(userId);
+            i.setUserProductId(loanProductEntity.getLoanProductId());
+            i.setProductName(loanProductEntity.getLoanProductName());
+            i.setMtime(System.currentTimeMillis());
+            i.setBookingStatus(1);
+            i.setPrice(loanProductEntity.getPrice());
+            int insert = userProductDao.insert(i);
             if (insert == 0){
                 throw new DatabaseOperationException("添加产品失败");
             }else{

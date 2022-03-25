@@ -40,9 +40,10 @@ public class UserProductController {
                                      @PathVariable("type") String type,
                                      @PathVariable("productId") String productId) throws Exception {
         // 从Token中获取用户id
-        String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
-        JwtToken token = TokenUtil.decodeToken(jwtToken);
-        String userId = token.getUserId();
+//        String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
+//        JwtToken token = TokenUtil.decodeToken(jwtToken);
+//        String userId = token.getUserId();
+        String userId = "test_user_id";
 
         if (request.getHeader(FeignConsts.HEADER_NAME) != null){
             return userProductService.userAppointProduct(userId, type, productId);
@@ -68,9 +69,10 @@ public class UserProductController {
                                  @PathVariable("type") String type,
                                  @PathVariable("productId") String productId) throws Exception {
         // 从Token中获取用户id
-        String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
-        JwtToken token = TokenUtil.decodeToken(jwtToken);
-        String userId = token.getUserId();
+//        String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
+//        JwtToken token = TokenUtil.decodeToken(jwtToken);
+//        String userId = token.getUserId();
+        String userId = "test_user_id";
         if (request.getHeader(FeignConsts.HEADER_NAME) != null){
             return userProductService.userBuyProduct(userId, type, productId);
         } else {
@@ -91,13 +93,14 @@ public class UserProductController {
     @GetMapping("/userGetAppointmentProduct")
     public Object userGetAppointment(HttpServletRequest request){
         // 从Token中获取用户id
-        String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
-        JwtToken token = TokenUtil.decodeToken(jwtToken);
-        String userId = token.getUserId();
+//        String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
+//        JwtToken token = TokenUtil.decodeToken(jwtToken);
+//        String userId = token.getUserId();
+        String userId = "test_user_id";
         if (request.getHeader(FeignConsts.HEADER_NAME) != null){
             return userProductService.userGetAppointment(userId);
         } else {
-            return DataFactory.success(ListData.class, "ok").parseData(userProductService.userGetAppointment(null));
+            return DataFactory.success(ListData.class, "ok").parseData(userProductService.userGetAppointment(userId));
         }
     }
 
@@ -114,7 +117,7 @@ public class UserProductController {
         if (request.getHeader(FeignConsts.HEADER_NAME) != null){
             return userProductService.adminGetUserByProductId(productId);
         } else {
-            return DataFactory.success(ListData.class, "ok").parseData(userProductService.adminGetUserByProductId(null));
+            return DataFactory.success(ListData.class, "ok").parseData(userProductService.adminGetUserByProductId(productId));
         }
     }
 
