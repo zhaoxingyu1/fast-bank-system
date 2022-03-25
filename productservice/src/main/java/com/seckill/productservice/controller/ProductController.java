@@ -211,7 +211,7 @@ public class ProductController {
     // 传入一个id的list，遍历这个list，根据对应的type，查询出对应的产品对象List
     @PostMapping("/getProductsBatch")
     public Object getProductsBatch(HttpServletRequest request,
-                                   @RequestParam("ids") List<ProductTypeEntity> ids) throws Exception{
+                                   @RequestBody List<ProductTypeEntity> ids) throws Exception{
         // 遍历ids，根据ProductTypeEntity中的type属性，查询出对应的产品
         List<Object> flProducts = new ArrayList<>();
         for (ProductTypeEntity productTypeEntity : ids) {
