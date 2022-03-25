@@ -1,6 +1,7 @@
 package com.seckill.productservice.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.seckill.common.consts.PageConst;
 import com.seckill.common.exception.DatabaseOperationException;
@@ -136,9 +137,11 @@ public class FinancialProductService implements IFinancialProductService {
 
     @Override
     public List<FinancialProductEntity> getProductById(int page) {
-        Page<FinancialProductEntity> objectPage = new Page<>(page, PageConst.PageSize);
-        financialProductDao.selectPage(objectPage, null);
-        return objectPage.getRecords();
+        //设置分页
+        Page<FinancialProductEntity> page1 = new Page<>(page,PageConst.PageSize);
+        //查询
+        IPage<FinancialProductEntity> iPage = financialProductDao.selectPage(page1, null);
+        return iPage.getRecords();
     }
 
     @Override

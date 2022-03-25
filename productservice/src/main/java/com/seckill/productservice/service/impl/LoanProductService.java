@@ -1,6 +1,7 @@
 package com.seckill.productservice.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.seckill.common.consts.PageConst;
 import com.seckill.common.exception.DatabaseOperationException;
@@ -125,9 +126,9 @@ public class LoanProductService implements ILoanProductService {
 
     @Override
     public List<LoanProductEntity> getProductById(int page) {
-        Page<LoanProductEntity> objectPage = new Page<>(page, PageConst.PageSize);
-        loanProductDao.selectPage(objectPage, null);
-        return objectPage.getRecords();
+        Page<LoanProductEntity> page1 = new Page<>(page, PageConst.PageSize);
+        IPage<LoanProductEntity> iPage = loanProductDao.selectPage(page1, null);
+        return iPage.getRecords();
     }
 
     @Override
