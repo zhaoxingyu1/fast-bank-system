@@ -183,10 +183,10 @@ public class ProductController {
      * @return 返回数据或者对象
      * @throws Exception 异常
      */
-    @GetMapping("/{type}/findAllByPage")
+    @GetMapping("/{type}/findAllByPage/{page}")
     public Object findAllByPage(@PathVariable("type") String type,
                                 HttpServletRequest request,
-                                int page) throws Exception{
+                                @PathVariable("page") int page) throws Exception{
         if (request.getHeader(FeignConsts.HEADER_NAME) != null){
             if(type.equals("financial")){
                 return financialProductService.getProductById(page);

@@ -1,6 +1,7 @@
 package com.seckill.productservice.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.seckill.common.consts.PageConst;
 import com.seckill.common.exception.DatabaseOperationException;
@@ -58,8 +59,13 @@ public class LoanProductService implements ILoanProductService {
 
             // 将消息发送到延时队列delayProductQueue
             rabbitTemplate.convertAndSend("delayProductQueue", productMap, message -> {
-                // todo 根据当前时间和产品开枪时间计算延时多少毫秒
-                message.getMessageProperties().setExpiration("10000");
+                // 获取当前时间戳，计算延时时间
+                long nowTime = System.currentTimeMillis();
+                long delayTime = loanProductEntity.getStartTime() - nowTime;
+                // 将delayTime转换为毫秒，并转换为字符串
+                String delayTimeStr = String.valueOf(delayTime);
+                // 设置延时时间
+                message.getMessageProperties().setExpiration(delayTimeStr);
                 return message;
             });
         }else {
@@ -120,9 +126,9 @@ public class LoanProductService implements ILoanProductService {
 
     @Override
     public List<LoanProductEntity> getProductById(int page) {
-        Page<LoanProductEntity> objectPage = new Page<>(page, PageConst.PageSize);
-        loanProductDao.selectPage(objectPage, null);
-        return objectPage.getRecords();
+        Page<LoanProductEntity> page1 = new Page<>(page, PageConst.PageSize);
+        IPage<LoanProductEntity> iPage = loanProductDao.selectPage(page1, null);
+        return iPage.getRecords();
     }
 
     @Override
