@@ -58,8 +58,13 @@ public class LoanProductService implements ILoanProductService {
 
             // 将消息发送到延时队列delayProductQueue
             rabbitTemplate.convertAndSend("delayProductQueue", productMap, message -> {
-                // todo 根据当前时间和产品开枪时间计算延时多少毫秒
-                message.getMessageProperties().setExpiration("10000");
+                // 获取当前时间戳，计算延时时间
+                long nowTime = System.currentTimeMillis();
+                long delayTime = loanProductEntity.getStartTime() - nowTime;
+                // 将delayTime转换为毫秒，并转换为字符串
+                String delayTimeStr = String.valueOf(delayTime);
+                // 设置延时时间
+                message.getMessageProperties().setExpiration(delayTimeStr);
                 return message;
             });
         }else {

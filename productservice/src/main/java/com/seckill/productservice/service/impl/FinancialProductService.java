@@ -67,8 +67,13 @@ public class FinancialProductService implements IFinancialProductService {
             productMap.put("con_time", conTime);
             // 发送消息至延时队列
             rabbitTemplate.convertAndSend("delayProductQueue", productMap, message -> {
-                // todo 根据当前时间和产品开枪时间计算延时多少毫秒
-                message.getMessageProperties().setExpiration("10000");
+                // 获取当前时间戳，计算延时时间
+                long nowTime = System.currentTimeMillis();
+                long delayTime = financialProductEntity.getStartTime() - nowTime;
+                // 将delayTime转换为毫秒，并转换为字符串
+                String delayTimeStr = String.valueOf(delayTime);
+                // 设置延时时间
+                message.getMessageProperties().setExpiration(delayTimeStr);
                 return message;
             });
 //            System.out.println("成功发送了消息：" + new Date());
