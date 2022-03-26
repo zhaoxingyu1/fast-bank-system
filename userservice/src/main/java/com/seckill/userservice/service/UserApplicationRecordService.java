@@ -13,7 +13,6 @@ import com.seckill.common.utils.RiskControl;
 import com.seckill.common.utils.RiskControlUtils;
 import com.seckill.userservice.dao.UserApplicationRecordDao;
 import com.seckill.userservice.dao.UserInfoDao;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
