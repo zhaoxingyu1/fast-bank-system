@@ -21,7 +21,7 @@ import javax.validation.constraints.Pattern;
 @TableName("user_info")
 public class UserInfoEntity {
 
-    @NotNull(message = "id不能为空")
+
     @TableId(type = IdType.ASSIGN_UUID)
     private String userInfoId;
 

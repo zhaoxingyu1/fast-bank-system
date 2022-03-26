@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
  * @Date: 2022/3/12 13:31
  */
 @RestController
-@RequestMapping("/userProduct")
+@RequestMapping("/product/userProduct")
 public class UserProductController {
     @Resource
     private IUserProductService userProductService;
@@ -69,10 +69,10 @@ public class UserProductController {
                                  @PathVariable("type") String type,
                                  @PathVariable("productId") String productId) throws Exception {
         // 从Token中获取用户id
-//        String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
-//        JwtToken token = TokenUtil.decodeToken(jwtToken);
-//        String userId = token.getUserId();
-        String userId = "test_user_id";
+        String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
+        JwtToken token = TokenUtil.decodeToken(jwtToken);
+        String userId = token.getUserId();
+//        String userId = "test_user_id";
         if (request.getHeader(FeignConsts.HEADER_NAME) != null){
             return userProductService.userBuyProduct(userId, type, productId);
         } else {
@@ -93,10 +93,10 @@ public class UserProductController {
     @GetMapping("/userGetAppointmentProduct")
     public Object userGetAppointment(HttpServletRequest request){
         // 从Token中获取用户id
-//        String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
-//        JwtToken token = TokenUtil.decodeToken(jwtToken);
-//        String userId = token.getUserId();
-        String userId = "test_user_id";
+        String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
+        JwtToken token = TokenUtil.decodeToken(jwtToken);
+        String userId = token.getUserId();
+//        String userId = "test_user_id";
         if (request.getHeader(FeignConsts.HEADER_NAME) != null){
             return userProductService.userGetAppointment(userId);
         } else {
