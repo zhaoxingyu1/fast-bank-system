@@ -32,11 +32,9 @@ public class UserInfoService {
         }
     }
 
-    public UserInfoEntity selectUserInfoByName(String name){
-        QueryWrapper<UserInfoEntity> wrapper = new QueryWrapper<>();
-        wrapper
-                .eq("real_name",name);
-        UserInfoEntity userInfoEntity = userInfoDao.selectOne(wrapper);
+    public UserInfoEntity selectUserInfoById(String userInfoId){
+
+        UserInfoEntity userInfoEntity = userInfoDao.selectById(userInfoId);
         return userInfoEntity;
     }
 
@@ -62,33 +60,18 @@ public class UserInfoService {
      * 根据真实名字查询个人信息
      * @return
      */
-    public Page<UserInfoEntity> selectUserListByRealName(String realName,Integer current){
+    public Page<UserInfoEntity> selectUserListByRealName(String name,Integer current){
 
         QueryWrapper<UserInfoEntity> wrapper = new QueryWrapper<>();
         wrapper
-                .eq("real_name",realName);
+                .like("real_name",name)
+                .or()
+                .like("nickname",name);
         Page<UserInfoEntity> page = new Page<>(current - 1, PageConst.PageSize);
         Page<UserInfoEntity> userInfoEntityPage = userInfoDao.selectPage(page,wrapper);
 
         return userInfoEntityPage;
     }
-
-    /**
-     * 根据用户名查询个人信息
-     * @return
-     */
-    public Page<UserInfoEntity> selectUserListByNickName(String nickname,Integer current){
-
-        QueryWrapper<UserInfoEntity> wrapper = new QueryWrapper<>();
-        wrapper
-                .eq("nickname",nickname);
-        Page<UserInfoEntity> page = new Page<>(current - 1, PageConst.PageSize);
-        Page<UserInfoEntity> userInfoEntityPage = userInfoDao.selectPage(page,wrapper);
-
-        return userInfoEntityPage;
-    }
-
-
 
 
 }

@@ -1,8 +1,6 @@
 package com.seckill.common.entity.user;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
@@ -29,6 +27,7 @@ public class UserProductEntity {
 
     private BigDecimal price;
     private Integer bookingStatus;
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long mtime;
 
 }

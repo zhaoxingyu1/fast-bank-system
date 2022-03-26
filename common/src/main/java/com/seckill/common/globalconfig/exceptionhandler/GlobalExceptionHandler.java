@@ -7,21 +7,27 @@ import com.seckill.common.exception.NotFoundException;
 import com.seckill.common.response.DataFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.AuthorizationException;
+import org.springframework.validation.BindException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author : 陈征
  * @date : 2022-02-19 05:06
  */
-@ControllerAdvice
+@RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
-    @ResponseBody
+
     @ExceptionHandler(Exception.class)
     private Object baseException(HttpServletRequest request, HttpServletResponse response, Exception e) {
         log.error(e.getClass().toString());
@@ -36,8 +42,29 @@ public class GlobalExceptionHandler {
             code = CodeEnum.NOT_FOUND;
         } else if (e instanceof AuthorizationException) {
             code = CodeEnum.UNAUTHORIZED;
+        } else if (e instanceof BindException) {
+
+            BindException ex = (BindException) e;
+            List<String> messageList = ex.getBindingResult()
+                    .getFieldErrors()
+                    .stream()
+                    .map(FieldError::getDefaultMessage)
+                    .collect(Collectors.toList());
+            String message = String.valueOf(messageList);
+            return DataFactory.fail(CodeEnum.BAD_REQUEST, message);
+
+
+        } else if (e instanceof MethodArgumentNotValidException) {
+            MethodArgumentNotValidException ex = (MethodArgumentNotValidException) e;
+            List<String> messageList = ex.getBindingResult()
+                    .getFieldErrors()
+                    .stream()
+                    .map(FieldError::getDefaultMessage)
+                    .collect(Collectors.toList());
+            String message = String.valueOf(messageList);
+            return DataFactory.fail(CodeEnum.BAD_REQUEST, message);
         }
-//        response.setStatus(code.value());
+
         return DataFactory.fail(code, e.getMessage());
     }
 

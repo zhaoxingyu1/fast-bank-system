@@ -24,6 +24,5 @@ public class JwtToken {
     private String username;
     private String role;
 
-    private Integer creditStatus;
 
 }

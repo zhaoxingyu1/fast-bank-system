@@ -1,15 +1,14 @@
 package com.seckill.common.entity.user;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import org.hibernate.validator.constraints.CreditCardNumber;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
@@ -26,7 +25,8 @@ public class UserInfoEntity {
     @TableId(type = IdType.ASSIGN_UUID)
     private String userInfoId;
 
-    @NotNull(message = "昵称不能为空")
+//    @NotNull(message = "昵称不能为空")
+    @NotEmpty
     private String nickname;
 
     @NotNull(message = "真实名字不能为空")
@@ -49,11 +49,12 @@ public class UserInfoEntity {
     private String email;
     private Integer workingState;
 
-    @CreditCardNumber(message = "银行卡号错误")
     private String bankCard;
     private Integer overdueNumber;
     private Integer creditStatus;
+    @TableField(fill = FieldFill.INSERT)
     private Long ctime;
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long mtime;
 
 

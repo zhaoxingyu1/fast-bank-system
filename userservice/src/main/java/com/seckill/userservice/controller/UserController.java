@@ -20,15 +20,19 @@ import com.seckill.userservice.service.UserService;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
 
+import org.hibernate.validator.constraints.CreditCardNumber;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.mail.MailException;
 import org.springframework.util.DigestUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import javax.validation.constraints.*;
 
 
 /**
@@ -38,6 +42,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @RestController
 @RequestMapping("/user")
+@Validated
 public class UserController {
 
     @Resource
@@ -65,7 +70,8 @@ public class UserController {
 
 
     @PostMapping("/login")
-    public Object userLogin(HttpServletRequest request, HttpServletResponse response, @RequestParam("username") String username, @RequestParam("password") String password) {
+    @Valid
+    public Object userLogin(HttpServletRequest request, HttpServletResponse response,@NotNull(message = "用户名不能为空") @RequestParam("username") String username,@NotNull(message = "密码不能为空") @RequestParam("password") String password) {
 
         String jwtToken = null;
         try {
@@ -129,12 +135,15 @@ public class UserController {
      * @throws Exception
      */
     @PostMapping("/registerUser")
-    public Object createUser(UserEntity user, UserInfoEntity userInfo, RoleEntity role,String emailCode) throws Exception {
+    @Valid
+    public Object createUser(@Valid UserEntity user,@Valid UserInfoEntity userInfo,@Valid RoleEntity role,@NotEmpty(message = "验证码不能为空") String emailCode) throws Exception {
 
 
         ValueOperations<String, Object> opsForValue = redis.opsForValue();
 
-
+        if(userInfo.getNickname()==null || userInfo.getNickname().equals("")){
+            userInfo.setNickname(user.getUsername()+"123");
+        }
 
         Object code =opsForValue.get(userInfo.getEmail());
         code = ""+code+"";
@@ -147,7 +156,7 @@ public class UserController {
         }
 
         user.setPassword(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()));
-//        DigestUtils.md5DigestAsHex(user.getPassword().getBytes());
+
         Boolean bool = userService.insertUser(user, userInfo, role);
 
         if (!bool) {
@@ -178,8 +187,8 @@ public class UserController {
     }
 
 
-    @PostMapping("/updateUserById")
-    public Object updateUserById(HttpServletRequest request, HttpServletResponse response,String oldPassword,String newPassword) {
+    @PostMapping("/updateUserPassWd")
+    public Object updateUserPassWd(HttpServletRequest request, HttpServletResponse response,String oldPassword,String newPassword) {
 
         // 通过jwt获取用户id进行删除
         String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
@@ -241,20 +250,38 @@ public class UserController {
 
     /**
      * 修改用户信息
-     *
      * @param request
-     * @param userInfo
+     * @param nickname
+     * @param email
+     * @param phone
+     * @param bankCard
+     * @param workingState
      * @return
+     * @throws Exception
      */
-
     @PostMapping("/updateUserInfo")
-    public Object updateUserInfo(HttpServletRequest request, UserInfoEntity userInfo) throws Exception {
+    public Object updateUserInfo(HttpServletRequest request,@RequestParam(required = false)String nickname, @Email @RequestParam(required = false) String email, @Pattern(regexp = "^1[3|4|5|7|8][0-9]{9}$",message = "电话号码格式错误") @RequestParam(required = false)String phone,@RequestParam(required = false)String bankCard, @RequestParam(required = false) Integer workingState ) throws Exception {
 
         String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
 
         JwtToken token = TokenUtil.decodeToken(jwtToken);
+        UserInfoEntity userInfo = userInfoService.selectUserInfoById(token.getUserInfoId());
 
-        userInfo.setUserInfoId(token.getUserInfoId());
+        if(nickname!=null && !nickname.equals("")){
+            userInfo.setNickname(nickname);
+        }
+        if(email!=null && !email.equals("")){
+            userInfo.setEmail(email);
+        }
+        if(phone!=null && !phone.equals("")){
+            userInfo.setPhone(phone);
+        }
+        if(bankCard!=null && !bankCard.equals("")){
+            userInfo.setBankCard(bankCard);
+        }
+        if(workingState!=null && !workingState.equals("")){
+            userInfo.setWorkingState(workingState);
+        }
         Boolean bool = userInfoService.updateUserInfo(userInfo);
 
         if (!bool) {

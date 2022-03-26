@@ -1,9 +1,6 @@
 package com.seckill.common.entity.user;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -41,6 +38,7 @@ public class UserApplicationRecordEntity {
     // 申请通不通过的原因
     private String cause;
     // 申请时间
+    @TableField(fill = FieldFill.INSERT)
     private Long ctime;
 
 

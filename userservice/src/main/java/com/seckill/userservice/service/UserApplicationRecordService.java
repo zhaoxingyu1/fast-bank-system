@@ -102,6 +102,7 @@ public class UserApplicationRecordService {
         } else {
             wrapper
                     .like("username", name)
+                    .or()
                     .like("product_name", name);
             userApplicationRecordEntityPage = userApplicationRecordDao.selectPage(page, wrapper);
         }

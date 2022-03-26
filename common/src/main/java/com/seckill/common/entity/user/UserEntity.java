@@ -1,9 +1,6 @@
 package com.seckill.common.entity.user;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
@@ -34,6 +31,7 @@ public class UserEntity {
     @NotNull(message = "id不能为空")
     private String userInfoId;
 
+    @TableField(fill = FieldFill.INSERT)
     private Long ctime;
 
     @TableField(exist = false)

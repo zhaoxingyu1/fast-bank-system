@@ -35,7 +35,7 @@ public class RiskControlUtils {
         }
 
 
-        return new RiskControl(1,"信用没有问题，成功通过审核");
+        return new RiskControl(1,"信用没有问题,成功通过审核");
     }
 
 }

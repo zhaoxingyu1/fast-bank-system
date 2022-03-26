@@ -40,7 +40,7 @@ public class TokenUtil {
      */
     public static JwtToken convertJwtToken(UserEntity user){
 
-        JwtToken jwtToken = new JwtToken(user.getUserId(), user.getRoleId(), user.getUserInfoId(), user.getUsername(), user.getUserRole().getRole(),user.getUserInfo().getCreditStatus());
+        JwtToken jwtToken = new JwtToken(user.getUserId(), user.getRoleId(), user.getUserInfoId(), user.getUsername(), user.getUserRole().getRole());
 
 
         return jwtToken;
