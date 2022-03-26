@@ -25,8 +25,7 @@ public class UserInfoEntity {
     @TableId(type = IdType.ASSIGN_UUID)
     private String userInfoId;
 
-//    @NotNull(message = "昵称不能为空")
-    @NotEmpty
+    @Length(min = 2 ,max = 30,message = "昵称长度为2-20个字符以内")
     private String nickname;
 
     @NotNull(message = "真实名字不能为空")
