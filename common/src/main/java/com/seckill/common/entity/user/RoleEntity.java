@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
 @TableName("role")
 public class RoleEntity {
 
-    @NotNull(message = "id不能为空")
+
     @TableId(type = IdType.ASSIGN_UUID)
     private String roleId;
 

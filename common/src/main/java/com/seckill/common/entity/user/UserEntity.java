@@ -15,7 +15,7 @@ import javax.validation.constraints.Null;
 @TableName("user")
 public class UserEntity {
 
-    @NotNull(message = "id不能为空")
+
     @TableId(type = IdType.ASSIGN_UUID)
     private String userId;
 
@@ -25,10 +25,10 @@ public class UserEntity {
     @NotNull(message = "密码不能为空")
     private String password;
 
-    @NotNull(message = "id不能为空")
+
     private String roleId;
 
-    @NotNull(message = "id不能为空")
+
     private String userInfoId;
 
     @TableField(fill = FieldFill.INSERT)
