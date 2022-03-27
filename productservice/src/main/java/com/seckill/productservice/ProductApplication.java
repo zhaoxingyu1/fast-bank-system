@@ -4,6 +4,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * @author zxy
@@ -12,6 +13,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  */
 @MapperScan("com.seckill.productservice.dao")
 @EnableFeignClients(basePackages = "com.seckill.common.feign" )
+@EnableTransactionManagement
 @SpringBootApplication(scanBasePackages = {"com.seckill.productservice", "com.seckill.common.globalconfig"})
 public class ProductApplication {
 

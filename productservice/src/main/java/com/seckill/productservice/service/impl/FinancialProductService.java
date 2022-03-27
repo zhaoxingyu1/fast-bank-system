@@ -55,7 +55,7 @@ public class FinancialProductService implements IFinancialProductService {
         long nowTime = System.currentTimeMillis();
         long delayTime = financialProductEntity.getStartTime() - nowTime;
         if (delayTime < 0) {
-            throw new DatabaseOperationException("延时时间不合法");
+            throw new DatabaseOperationException("开抢时间不合法");
         }
         System.out.println(financialProductEntity);
         QueryWrapper<FinancialProductEntity> queryWrapper = new QueryWrapper<>();
@@ -68,6 +68,9 @@ public class FinancialProductService implements IFinancialProductService {
             // 计算时间间隔
             Integer count = financialProductEntity.getStock();
             long conTime = financialProductEntity.getEndTime() - financialProductEntity.getStartTime();
+            if(conTime <= 0){
+                throw new DatabaseOperationException("时间间隔不合法，相隔时间戳必须大于0");
+            }
             // 获取ID值要重新查询出来
             QueryWrapper<FinancialProductEntity> queryWrapper2 = new QueryWrapper<>();
             queryWrapper2.eq("financial_product_name",financialProductEntity.getFinancialProductName());

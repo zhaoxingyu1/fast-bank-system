@@ -45,7 +45,7 @@ public class LoanProductService implements ILoanProductService {
         long nowTime = System.currentTimeMillis();
         long delayTime = loanProductEntity.getStartTime() - nowTime;
         if (delayTime < 0) {
-            throw new DatabaseOperationException("延时时间不合法");
+            throw new DatabaseOperationException("开抢时间不合法");
         }
         QueryWrapper<LoanProductEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("loan_product_name",loanProductEntity.getLoanProductName());
@@ -54,6 +54,9 @@ public class LoanProductService implements ILoanProductService {
             loanProductDao.insert(loanProductEntity);
             //计算startTime和endTime的间隔
             long interval = loanProductEntity.getEndTime() - loanProductEntity.getStartTime();
+            if(interval <= 0){
+                throw new DatabaseOperationException("时间间隔不合法，相隔时间戳必须大于0");
+            }
             // 获取库存
             Integer stock = loanProductEntity.getStock();
 
