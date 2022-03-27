@@ -8,9 +8,11 @@ import com.seckill.common.consts.PageConst;
 import com.seckill.common.consts.RabbitConsts;
 import com.seckill.common.consts.RedisConsts;
 import com.seckill.common.entity.order.OrderEntity;
+import com.seckill.common.entity.product.BaseProduct;
 import com.seckill.common.enums.OrderStateEnum;
 import com.seckill.common.exception.ForbiddenException;
 import com.seckill.common.exception.NotFoundException;
+import com.seckill.common.feign.ProductClient;
 import com.seckill.common.jwt.TokenUtil;
 import com.seckill.orderservice.dao.OrderDao;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +47,9 @@ public class OrderService {
     @Resource
     private OrderDao orderDao;
 
+    @Resource
+    private ProductClient productClient;
+
     public OrderEntity getById(HttpServletRequest request, String id) throws Exception {
         if (id == null) {
             throw new NotFoundException("id 为空");
@@ -56,7 +61,8 @@ public class OrderService {
         if (!orderEntity.getUserId().equals(TokenUtil.decodeToken(request.getHeader(HeaderConsts.JWT_TOKEN)).getUserId())) {
             throw new ForbiddenException("你就是歌姬吧");
         }
-//        todo 调用产品的getbyid 还没好吗还没好吗还没好吗还没好吗还没好吗还没好吗还没好吗还没好吗
+//        调用产品的 getbyid
+        orderEntity.setProduct(productClient.getById(id));
 
         return orderEntity;
     }
@@ -70,12 +76,17 @@ public class OrderService {
                 .orderByDesc("ctime");
         Page<OrderEntity> res = orderDao.selectPage(new Page<>(page, PageConst.PageSize), wrapper);
 
-        List<String> ids = res.getRecords().stream().map(OrderEntity::getProductId).collect(Collectors.toList());
-        // todo 调用产品的 getProductsBatch 方法要求根据 id 的 List 查出对应的所有产品，以 List 形式返回
+        List<OrderEntity> orderEntities = res.getRecords();
+        List<String> ids = orderEntities.stream().map(OrderEntity::getProductId).collect(Collectors.toList());
+        // 调用产品的 getProductsBatch 方法要求根据 id 的 List 查出对应的所有产品，以 List 形式返回
+        List<BaseProduct> products = productClient.getProductsBatch(ids);
+        for (int i = 0; i < products.size(); i++) {
+            orderEntities.get(i).setProduct(products.get(i));
+        }
         return res;
     }
 
-    public void create(OrderEntity order) throws Exception {
+    public String create(OrderEntity order) throws Exception {
         ValueOperations<String, Object> ops = redis.opsForValue();
 
         OrderEntity entity = orderDao.selectOne(
@@ -117,6 +128,7 @@ public class OrderService {
         );
 //        解锁
         redis.unlink(order.getProductId());
+        return order.getOrderId();
     }
 
     public void updateState(String id, OrderStateEnum orderState) {

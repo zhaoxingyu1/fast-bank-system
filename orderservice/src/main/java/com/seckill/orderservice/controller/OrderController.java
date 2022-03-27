@@ -53,8 +53,8 @@ public class OrderController {
     public BaseData create(HttpServletRequest request, OrderEntity order) throws Exception {
         order.setUserId(TokenUtil.decodeToken(request.getHeader(HeaderConsts.JWT_TOKEN)).getUserId());
 
-        orderService.create(order);
-        return DataFactory.success(SimpleData.class, "ok");
+        String id = orderService.create(order);
+        return DataFactory.success(SimpleData.class, "ok").parseData(id);
     }
 
     @PostMapping("/updateState")
