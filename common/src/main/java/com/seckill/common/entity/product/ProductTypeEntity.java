@@ -1,5 +1,6 @@
 package com.seckill.common.entity.product;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
@@ -10,6 +11,8 @@ import lombok.Data;
 @Data
 @TableName("product_type")
 public class ProductTypeEntity {
+    @TableId
     private String productId;
+
     private String type;
 }

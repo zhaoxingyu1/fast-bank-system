@@ -4,10 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.seckill.common.consts.PageConst;
+import com.seckill.common.entity.product.ProductTypeEntity;
 import com.seckill.common.exception.DatabaseOperationException;
 import com.seckill.common.exception.NotFoundException;
 import com.seckill.productservice.dao.LoanProductDao;
 import com.seckill.common.entity.product.LoanProductEntity;
+import com.seckill.productservice.dao.ProductTypeDao;
 import com.seckill.productservice.service.ILoanProductService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -34,8 +36,17 @@ public class LoanProductService implements ILoanProductService {
     @Resource
     private RabbitTemplate rabbitTemplate;
 
+    @Resource
+    private ProductTypeDao productTypeDao;
+
     @Override
     public void addLoanProduct(LoanProductEntity loanProductEntity) throws Exception{
+        // 获取当前时间戳，计算延时时间，判断时间是否合法
+        long nowTime = System.currentTimeMillis();
+        long delayTime = loanProductEntity.getStartTime() - nowTime;
+        if (delayTime < 0) {
+            throw new DatabaseOperationException("延时时间不合法");
+        }
         QueryWrapper<LoanProductEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("loan_product_name",loanProductEntity.getLoanProductName());
         List<LoanProductEntity> i = loanProductDao.selectList(queryWrapper);
@@ -51,6 +62,12 @@ public class LoanProductService implements ILoanProductService {
             queryWrapper1.eq("loan_product_name",loanProductEntity.getLoanProductName());
             LoanProductEntity l = loanProductDao.selectOne(queryWrapper1);
 
+            // 还需要同时更新product_type表
+            ProductTypeEntity productTypeEntity = new ProductTypeEntity();
+            productTypeEntity.setProductId(l.getLoanProductId());
+            productTypeEntity.setType("loan");
+            productTypeDao.insert(productTypeEntity);
+
             // 构造消息，将id、count、interval放入map中
             HashMap<Object, Object> productMap = new HashMap<>();
             productMap.put("product_id", l.getLoanProductId());
@@ -60,10 +77,12 @@ public class LoanProductService implements ILoanProductService {
             // 将消息发送到延时队列delayProductQueue
             rabbitTemplate.convertAndSend("delayProductQueue", productMap, message -> {
                 // 获取当前时间戳，计算延时时间
-                long nowTime = System.currentTimeMillis();
-                long delayTime = loanProductEntity.getStartTime() - nowTime;
+//                long nowTime = System.currentTimeMillis();
+//                long delayTime = loanProductEntity.getStartTime() - nowTime;
+
                 // 将delayTime转换为毫秒，并转换为字符串
                 String delayTimeStr = String.valueOf(delayTime);
+
                 // 设置延时时间
                 message.getMessageProperties().setExpiration(delayTimeStr);
                 return message;

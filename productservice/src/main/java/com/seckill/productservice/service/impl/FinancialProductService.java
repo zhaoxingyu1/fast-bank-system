@@ -4,10 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.seckill.common.consts.PageConst;
+import com.seckill.common.entity.product.ProductTypeEntity;
 import com.seckill.common.exception.DatabaseOperationException;
 import com.seckill.common.exception.NotFoundException;
 import com.seckill.productservice.dao.FinancialProductDao;
 import com.seckill.common.entity.product.FinancialProductEntity;
+import com.seckill.productservice.dao.ProductTypeDao;
 import com.seckill.productservice.service.IFinancialProductService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.amqp.AmqpException;
@@ -43,9 +45,18 @@ public class FinancialProductService implements IFinancialProductService {
     @Resource
     private RabbitTemplate rabbitTemplate;
 
+    @Resource
+    private ProductTypeDao productTypeDao;
+
 
     @Override
     public void addFinancialProduct(FinancialProductEntity financialProductEntity) throws Exception{
+        // 获取当前时间戳，计算延时时间，判断时间是否合法
+        long nowTime = System.currentTimeMillis();
+        long delayTime = financialProductEntity.getStartTime() - nowTime;
+        if (delayTime < 0) {
+            throw new DatabaseOperationException("延时时间不合法");
+        }
         System.out.println(financialProductEntity);
         QueryWrapper<FinancialProductEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("financial_product_name",financialProductEntity.getFinancialProductName());
@@ -61,6 +72,13 @@ public class FinancialProductService implements IFinancialProductService {
             QueryWrapper<FinancialProductEntity> queryWrapper2 = new QueryWrapper<>();
             queryWrapper2.eq("financial_product_name",financialProductEntity.getFinancialProductName());
             FinancialProductEntity f = financialProductDao.selectOne(queryWrapper2);
+
+            // 还需要同时更新product_type表
+            ProductTypeEntity productTypeEntity = new ProductTypeEntity();
+            productTypeEntity.setType("financial");
+            productTypeEntity.setProductId(f.getFinancialProductId());
+            productTypeDao.insert(productTypeEntity);
+
             // 构造消息
             HashMap<String, Object> productMap = new HashMap<>();
             productMap.put("product_id", f.getFinancialProductId());
@@ -69,8 +87,8 @@ public class FinancialProductService implements IFinancialProductService {
             // 发送消息至延时队列
             rabbitTemplate.convertAndSend("delayProductQueue", productMap, message -> {
                 // 获取当前时间戳，计算延时时间
-                long nowTime = System.currentTimeMillis();
-                long delayTime = financialProductEntity.getStartTime() - nowTime;
+//                long nowTime = System.currentTimeMillis();
+//                long delayTime = financialProductEntity.getStartTime() - nowTime;
                 // 将delayTime转换为毫秒，并转换为字符串
                 String delayTimeStr = String.valueOf(delayTime);
                 // 设置延时时间

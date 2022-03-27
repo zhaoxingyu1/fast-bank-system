@@ -51,10 +51,12 @@ public class ProductController {
                                    FinancialProductEntity financialProductEntity,
                                    LoanProductEntity loanProductEntity)
     throws Exception{
-        if(financialProductEntity.getFinancialProductName() != null){
+        if (type.equals("financial")){
             financialProductService.addFinancialProduct(financialProductEntity);
-        }else if (loanProductEntity.getLoanProductName() != null){
+        }else if (type.equals("loan")){
             loanProductService.addLoanProduct(loanProductEntity);
+        }else{
+            return DataFactory.fail(CodeEnum.BAD_REQUEST,"type参数错误");
         }
         return DataFactory.success(SimpleData.class,"ok");
     }
@@ -70,10 +72,12 @@ public class ProductController {
                                 FinancialProductEntity financialProductEntity,
                                 LoanProductEntity loanProductEntity)
     throws Exception{
-        if (financialProductEntity.getFinancialProductName() != null){
+        if (type.equals("financial")){
             financialProductService.deleteFinancialProduct(financialProductEntity.getFinancialProductId());
-        }else if (loanProductEntity.getLoanProductName() != null){
+        }else if (type.equals("loan")){
             loanProductService.deleteLoanProduct(loanProductEntity.getLoanProductId());
+        }else{
+            return DataFactory.fail(CodeEnum.BAD_REQUEST,"type参数错误");
         }
         return DataFactory.success(SimpleData.class,"ok");
     }
@@ -89,10 +93,12 @@ public class ProductController {
                                 FinancialProductEntity financialProductEntity,
                                 LoanProductEntity loanProductEntity)
     throws Exception{
-        if (financialProductEntity.getFinancialProductName() != null){
+        if (type.equals("financial")){
             financialProductService.updateFinancialProduct(financialProductEntity);
-        }else if (loanProductEntity.getLoanProductName() != null){
+        } else if (type.equals("loan")){
             loanProductService.updateLoanProduct(loanProductEntity);
+        } else {
+            return DataFactory.fail(CodeEnum.BAD_REQUEST,"type参数错误");
         }
         return DataFactory.success(SimpleData.class,"ok");
     }
@@ -105,28 +111,25 @@ public class ProductController {
     @GetMapping("/getbyid/{id}")
     public Object findFinancialProduct(@PathVariable("id")String id,
                                        HttpServletRequest request){
-
-        String type;
-
-        //判断id是哪个类型的产品
-        FinancialProductEntity i = financialProductService.findFinancialProductById(id);
-        if (i != null){
-            type = "financial";
-        }else {
-            type = "loan";
-        }
+        //使用 productTypeDao 判断id是哪个类型的产品
+        ProductTypeEntity productTypeEntity = productTypeDao.selectById(id);
+        String type = productTypeEntity.getType();
 
         if (request.getHeader(FeignConsts.HEADER_NAME) != null){
             if(type.equals("financial")){
                 return financialProductService.findFinancialProductById(id);
-            }else {
+            }else if (type.equals("loan")){
                 return loanProductService.findLoanProductById(id);
+            }else {
+                return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"未知错误，可能是没找到ID对应的产品");
             }
         }else{
             if(type.equals("financial")){
                 return DataFactory.success(SimpleData.class, "ok").parseData(financialProductService.findFinancialProductById(id));
-            }else {
+            }else if (type.equals("loan")){
                 return DataFactory.success(SimpleData.class, "ok").parseData(loanProductService.findLoanProductById(id));
+            }else {
+                return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"未知错误，可能是没找到ID对应的产品");
             }
         }
     }
@@ -222,13 +225,14 @@ public class ProductController {
         // 遍历ids，根据ProductTypeEntity中的type属性，查询出对应的产品
         List<Object> flProducts = new ArrayList<>();
         for (String id : ids) {
-            FinancialProductEntity i = financialProductService.findFinancialProductById(id);
-            if(i != null){
-                flProducts.add(i);
-            }
-            else if(loanProductService.findLoanProductById(id) != null) {
+            //使用 productTypeDao 判断id是哪个类型的产品
+            ProductTypeEntity productTypeEntity = productTypeDao.selectById(id);
+            String type = productTypeEntity.getType();
+            if (type.equals("financial")) {
                 flProducts.add(loanProductService.findLoanProductById(id));
-            }else{
+            }else if (type.equals("loan")) {
+                flProducts.add(loanProductService.findLoanProductById(id));
+            } else {
                 return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现了未知错误，可能是ID不存在");
             }
         }
