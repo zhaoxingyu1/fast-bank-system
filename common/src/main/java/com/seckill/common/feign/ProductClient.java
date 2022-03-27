@@ -14,9 +14,9 @@ import java.util.List;
 @FeignClient("productservice")
 public interface ProductClient {
 
-    @GetMapping("/getbyid/{id}")
+    @GetMapping("product/getbyid/{id}")
     BaseProduct getById(@PathVariable("id") String id);
 
-    @PostMapping("/getProductsBatch")
+    @PostMapping("product/getProductsBatch")
     List<BaseProduct> getProductsBatch(@RequestBody List<String> ids);
 }
