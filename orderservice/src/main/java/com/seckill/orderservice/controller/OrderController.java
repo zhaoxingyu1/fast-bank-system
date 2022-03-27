@@ -38,11 +38,14 @@ public class OrderController {
         if (request.getHeader(FeignConsts.HEADER_NAME) != null) {
             return order;
         }
-        return DataFactory.success(SimpleData.class, "ok");
+        return DataFactory.success(SimpleData.class, "ok").parseData(order);
     }
 
     @GetMapping("/getByUser")
-    public BaseData getByUser(HttpServletRequest request, int page) throws Exception {
+    public BaseData getByUser(HttpServletRequest request, Integer page) throws Exception {
+        if (page == null) {
+            page = 1;
+        }
         String id = TokenUtil.decodeToken(request.getHeader(HeaderConsts.JWT_TOKEN)).getUserId();
 
         Page<OrderEntity> entities = orderService.getByUserId(id, page);
