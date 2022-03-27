@@ -50,7 +50,7 @@ public class FinancialProductService implements IFinancialProductService {
 
 
     @Override
-    public void addFinancialProduct(FinancialProductEntity financialProductEntity) throws Exception{
+    public String addFinancialProduct(FinancialProductEntity financialProductEntity) throws Exception{
         // 获取当前时间戳，计算延时时间，判断时间是否合法
         long nowTime = System.currentTimeMillis();
         long delayTime = financialProductEntity.getStartTime() - nowTime;
@@ -98,6 +98,7 @@ public class FinancialProductService implements IFinancialProductService {
                 message.getMessageProperties().setExpiration(delayTimeStr);
                 return message;
             });
+            return f.getFinancialProductId();
 //            System.out.println("成功发送了消息：" + new Date());
         }else{
             throw new DatabaseOperationException("产品已存在，无需重复添加");

@@ -40,7 +40,7 @@ public class LoanProductService implements ILoanProductService {
     private ProductTypeDao productTypeDao;
 
     @Override
-    public void addLoanProduct(LoanProductEntity loanProductEntity) throws Exception{
+    public String addLoanProduct(LoanProductEntity loanProductEntity) throws Exception{
         // 获取当前时间戳，计算延时时间，判断时间是否合法
         long nowTime = System.currentTimeMillis();
         long delayTime = loanProductEntity.getStartTime() - nowTime;
@@ -90,6 +90,7 @@ public class LoanProductService implements ILoanProductService {
                 message.getMessageProperties().setExpiration(delayTimeStr);
                 return message;
             });
+            return l.getLoanProductId();
         }else {
             throw new DatabaseOperationException("产品已存在，无需重复添加");
         }

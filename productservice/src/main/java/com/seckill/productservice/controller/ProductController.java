@@ -49,16 +49,28 @@ public class ProductController {
     @PostMapping("/{type}/create")
     public Object createNewProduct(@PathVariable("type") String type,
                                    FinancialProductEntity financialProductEntity,
-                                   LoanProductEntity loanProductEntity)
+                                   LoanProductEntity loanProductEntity,
+                                   HttpServletRequest request)
     throws Exception{
-        if (type.equals("financial")){
-            financialProductService.addFinancialProduct(financialProductEntity);
-        }else if (type.equals("loan")){
-            loanProductService.addLoanProduct(loanProductEntity);
+        if(request.getHeader(FeignConsts.HEADER_NAME) != null){
+            if (type.equals("financial")){
+                return financialProductService.addFinancialProduct(financialProductEntity);
+            }else if (type.equals("loan")){
+                return loanProductService.addLoanProduct(loanProductEntity);
+            }else{
+                return DataFactory.fail(CodeEnum.BAD_REQUEST,"type参数错误");
+            }
         }else{
-            return DataFactory.fail(CodeEnum.BAD_REQUEST,"type参数错误");
+            if (type.equals("financial")){
+                return DataFactory.success(SimpleData.class, "ok")
+                        .parseData(financialProductService.addFinancialProduct(financialProductEntity));
+            }else if (type.equals("loan")){
+                return DataFactory.success(SimpleData.class, "ok")
+                        .parseData(loanProductService.addLoanProduct(loanProductEntity));
+            }else{
+                return DataFactory.fail(CodeEnum.BAD_REQUEST,"type参数错误");
+            }
         }
-        return DataFactory.success(SimpleData.class,"ok");
     }
 
     /**

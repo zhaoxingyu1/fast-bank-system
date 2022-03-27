@@ -10,7 +10,7 @@ import java.util.List;
  */
 public interface ILoanProductService{
     //新增贷款产品
-    void addLoanProduct(LoanProductEntity loanProductEntity) throws Exception;
+    String addLoanProduct(LoanProductEntity loanProductEntity) throws Exception;
 
     //删除贷款产品
     void deleteLoanProduct(String loanProductId) throws Exception;

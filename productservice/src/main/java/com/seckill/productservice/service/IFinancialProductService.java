@@ -10,7 +10,7 @@ import java.util.List;
  */
 public interface IFinancialProductService{
     //新增理财产品
-    void addFinancialProduct(FinancialProductEntity financialProductEntity) throws Exception;
+    String addFinancialProduct(FinancialProductEntity financialProductEntity) throws Exception;
 
     //删除理财产品（根据ID）
     void deleteFinancialProduct(String financialProductId) throws Exception;
