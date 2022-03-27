@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 @FeignClient("orderservice")
 public interface OrderClient {
-    @GetMapping("/order/getById")
+    @GetMapping("order/getById")
     Object getById(String id);
 
-    @PostMapping("/order/updateState")
+    @PostMapping("order/updateState")
     Object updateState(@PathVariable String id, @PathVariable String state);
 }

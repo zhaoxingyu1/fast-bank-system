@@ -97,6 +97,13 @@ public class OrderService {
         if (entity != null) {
             throw new ForbiddenException("不能对同一产品重复下单哦");
         }
+//         分布式锁
+        Boolean absent = ops.setIfAbsent(
+                "lock_" + order.getProductId(),
+                "KANO",
+                RedisConsts.ORDER_WAITING_TIME,
+                TimeUnit.MILLISECONDS
+        );
 
         Long decrement = ops.decrement(order.getProductId());
         assert decrement != null;
@@ -104,13 +111,6 @@ public class OrderService {
             ops.increment(order.getProductId());
             throw new ForbiddenException("商品已卖完或者未在抢购期限内");
         }
-//         分布式锁
-        Boolean absent = ops.setIfAbsent(
-                order.getProductId(),
-                "KANO",
-                RedisConsts.ORDER_WAITING_TIME,
-                TimeUnit.MILLISECONDS
-        );
         assert absent != null;
         if (!absent) {
             throw new NotFoundException("晚了一步");
