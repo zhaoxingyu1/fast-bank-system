@@ -218,14 +218,18 @@ public class ProductController {
     // 传入一个id的list，遍历这个list，根据对应的type，查询出对应的产品对象List
     @PostMapping("/getProductsBatch")
     public Object getProductsBatch(HttpServletRequest request,
-                                   @RequestBody List<ProductTypeEntity> ids) throws Exception{
+                                   @RequestBody List<String> ids) throws Exception{
         // 遍历ids，根据ProductTypeEntity中的type属性，查询出对应的产品
         List<Object> flProducts = new ArrayList<>();
-        for (ProductTypeEntity productTypeEntity : ids) {
-            if(productTypeEntity.getType().equals("financial")){
-                flProducts.add(financialProductService.findFinancialProductById(productTypeEntity.getProductId()));
-            } else {
-                flProducts.add(loanProductService.findLoanProductById(productTypeEntity.getProductId()));
+        for (String id : ids) {
+            FinancialProductEntity i = financialProductService.findFinancialProductById(id);
+            if(i != null){
+                flProducts.add(i);
+            }
+            else if(loanProductService.findLoanProductById(id) != null) {
+                flProducts.add(loanProductService.findLoanProductById(id));
+            }else{
+                return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现了未知错误，可能是ID不存在");
             }
         }
         if (request.getHeader(FeignConsts.HEADER_NAME) != null){

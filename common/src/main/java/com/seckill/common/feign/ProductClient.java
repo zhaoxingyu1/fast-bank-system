@@ -13,9 +13,9 @@ import java.util.List;
 @FeignClient("productservice")
 public interface ProductClient {
 
-    @GetMapping("/{type}/getbyid/{id}")
-    String getById(@PathVariable("type")String type, @PathVariable("id")String id);
+    @GetMapping("/getbyid/{id}")
+    String getById(@PathVariable("id")String id);
 
     @PostMapping("/getProductsBatch")
-    String getProductsBatch(@RequestBody List<ProductTypeEntity> ids);
+    String getProductsBatch(@RequestBody List<String> ids);
 }
