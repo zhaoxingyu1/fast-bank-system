@@ -33,11 +33,11 @@ public class UserApplicationRecordService {
     private UserApplicationRecordDao userApplicationRecordDao;
 
 
-    public Object insert(UserEntity user, String productName) {
+    public Object insert(UserEntity user, String productName,RiskControl riskControl) {
 
         UserApplicationRecordEntity userApplicationRecord = new UserApplicationRecordEntity();
 
-        RiskControl riskControl = RiskControlUtils.isQualified(user);
+
 
 
         userApplicationRecord.setUsername(user.getUsername());
@@ -53,14 +53,9 @@ public class UserApplicationRecordService {
         int bool = userApplicationRecordDao.insert(userApplicationRecord);
 
         if (bool > 0) {
-
-            if(riskControl.getThroughState()==1){
-                return DataFactory.success(SimpleData.class,"ok");
-            }else{
-                return DataFactory.fail(CodeEnum.FORBIDDEN,riskControl.getCause());
-            }
+            return true;
         } else {
-            return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现未知错误,请联系管理员");
+            return false;
         }
     }
 

@@ -38,8 +38,6 @@ public class AdminController {
 
     /**
      * 分页查询全部用户
-     * =========================================待修改=========================================================
-     *
      * @param request
      * @return
      */
@@ -69,6 +67,23 @@ public class AdminController {
 
     }
 
+    @PostMapping("/admin/updateUserCreditStatus")
+    public Object updateUserCreditStatus(String userId,Integer creditStatus){
+
+        UserEntity user = userService.selectUserById(userId);
+
+        UserInfoEntity userInfoEntity = new UserInfoEntity();
+        userInfoEntity.setUserInfoId(user.getUserInfoId());
+        userInfoEntity.setCreditStatus(creditStatus);
+
+        Boolean bool = userInfoService.updateUserInfo(userInfoEntity);
+
+        if(!bool){
+            return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"修改失败");
+        }
+        return DataFactory.success(SimpleData.class,"ok");
+
+    }
 
 }
 
