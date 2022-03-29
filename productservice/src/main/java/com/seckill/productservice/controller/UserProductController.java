@@ -144,4 +144,17 @@ public class UserProductController {
             }
         }
     }
+
+
+    //传一个用户id和一个产品id，返回一个Boolean，判断用户是否预约这个产品
+    @GetMapping("/isReserved/{userId}/{productId}")
+    public Object isReserved(@PathVariable("userId") String userId,
+                             @PathVariable("productId") String productId,
+                             HttpServletRequest request) throws Exception{
+        if (request.getHeader(FeignConsts.HEADER_NAME) != null){
+            return userProductService.userIsAppoint(userId, productId);
+        }else {
+            return DataFactory.success(SimpleData.class, "ok").parseData(userProductService.userIsAppoint(userId, productId));
+        }
+    }
 }

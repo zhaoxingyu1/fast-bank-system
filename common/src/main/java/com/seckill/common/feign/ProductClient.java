@@ -24,4 +24,9 @@ public interface ProductClient {
     // 传入一个id，返回对应的产品类型
     @GetMapping("product/getTypeById/{id}")
     String getProductType(@PathVariable("id") String id);
+
+    //传一个用户id和一个产品id，返回一个Boolean，判断用户是否预约这个产品
+    @GetMapping("product/userProduct/isReserved/{userId}/{productId}")
+    Boolean isReserved(@PathVariable("userId") String userId,
+                       @PathVariable("productId") String productId);
 }

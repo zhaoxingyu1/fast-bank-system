@@ -125,4 +125,17 @@ public class UserProductService implements IUserProductService {
         }
         return false;
     }
+
+    @Override
+    public Boolean userIsAppoint(String userId, String productId) {
+        QueryWrapper<UserProductEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id",userId);
+        queryWrapper.eq("user_product_id",productId);
+        List<UserProductEntity> userProductEntities = userProductDao.selectList(queryWrapper);
+        if (userProductEntities.size() != 0){
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

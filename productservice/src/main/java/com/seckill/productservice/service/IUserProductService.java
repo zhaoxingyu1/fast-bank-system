@@ -25,4 +25,7 @@ public interface IUserProductService {
 
     // 管理员取消某个人的对某个产品的预约
     Boolean adminDeleteAppointByUserId(String productId, String userId) throws Exception;
+
+    // 判断用户是否预约了某个产品
+    Boolean userIsAppoint(String userId,String productId);
 }
