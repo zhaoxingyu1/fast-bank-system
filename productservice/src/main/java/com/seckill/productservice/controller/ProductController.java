@@ -254,4 +254,16 @@ public class ProductController {
             return DataFactory.success(ListData.class, "ok").parseData(flProducts);
         }
     }
+
+
+    // 传入一个id，返回对应的产品类型
+    @GetMapping("/getTypeById/{id}")
+    public Object getProductType(@PathVariable("id") String id,
+                                 HttpServletRequest request) throws Exception{
+        if (request.getHeader(FeignConsts.HEADER_NAME) != null){
+            return productTypeDao.selectById(id).getType();
+        }else {
+            return DataFactory.success(ListData.class, "ok").parseData(productTypeDao.selectById(id).getType());
+        }
+    }
 }

@@ -99,6 +99,7 @@ public class FinancialProductService implements IFinancialProductService {
                 return message;
             });
             return f.getFinancialProductId();
+
 //            System.out.println("成功发送了消息：" + new Date());
         }else{
             throw new DatabaseOperationException("产品已存在，无需重复添加");
