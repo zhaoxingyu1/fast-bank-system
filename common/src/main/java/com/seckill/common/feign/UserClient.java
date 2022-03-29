@@ -13,9 +13,9 @@ import javax.servlet.http.HttpServletRequest;
 public interface UserClient {
 
     @GetMapping("user/selectUserById")
-    Object selectUserById(@RequestParam(required = false)String userId);
+    UserEntity selectUserById(@RequestParam(required = false)String userId);
 
 
     @GetMapping("user/applicationRecord/insert")
-    Object insertApplicationRecord(String userId, String productName, RiskControl riskControl);
+    Boolean insertApplicationRecord(String userId, String productName, RiskControl riskControl);
 }

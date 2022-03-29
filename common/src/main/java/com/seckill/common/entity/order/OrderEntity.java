@@ -23,7 +23,4 @@ public class OrderEntity {
 
     @TableField(fill = FieldFill.INSERT)
     Long ctime;
-
-    @TableField(exist = false)
-    BaseProduct product;
 }
