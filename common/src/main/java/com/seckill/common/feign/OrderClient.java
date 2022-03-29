@@ -1,5 +1,6 @@
 package com.seckill.common.feign;
 
+import com.seckill.common.entity.order.OrderEntity;
 import com.seckill.common.enums.OrderStateEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,8 +16,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 @FeignClient("orderservice")
 public interface OrderClient {
     @GetMapping("order/getById")
-    Object getById(String id);
+    OrderEntity getById(String id);
 
     @PostMapping("order/updateState")
-    Object updateState(@PathVariable String id, @PathVariable String state);
+    void updateState(@PathVariable String id, @PathVariable String state);
 }

@@ -15,5 +15,8 @@ public class RabbitConsts {
 //    // 新增产品但是还没开始抢购的延时队列（loan）
 //    public static String PRODUCT_DELAY_QUEUE_L = "loandelayqueue";
 
-    // 寄！暂时用不到这边
+    // 订单削峰使用的队列
+    public static String LOAN_ORDER_QUEUE = "loan_order_queue";
+    public static String LOAN_ORDER_EXCHANGE = "loan_order_exchange";
+    public static String LOAN_ORDER_ROUTING = "loan_order_routing";
 }

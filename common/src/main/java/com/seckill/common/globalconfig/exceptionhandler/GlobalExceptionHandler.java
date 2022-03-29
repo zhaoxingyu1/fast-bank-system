@@ -45,23 +45,23 @@ public class GlobalExceptionHandler {
         } else if (e instanceof BindException) {
 
             BindException ex = (BindException) e;
-            List<String> messageList = ex.getBindingResult()
+            String message = ex.getBindingResult()
                     .getFieldErrors()
                     .stream()
                     .map(FieldError::getDefaultMessage)
-                    .collect(Collectors.toList());
-            String message = String.valueOf(messageList);
+                    .reduce((s1, s2) -> s1+s2)
+                    .get();
             return DataFactory.fail(CodeEnum.BAD_REQUEST, message);
 
 
         } else if (e instanceof MethodArgumentNotValidException) {
             MethodArgumentNotValidException ex = (MethodArgumentNotValidException) e;
-            List<String> messageList = ex.getBindingResult()
+            String message = ex.getBindingResult()
                     .getFieldErrors()
                     .stream()
                     .map(FieldError::getDefaultMessage)
-                    .collect(Collectors.toList());
-            String message = String.valueOf(messageList);
+                    .reduce((s1, s2) -> s1+s2)
+                    .get();
             return DataFactory.fail(CodeEnum.BAD_REQUEST, message);
         }
 

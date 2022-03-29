@@ -9,6 +9,7 @@ import com.seckill.common.jwt.JwtToken;
 import com.seckill.common.jwt.TokenUtil;
 import com.seckill.common.response.DataFactory;
 import com.seckill.common.response.SimpleData;
+import com.seckill.common.utils.RiskControl;
 import com.seckill.userservice.service.UserApplicationRecordService;
 import com.seckill.userservice.service.UserService;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,20 +35,18 @@ public class UserApplicationRecordController {
     private UserService userService;
 
     /**
-     * 预约贷款产品的时候添加申请记录
-     * @param request
+     * 购买贷款产品的时候添加申请记录，判断是否有无资格
+     * @param userId
      * @param productName
      * @return
      */
     @PostMapping("/applicationRecord/insert")
-    public Object insert(HttpServletRequest request,String productName){
+    public Object insertApplicationRecord(String userId, String productName, RiskControl riskControl){
 
-        String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
-        JwtToken token = TokenUtil.decodeToken(jwtToken);
 
-        UserEntity user = userService.selectUserById(token.getUserId());
+        UserEntity user = userService.selectUserById(userId);
 
-        return userApplicationRecordService.insert(user, productName);
+        return userApplicationRecordService.insert(user, productName,riskControl);
 
     }
 
