@@ -52,6 +52,23 @@ public class OrderController {
         return DataFactory.success(SimpleData.class, "ok").parseData(entities);
     }
 
+    @GetMapping("/getAll")
+    public BaseData getAll(Integer page) {
+        if (page == null) {
+            page = 1;
+        }
+        Page<OrderEntity> all = orderService.getAll(page);
+        return DataFactory.success(SimpleData.class, "ok").parseData(all);
+    }
+
+    @PostMapping("/seckill")
+    public BaseData seckill(HttpServletRequest request, OrderEntity order) throws Exception {
+        order.setUserId(TokenUtil.decodeToken(request.getHeader(HeaderConsts.JWT_TOKEN)).getUserId());
+
+        String id = orderService.seckill(order);
+        return DataFactory.success(SimpleData.class, "ok").parseData(id);
+    }
+
     @PostMapping("/create")
     public BaseData create(HttpServletRequest request, OrderEntity order) throws Exception {
         order.setUserId(TokenUtil.decodeToken(request.getHeader(HeaderConsts.JWT_TOKEN)).getUserId());

@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.seckill.common.consts.HeaderConsts;
 import com.seckill.common.consts.PageConst;
-import com.seckill.common.consts.RabbitConsts;
 import com.seckill.common.consts.RedisConsts;
 import com.seckill.common.entity.order.OrderEntity;
 import com.seckill.common.entity.product.BaseProduct;
@@ -27,7 +26,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author : 陈征
@@ -86,7 +84,18 @@ public class OrderService {
         return res;
     }
 
-    public String create(OrderEntity order) throws Exception {
+    public Page<OrderEntity> getAll(int page) {
+        return orderDao.selectPage(
+                new Page<>(page, PageConst.PageSize),
+                new QueryWrapper<>()
+        );
+    }
+
+    public String seckill(OrderEntity order) throws Exception {
+        if (productClient.getProductType(order.getProductId()).equals("loan")) {
+            throw new ForbiddenException("傻逼");
+        }
+
         ValueOperations<String, Object> ops = redis.opsForValue();
 
         OrderEntity entity = orderDao.selectOne(
@@ -119,7 +128,7 @@ public class OrderService {
         order.setState(OrderStateEnum.PENDING.name());
         orderDao.insert(order);
 
-        log.info("created order: " + order.getOrderId());
+        log.info("created financial order: " + order.getOrderId());
         ops.set(
                 RedisConsts.ORDER_KEY_PREFIX_EXPIRED + order.getOrderId(),
                 "寄",
@@ -128,6 +137,17 @@ public class OrderService {
         );
 //        解锁
         redis.unlink(order.getProductId());
+        return order.getOrderId();
+    }
+
+    public String create(OrderEntity order) throws Exception {
+        if (productClient.getProductType(order.getProductId()).equals("financial")) {
+            throw new ForbiddenException("傻逼");
+        }
+
+        order.setState(OrderStateEnum.PENDING.name());
+        orderDao.insert(order);
+        log.info("created loan order: " + order.getOrderId());
         return order.getOrderId();
     }
 
