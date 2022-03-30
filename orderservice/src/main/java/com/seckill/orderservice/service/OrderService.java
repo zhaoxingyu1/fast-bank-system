@@ -8,11 +8,15 @@ import com.seckill.common.consts.PageConst;
 import com.seckill.common.consts.RedisConsts;
 import com.seckill.common.entity.order.OrderEntity;
 import com.seckill.common.entity.product.BaseProduct;
+import com.seckill.common.entity.user.UserEntity;
 import com.seckill.common.enums.OrderStateEnum;
 import com.seckill.common.exception.ForbiddenException;
 import com.seckill.common.exception.NotFoundException;
 import com.seckill.common.feign.ProductClient;
+import com.seckill.common.feign.UserClient;
 import com.seckill.common.jwt.TokenUtil;
+import com.seckill.common.utils.RiskControl;
+import com.seckill.common.utils.RiskControlUtils;
 import com.seckill.orderservice.dao.OrderDao;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -48,6 +52,9 @@ public class OrderService {
     @Resource
     private ProductClient productClient;
 
+    @Resource
+    private UserClient userClient;
+
     public OrderEntity getById(HttpServletRequest request, String id) throws Exception {
         if (id == null) {
             throw new NotFoundException("id 为空");
@@ -59,9 +66,6 @@ public class OrderService {
         if (!orderEntity.getUserId().equals(TokenUtil.decodeToken(request.getHeader(HeaderConsts.JWT_TOKEN)).getUserId())) {
             throw new ForbiddenException("你就是歌姬吧");
         }
-//        调用产品的 getbyid
-        orderEntity.setProduct(productClient.getById(id));
-
         return orderEntity;
     }
 
@@ -72,16 +76,7 @@ public class OrderService {
         QueryWrapper<OrderEntity> wrapper = new QueryWrapper<OrderEntity>()
                 .eq("user_id", id)
                 .orderByDesc("ctime");
-        Page<OrderEntity> res = orderDao.selectPage(new Page<>(page, PageConst.PageSize), wrapper);
-
-        List<OrderEntity> orderEntities = res.getRecords();
-        List<String> ids = orderEntities.stream().map(OrderEntity::getProductId).collect(Collectors.toList());
-        // 调用产品的 getProductsBatch 方法要求根据 id 的 List 查出对应的所有产品，以 List 形式返回
-        List<BaseProduct> products = productClient.getProductsBatch(ids);
-        for (int i = 0; i < products.size(); i++) {
-            orderEntities.get(i).setProduct(products.get(i));
-        }
-        return res;
+        return orderDao.selectPage(new Page<>(page, PageConst.PageSize), wrapper);
     }
 
     public Page<OrderEntity> getAll(int page) {
@@ -94,6 +89,11 @@ public class OrderService {
     public String seckill(OrderEntity order) throws Exception {
         if (productClient.getProductType(order.getProductId()).equals("loan")) {
             throw new ForbiddenException("傻逼");
+        }
+        // 判断用户是否已预约
+        Boolean reserved = productClient.isReserved(order.getUserId(), order.getProductId());
+        if (!reserved) {
+            throw new ForbiddenException("还没有预约哦");
         }
 
         ValueOperations<String, Object> ops = redis.opsForValue();
@@ -143,6 +143,12 @@ public class OrderService {
     public String create(OrderEntity order) throws Exception {
         if (productClient.getProductType(order.getProductId()).equals("financial")) {
             throw new ForbiddenException("傻逼");
+        }
+        // 风险控制
+        UserEntity user = userClient.selectUserById(order.getUserId());
+        RiskControl riskControl = RiskControlUtils.isQualified(user);
+        if (riskControl.getThroughState() == 0) {
+            throw new ForbiddenException(riskControl.getCause());
         }
 
         order.setState(OrderStateEnum.PENDING.name());
