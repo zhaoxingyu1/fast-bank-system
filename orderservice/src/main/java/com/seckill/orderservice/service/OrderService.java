@@ -111,28 +111,25 @@ public class OrderService {
             throw new ForbiddenException("不能对同一产品重复下单哦");
         }
         Long decrement = ops.decrement(order.getProductId());
-        assert decrement != null;
         if (decrement < 0) {
             ops.increment(order.getProductId());
             throw new ForbiddenException("商品已卖完或者未在抢购期限内");
         }
 //         分布式锁
-        Boolean absent = ops.setIfAbsent(
-                "lock_" + order.getProductId(),
-                "KANO",
-                RedisConsts.ORDER_WAITING_TIME,
-                TimeUnit.MILLISECONDS
-        );
-
-        assert absent != null;
-        if (!absent) {
-            throw new NotFoundException("晚了一步");
-        }
+//        Boolean absent = ops.setIfAbsent(
+//                "lock_" + order.getProductId(),
+//                "KANO",
+//                RedisConsts.ORDER_WAITING_TIME,
+//                TimeUnit.MILLISECONDS
+//        );
+//        assert absent != null;
+//        if (!absent) {
+//            throw new NotFoundException("晚了一步");
+//        }
 
         order.setState(OrderStateEnum.PENDING.name());
         order.setProductType(ProductTypeEnum.financial.name());
         orderDao.insert(order);
-
         log.info("created financial order: " + order.getOrderId());
 //        往 redis 插入一条 15 分钟后过期的键，等待支付
         ops.set(
@@ -142,7 +139,7 @@ public class OrderService {
                 TimeUnit.MILLISECONDS
         );
 //        解锁
-        redis.unlink(order.getProductId());
+//        redis.unlink("lock_" + order.getProductId());
         return order.getOrderId();
     }
 
