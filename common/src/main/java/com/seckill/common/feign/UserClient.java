@@ -1,12 +1,10 @@
 package com.seckill.common.feign;
 
+import com.seckill.common.entity.user.RiskControlEntity;
 import com.seckill.common.entity.user.UserEntity;
 import com.seckill.common.utils.RiskControl;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -19,4 +17,7 @@ public interface UserClient {
 
     @GetMapping("user/applicationRecord/insert")
     Boolean insertApplicationRecord(@RequestParam String userId,@RequestParam String productName,@RequestBody RiskControl riskControl);
+
+    @PostMapping("/user/admin/getRiskControl")
+    RiskControlEntity getRiskControl();
 }

@@ -1,6 +1,8 @@
 package com.seckill.userservice.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.seckill.common.consts.FeignConsts;
+import com.seckill.common.entity.user.RiskControlEntity;
 import com.seckill.common.entity.user.RoleEntity;
 import com.seckill.common.entity.user.UserEntity;
 import com.seckill.common.entity.user.UserInfoEntity;
@@ -9,6 +11,7 @@ import com.seckill.common.response.ComplexData;
 import com.seckill.common.response.DataFactory;
 import com.seckill.common.response.SimpleData;
 
+import com.seckill.userservice.service.RiskControlService;
 import com.seckill.userservice.service.RoleService;
 import com.seckill.userservice.service.UserInfoService;
 import com.seckill.userservice.service.UserService;
@@ -35,6 +38,8 @@ public class AdminController {
     private UserService userService;
     @Resource
     private RoleService roleService;
+    @Resource
+    private RiskControlService riskControlService;
 
     /**
      * 分页查询全部用户
@@ -68,12 +73,10 @@ public class AdminController {
     }
 
     @PostMapping("/admin/updateUserCreditStatus")
-    public Object updateUserCreditStatus(String userId,Integer creditStatus){
-
-        UserEntity user = userService.selectUserById(userId);
+    public Object updateUserCreditStatus(String userInfoId,Integer creditStatus){
 
         UserInfoEntity userInfoEntity = new UserInfoEntity();
-        userInfoEntity.setUserInfoId(user.getUserInfoId());
+        userInfoEntity.setUserInfoId(userInfoId);
         userInfoEntity.setCreditStatus(creditStatus);
 
         Boolean bool = userInfoService.updateUserInfo(userInfoEntity);
@@ -82,6 +85,42 @@ public class AdminController {
             return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"修改失败");
         }
         return DataFactory.success(SimpleData.class,"ok");
+
+    }
+
+
+    @PostMapping("/admin/selectAllByInfo")
+    public Object selectAllByInfo(@RequestParam(required = false)String info,Integer current){
+
+        Page<UserInfoEntity> userInfoEntityPage = userInfoService.selectAllByInfo(info, current);
+
+        return DataFactory.success(SimpleData.class,"ok").parseData(userInfoEntityPage);
+    }
+
+    @PostMapping("/admin/insertOrUpdate")
+    public Object insertOrUpdate(RiskControlEntity riskControl){
+
+        Boolean bool = riskControlService.insertOrUpdate(riskControl);
+
+        if (bool){
+            return DataFactory.success(SimpleData.class,"ok");
+        }else{
+            return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"修改或插入规则失败");
+        }
+
+    }
+
+    @PostMapping("/admin/getRiskControl")
+    public Object getRiskControl(HttpServletRequest request){
+
+
+        RiskControlEntity riskControl = riskControlService.getRiskControl();
+
+        if(request.getHeader(FeignConsts.HEADER_NAME)==null){
+            return DataFactory.success(SimpleData.class,"ok").parseData(riskControl);
+        }else{
+            return riskControl;
+        }
 
     }
 

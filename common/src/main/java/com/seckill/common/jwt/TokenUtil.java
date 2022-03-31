@@ -15,7 +15,7 @@ import java.util.Date;
 
 public class TokenUtil {
 
-    private static final long EXPIRE_TIME = 24 * 60 * 60 * 60 * 1000L;//token到期时间24小时
+    private static final long EXPIRE_TIME = 24 * 60 * 60 * 30 * 1000L;//token到期时间30天
     private static final String TOKEN_SECRET = "123456789*jwtToken";  //密钥盐
 
 
