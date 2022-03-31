@@ -12,10 +12,7 @@ import com.seckill.common.response.SimpleData;
 import com.seckill.common.utils.RiskControl;
 import com.seckill.userservice.service.UserApplicationRecordService;
 import com.seckill.userservice.service.UserService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -41,7 +38,7 @@ public class UserApplicationRecordController {
      * @return
      */
     @PostMapping("/applicationRecord/insert")
-    public Object insertApplicationRecord(String userId, String productName, RiskControl riskControl){
+    public Object insertApplicationRecord(@RequestParam String userId,@RequestParam String productName,@RequestBody RiskControl riskControl){
 
 
         UserEntity user = userService.selectUserById(userId);

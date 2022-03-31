@@ -11,7 +11,8 @@ public enum CodeEnum {
     NOT_FOUND(404),
     FORBIDDEN(403),
     UNAUTHORIZED(401),
-    BAD_REQUEST(400);
+    BAD_REQUEST(400),
+    TOKEN_EXPIRED(1001);
 
     private final Integer code;
 
