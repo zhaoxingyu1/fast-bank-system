@@ -5,6 +5,7 @@ import com.seckill.common.consts.HeaderConsts;
 import com.seckill.common.entity.order.OrderEntity;
 import com.seckill.common.consts.FeignConsts;
 import com.seckill.common.enums.OrderStateEnum;
+import com.seckill.common.jwt.JwtToken;
 import com.seckill.common.jwt.TokenUtil;
 import com.seckill.common.response.BaseData;
 import com.seckill.common.response.DataFactory;
@@ -42,13 +43,18 @@ public class OrderController {
     }
 
     @GetMapping("/getByUser")
-    public BaseData getByUser(HttpServletRequest request, Integer page) throws Exception {
+    public BaseData getByUser(HttpServletRequest request, Integer page, String userId, String productType) throws Exception {
         if (page == null) {
             page = 1;
         }
-        String id = TokenUtil.decodeToken(request.getHeader(HeaderConsts.JWT_TOKEN)).getUserId();
 
-        Page<OrderEntity> entities = orderService.getByUserId(id, page);
+        JwtToken token = TokenUtil.decodeToken(request.getHeader(HeaderConsts.JWT_TOKEN));
+        String id = token.getUserId();
+        if (token.getRole().equals("admin")) {
+            id = userId;
+        }
+
+        Page<OrderEntity> entities = orderService.getByUserId(id, productType, page);
         return DataFactory.success(SimpleData.class, "ok").parseData(entities);
     }
 

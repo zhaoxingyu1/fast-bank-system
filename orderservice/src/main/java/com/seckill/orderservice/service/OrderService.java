@@ -10,6 +10,7 @@ import com.seckill.common.entity.order.OrderEntity;
 import com.seckill.common.entity.product.BaseProduct;
 import com.seckill.common.entity.user.UserEntity;
 import com.seckill.common.enums.OrderStateEnum;
+import com.seckill.common.enums.ProductTypeEnum;
 import com.seckill.common.exception.ForbiddenException;
 import com.seckill.common.exception.NotFoundException;
 import com.seckill.common.feign.ProductClient;
@@ -69,13 +70,16 @@ public class OrderService {
         return orderEntity;
     }
 
-    public Page<OrderEntity> getByUserId(String id, int page) throws Exception {
+    public Page<OrderEntity> getByUserId(String id, String productType, int page) throws Exception {
         if (id == null) {
             throw new NotFoundException("id 为空");
         }
         QueryWrapper<OrderEntity> wrapper = new QueryWrapper<OrderEntity>()
                 .eq("user_id", id)
                 .orderByDesc("ctime");
+        if (productType != null) {
+            wrapper = wrapper.eq("product_type", ProductTypeEnum.valueOf(productType));
+        }
         return orderDao.selectPage(new Page<>(page, PageConst.PageSize), wrapper);
     }
 
@@ -106,29 +110,28 @@ public class OrderService {
         if (entity != null) {
             throw new ForbiddenException("不能对同一产品重复下单哦");
         }
-//         分布式锁
-        Boolean absent = ops.setIfAbsent(
-                "lock_" + order.getProductId(),
-                "KANO",
-                RedisConsts.ORDER_WAITING_TIME,
-                TimeUnit.MILLISECONDS
-        );
-
         Long decrement = ops.decrement(order.getProductId());
-        assert decrement != null;
         if (decrement < 0) {
             ops.increment(order.getProductId());
             throw new ForbiddenException("商品已卖完或者未在抢购期限内");
         }
-        assert absent != null;
-        if (!absent) {
-            throw new NotFoundException("晚了一步");
-        }
+//         分布式锁
+//        Boolean absent = ops.setIfAbsent(
+//                "lock_" + order.getProductId(),
+//                "KANO",
+//                RedisConsts.ORDER_WAITING_TIME,
+//                TimeUnit.MILLISECONDS
+//        );
+//        assert absent != null;
+//        if (!absent) {
+//            throw new NotFoundException("晚了一步");
+//        }
 
         order.setState(OrderStateEnum.PENDING.name());
+        order.setProductType(ProductTypeEnum.financial.name());
         orderDao.insert(order);
-
         log.info("created financial order: " + order.getOrderId());
+//        往 redis 插入一条 15 分钟后过期的键，等待支付
         ops.set(
                 RedisConsts.ORDER_KEY_PREFIX_EXPIRED + order.getOrderId(),
                 "寄",
@@ -136,7 +139,7 @@ public class OrderService {
                 TimeUnit.MILLISECONDS
         );
 //        解锁
-        redis.unlink(order.getProductId());
+//        redis.unlink("lock_" + order.getProductId());
         return order.getOrderId();
     }
 
@@ -152,6 +155,7 @@ public class OrderService {
         }
 
         order.setState(OrderStateEnum.PENDING.name());
+        order.setProductType(ProductTypeEnum.loan.name());
         orderDao.insert(order);
         log.info("created loan order: " + order.getOrderId());
         return order.getOrderId();
