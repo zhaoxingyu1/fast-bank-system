@@ -57,20 +57,20 @@ public class UserController {
 
 
     @PostMapping("/sendEmail")
-    public Object sendEmail(String email){
+    public Object sendEmail(String email) {
 
         try {
             userService.sendEmail(email);
-        }catch (MailException e){
+        } catch (MailException e) {
 
-            return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"验证码发送失败,请重试");
+            return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "验证码发送失败,请重试");
         }
-        return DataFactory.success(SimpleData.class,"验证码发送成功,请注意查收");
+        return DataFactory.success(SimpleData.class, "验证码发送成功,请注意查收");
     }
 
 
     @PostMapping("/login")
-    public Object userLogin(HttpServletRequest request, HttpServletResponse response,@NotEmpty(message = "用户名不能为空") String username,@NotEmpty(message = "密码不能为空") String password) {
+    public Object userLogin(HttpServletRequest request, HttpServletResponse response, @NotEmpty(message = "用户名不能为空") String username, @NotEmpty(message = "密码不能为空") String password) {
 
         String jwtToken = null;
         try {
@@ -78,20 +78,18 @@ public class UserController {
             UserEntity user = userService.selectUserByUsername(username);
 
             if (user == null) {
-                new UnknownAccountException();
+               throw  new UnknownAccountException();
             }
             if (!user.getPassword().equals(DigestUtils.md5DigestAsHex(password.getBytes()))) {
-                new IncorrectCredentialsException();
+                throw new IncorrectCredentialsException();
             }
-
 
 
             JwtToken token;
 
-            token= TokenUtil.convertJwtToken(user);
+            token = TokenUtil.convertJwtToken(user);
 
             jwtToken = TokenUtil.issuedToken(token);
-
 
 
         } catch (UnknownAccountException e) {
@@ -135,23 +133,23 @@ public class UserController {
      */
     @PostMapping("/registerUser")
     @Valid
-    public Object createUser(@Valid UserEntity user,@Valid UserInfoEntity userInfo,@Valid RoleEntity role,@NotEmpty(message = "验证码不能为空") String emailCode) throws Exception {
+    public Object createUser(@Valid UserEntity user, @Valid UserInfoEntity userInfo, @Valid RoleEntity role, @NotEmpty(message = "验证码不能为空") String emailCode) throws Exception {
 
 
         ValueOperations<String, Object> opsForValue = redis.opsForValue();
 
-        if(userInfo.getNickname()==null || userInfo.getNickname().equals("")){
-            userInfo.setNickname(user.getUsername()+"123");
+        if (userInfo.getNickname() == null || userInfo.getNickname().equals("")) {
+            userInfo.setNickname(user.getUsername() + "123");
         }
 
-        Object code =opsForValue.get(userInfo.getEmail());
-        code = ""+code+"";
-        if (code==null || code.equals("") || !code.equals(emailCode)){
-            return DataFactory.fail(CodeEnum.FORBIDDEN,"验证码错误,或者验证码已过期");
+        Object code = opsForValue.get(userInfo.getEmail());
+        code = "" + code + "";
+        if (code == null || code.equals("") || !code.equals(emailCode)) {
+            return DataFactory.fail(CodeEnum.FORBIDDEN, "验证码错误,或者验证码已过期");
         }
 
-        if (userService.selectUserByUsername(user.getUsername())!=null){
-            return DataFactory.fail(CodeEnum.FORBIDDEN,"此用户名已经注册过");
+        if (userService.selectUserByUsername(user.getUsername()) != null) {
+            return DataFactory.fail(CodeEnum.FORBIDDEN, "此用户名已经注册过");
         }
 
         user.setPassword(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()));
@@ -187,7 +185,7 @@ public class UserController {
 
 
     @PostMapping("/updateUserPassWd")
-    public Object updateUserPassWd(HttpServletRequest request, HttpServletResponse response,String oldPassword,String newPassword) {
+    public Object updateUserPassWd(HttpServletRequest request, HttpServletResponse response, String oldPassword, String newPassword) {
 
         // 通过jwt获取用户id进行删除
         String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
@@ -198,8 +196,8 @@ public class UserController {
 
             UserEntity user = userService.selectUserById(token.getUserId());
 
-            if(!user.getPassword().equals(oldPassword)){
-                return DataFactory.fail(CodeEnum.FORBIDDEN,"密码错误,请重新输入");
+            if (!user.getPassword().equals(oldPassword)) {
+                return DataFactory.fail(CodeEnum.FORBIDDEN, "密码错误,请重新输入");
             }
 
             user.setUserId(token.getUserId());
@@ -232,23 +230,30 @@ public class UserController {
      * @return
      */
     @GetMapping("/selectUserById")
-    public Object selectUserById(HttpServletRequest request,@RequestParam(required = false)String userId){
+    public Object selectUserById(HttpServletRequest request, @RequestParam(required = false) String userId) {
 
-        if(request.getHeader(FeignConsts.HEADER_NAME)==null){
-            String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
-            JwtToken token = TokenUtil.decodeToken(jwtToken);
-            String tokenUserId = token.getUserId();
-            UserEntity userEntity = userService.selectUserById(tokenUserId);
-            return DataFactory.success(SimpleData.class, "ok").parseData(userEntity);
+        if (request.getHeader(FeignConsts.HEADER_NAME) != null) {
+            UserEntity userEntity = userService.selectUserById(userId);
+            return userEntity;
+        } else {
+            if (userId != null) {
+                UserEntity user = userService.selectUserById(userId);
+                return DataFactory.success(SimpleData.class, "ok").parseData(user);
+            } else {
+                String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
+                JwtToken token = TokenUtil.decodeToken(jwtToken);
+                String tokenUserId = token.getUserId();
+                UserEntity userEntity = userService.selectUserById(tokenUserId);
+                return DataFactory.success(SimpleData.class, "ok").parseData(userEntity);
+            }
         }
 
-        UserEntity userEntity = userService.selectUserById(userId);
-        return userEntity;
     }
 
 
     /**
      * 修改用户信息
+     *
      * @param request
      * @param nickname
      * @param email
@@ -259,26 +264,26 @@ public class UserController {
      * @throws Exception
      */
     @PostMapping("/updateUserInfo")
-    public Object updateUserInfo(HttpServletRequest request,@RequestParam(required = false)String nickname, @Email @RequestParam(required = false) String email, @Pattern(regexp = "^1[3|4|5|7|8][0-9]{9}$",message = "电话号码格式错误") @RequestParam(required = false)String phone,@RequestParam(required = false)String bankCard, @RequestParam(required = false) Integer workingState ) throws Exception {
+    public Object updateUserInfo(HttpServletRequest request, @RequestParam(required = false) String nickname, @Email @RequestParam(required = false) String email, @Pattern(regexp = "^1[3|4|5|7|8][0-9]{9}$", message = "电话号码格式错误") @RequestParam(required = false) String phone, @RequestParam(required = false) String bankCard, @RequestParam(required = false) Integer workingState) throws Exception {
 
         String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
 
         JwtToken token = TokenUtil.decodeToken(jwtToken);
         UserInfoEntity userInfo = userInfoService.selectUserInfoById(token.getUserInfoId());
 
-        if(nickname!=null && !nickname.equals("")){
+        if (nickname != null && !nickname.equals("")) {
             userInfo.setNickname(nickname);
         }
-        if(email!=null && !email.equals("")){
+        if (email != null && !email.equals("")) {
             userInfo.setEmail(email);
         }
-        if(phone!=null && !phone.equals("")){
+        if (phone != null && !phone.equals("")) {
             userInfo.setPhone(phone);
         }
-        if(bankCard!=null && !bankCard.equals("")){
+        if (bankCard != null && !bankCard.equals("")) {
             userInfo.setBankCard(bankCard);
         }
-        if(workingState!=null && !workingState.equals("")){
+        if (workingState != null && !workingState.equals("")) {
             userInfo.setWorkingState(workingState);
         }
         Boolean bool = userInfoService.updateUserInfo(userInfo);

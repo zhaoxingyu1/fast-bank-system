@@ -60,18 +60,32 @@ public class UserInfoService {
      * 根据真实名字查询个人信息
      * @return
      */
-    public Page<UserInfoEntity> selectUserListByRealName(String name,Integer current){
-
-        QueryWrapper<UserInfoEntity> wrapper = new QueryWrapper<>();
-        wrapper
-                .like("real_name",name)
-                .or()
-                .like("nickname",name);
-        Page<UserInfoEntity> page = new Page<>(current - 1, PageConst.PageSize);
-        Page<UserInfoEntity> userInfoEntityPage = userInfoDao.selectPage(page,wrapper);
-
-        return userInfoEntityPage;
-    }
+//    public Page<UserInfoEntity> selectUserListByRealName(String info,Integer current){
+//
+//        QueryWrapper<UserInfoEntity> wrapper = new QueryWrapper<>();
+//        wrapper
+//                .like("real_name",info)
+//                .or()
+//                .like("nickname",info)
+//                .or()
+//                .like("phone",info)
+//                .or()
+//                .like("email",info);
+//
+//        Page<UserInfoEntity> page = new Page<>(current - 1, PageConst.PageSize);
+//
+//        Page<UserInfoEntity> userInfoEntityPage = userInfoDao.selectPage(page,wrapper);
+//
+//
+//        for (UserInfoEntity record : userInfoEntityPage.getRecords()) {
+//
+//
+//
+//        }
+//
+//
+//        return userInfoEntityPage;
+//    }
 
 
 }
