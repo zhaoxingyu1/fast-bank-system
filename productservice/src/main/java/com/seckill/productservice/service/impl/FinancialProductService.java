@@ -87,20 +87,31 @@ public class FinancialProductService implements IFinancialProductService {
             productMap.put("product_id", f.getFinancialProductId());
             productMap.put("count", count);
             productMap.put("con_time", conTime);
-            // 发送消息至延时队列
+            productMap.put("type", 1);
+            // 1.发送消息至延时队列（产品的抢购开始）
             rabbitTemplate.convertAndSend("delayProductQueue", productMap, message -> {
-                // 获取当前时间戳，计算延时时间
-//                long nowTime = System.currentTimeMillis();
-//                long delayTime = financialProductEntity.getStartTime() - nowTime;
-                // 将delayTime转换为毫秒，并转换为字符串
+                // 设置消息队列延时时间
                 String delayTimeStr = String.valueOf(delayTime);
-                // 设置延时时间
                 message.getMessageProperties().setExpiration(delayTimeStr);
                 return message;
             });
-            return f.getFinancialProductId();
 
-//            System.out.println("成功发送了消息：" + new Date());
+            // 2.发送消息至延时队列（产品开抢前五分钟的提醒）
+            if (getTime(delayTime)>0){
+                HashMap<String, Object> productMap2 = new HashMap<>();
+                productMap.put("product_id", f.getFinancialProductId());
+                productMap.put("count", count);
+                productMap.put("con_time", conTime);
+                productMap.put("type", 2);
+                rabbitTemplate.convertAndSend("delayProductQueue", productMap2, message -> {
+                    String delayTimeStr = String.valueOf(getTime(delayTime));
+                    // 设置延时时间
+                    message.getMessageProperties().setExpiration(delayTimeStr);
+                    return message;
+                });
+            }
+            // 返回产品ID
+            return f.getFinancialProductId();
         }else{
             throw new DatabaseOperationException("产品已存在，无需重复添加");
         }
@@ -176,5 +187,21 @@ public class FinancialProductService implements IFinancialProductService {
             list.add(financialProductEntity);
         }
         return list;
+    }
+
+    /**
+     * 计算这个时间前5分钟的时间
+     */
+    private long getTime(long time){
+        // 五分钟的毫秒数
+        long fiveMinute = 5 * 60 * 1000;
+
+        // 计算延时时间（邮件提醒消息需要提早五分钟发送给用户）
+        long delayTime = time - fiveMinute;
+        // 如果延时时间小于五分钟，则延时五分钟
+        if (delayTime < fiveMinute){
+            return 0;
+        }
+        return delayTime;
     }
 }

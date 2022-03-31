@@ -77,6 +77,8 @@ public class LoanProductService implements ILoanProductService {
             productMap.put("count", stock);
             productMap.put("con_time", interval);
 
+            //todo 还需要发一个早5分钟的延时消息
+
             // 将消息发送到延时队列delayProductQueue
             rabbitTemplate.convertAndSend("delayProductQueue", productMap, message -> {
                 // 获取当前时间戳，计算延时时间
