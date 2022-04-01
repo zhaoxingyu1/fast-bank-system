@@ -59,11 +59,11 @@ public class OrderController {
     }
 
     @GetMapping("/getAll")
-    public BaseData getAll(Integer page) {
+    public BaseData getAll(Integer page, String productType) {
         if (page == null) {
             page = 1;
         }
-        Page<OrderEntity> all = orderService.getAll(page);
+        Page<OrderEntity> all = orderService.getAll(page, productType);
         return DataFactory.success(SimpleData.class, "ok").parseData(all);
     }
 

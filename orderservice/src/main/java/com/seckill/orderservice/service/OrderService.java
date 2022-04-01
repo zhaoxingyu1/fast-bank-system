@@ -8,6 +8,7 @@ import com.seckill.common.consts.PageConst;
 import com.seckill.common.consts.RedisConsts;
 import com.seckill.common.entity.order.OrderEntity;
 import com.seckill.common.entity.product.BaseProduct;
+import com.seckill.common.entity.user.RiskControlEntity;
 import com.seckill.common.entity.user.UserEntity;
 import com.seckill.common.enums.OrderStateEnum;
 import com.seckill.common.enums.ProductTypeEnum;
@@ -83,10 +84,10 @@ public class OrderService {
         return orderDao.selectPage(new Page<>(page, PageConst.PageSize), wrapper);
     }
 
-    public Page<OrderEntity> getAll(int page) {
+    public Page<OrderEntity> getAll(int page, String productType) {
         return orderDao.selectPage(
                 new Page<>(page, PageConst.PageSize),
-                new QueryWrapper<>()
+                productType == null ? null : new QueryWrapper<OrderEntity>().eq("product_type", productType)
         );
     }
 
@@ -149,7 +150,8 @@ public class OrderService {
         }
         // 风险控制
         UserEntity user = userClient.selectUserById(order.getUserId());
-        RiskControl riskControl = RiskControlUtils.isQualified(user);
+        RiskControlEntity riskControlEntity = userClient.getRiskControl();
+        RiskControl riskControl = RiskControlUtils.isQualified(user, riskControlEntity);
         if (riskControl.getThroughState() == 0) {
             throw new ForbiddenException(riskControl.getCause());
         }
