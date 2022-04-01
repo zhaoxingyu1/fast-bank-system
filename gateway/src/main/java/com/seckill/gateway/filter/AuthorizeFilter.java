@@ -1,6 +1,7 @@
 package com.seckill.gateway.filter;
 
 import com.alibaba.fastjson.JSONObject;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.seckill.common.consts.HeaderConsts;
 import com.seckill.common.entity.user.UserEntity;
 import com.seckill.common.jwt.JwtToken;
@@ -41,14 +42,24 @@ public class AuthorizeFilter implements GlobalFilter {
             return chain.filter(exchange);
         }
 
-        if (jwtToken.equals("") || jwtToken ==null){
-            exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+        if (jwtToken ==null || jwtToken.equals("")){
+            exchange.getResponse().setStatusCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED);
             return exchange.getResponse().setComplete();
         }
 
 
         // 解析校验token
-        JwtToken token =TokenUtil.decodeToken(jwtToken);
+        JwtToken token;
+
+
+        try {
+            token =TokenUtil.decodeToken(jwtToken);
+        }catch (TokenExpiredException e){
+
+            exchange.getResponse().setStatusCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED );
+            return exchange.getResponse().setComplete();
+        }
+
 
         String[] split = path.split("/", 3);
 
@@ -56,8 +67,7 @@ public class AuthorizeFilter implements GlobalFilter {
             return chain.filter(exchange);
         }
 
-        System.err.println("禁止访问");
-        exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+
         return exchange.getResponse().setComplete();
 
     }

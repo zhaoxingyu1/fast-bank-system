@@ -19,7 +19,11 @@ public class RiskControlService {
 
     public Boolean insertOrUpdate(RiskControlEntity riskControl){
         int bool=0;
-        if (riskControl.getRiskControlId()!=null && riskControl.getRiskControlId().equals("")){
+
+        RiskControlEntity riskControlEntity = riskControlDao.selectOne(null);
+
+        if (riskControlEntity!=null){
+            riskControl.setRiskControlId(riskControlEntity.getRiskControlId());
             bool = riskControlDao.updateById(riskControl);
         }else{
             bool = riskControlDao.insert(riskControl);

@@ -37,9 +37,6 @@ public class UserApplicationRecordService {
 
         UserApplicationRecordEntity userApplicationRecord = new UserApplicationRecordEntity();
 
-
-
-
         userApplicationRecord.setUsername(user.getUsername());
         userApplicationRecord.setAge(user.getUserInfo().getAge());
         userApplicationRecord.setWorkingState(user.getUserInfo().getWorkingState());
