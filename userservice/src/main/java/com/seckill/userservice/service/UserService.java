@@ -55,7 +55,7 @@ public class UserService {
     @Transactional
     public Boolean insertUser(UserEntity user, UserInfoEntity userInfo, RoleEntity role) throws Exception {
 
-
+        userInfo.setCreditStatus(1);
         int i = userInfoDao.insert(userInfo);
         int i1 = roleDao.insert(role);
 
@@ -176,7 +176,7 @@ public class UserService {
                 .eq("username", name);
         UserEntity userEntity = userDao.selectOne(wrapper);
 
-        if (userEntity==null){
+        if (userEntity == null) {
             return null;
         }
 
@@ -198,23 +198,33 @@ public class UserService {
 
         message.setTo(email);
 
-        message.setSubject("注册验证码");
-        Integer code=0;
-        String text="你的注册验证码为：";
-        for(int i=1;i<=6;i++){
-            int random = (int)(Math.random()*10);
-            code =code*10 + random;
+        message.setSubject("三湘银行验证码");
+        Integer code = 0;
+        String text = "你的验证码为：";
+        for (int i = 1; i <= 6; i++) {
+            int random = (int) (Math.random() * 10);
+            code = code * 10 + random;
         }
-        text=text+code+"，此验证码过期时间为5分钟，请在有效时间内使用";
+        text = text + code + "，此验证码过期时间为5分钟，请在有效时间内使用";
         message.setText(text);
 
         mailSender.send(message);
 
         // 5分钟的过期时间
         ValueOperations<String, Object> opsForValue = redis.opsForValue();
-        opsForValue.set(email,code,5, TimeUnit.MINUTES);
+        opsForValue.set(email, code, 5, TimeUnit.MINUTES);
 
     }
 
+    public UserEntity selectByUserInfoId(String userInfoId) {
+
+        QueryWrapper<UserEntity> wrapper = new QueryWrapper<>();
+
+        wrapper
+                .eq("user_info_id", userInfoId);
+
+        UserEntity user = userDao.selectOne(wrapper);
+        return user;
+    }
 
 }

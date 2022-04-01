@@ -37,7 +37,7 @@ public class AuthorizeFilter implements GlobalFilter {
 
 
         // 3.校验
-        if ("/user/login".equals(path) || "/user/registerUser".equals(path) || "/user/sendEmail".equals(path)){
+        if ("/user/login".equals(path) || "/user/registerUser".equals(path) || "/user/sendEmail".equals(path) || "/user/retrievePassword".equals(path)){
             // 登录接口 ，放行
             return chain.filter(exchange);
         }
