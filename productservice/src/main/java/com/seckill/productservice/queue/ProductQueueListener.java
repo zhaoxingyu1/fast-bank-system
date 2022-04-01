@@ -33,6 +33,12 @@ public class ProductQueueListener {
         Long conTime = Long.valueOf(String.valueOf(map.get("con_time")));
         Integer type = (Integer) map.get("type");
 
+        // 打印属性
+        System.out.println("productId:" + productId);
+        System.out.println("count:" + count);
+        System.out.println("conTime:" + conTime);
+        System.out.println("type:" + type);
+
         if(type == 1){
             //类型1，产品开始抢购的消息
 
@@ -43,6 +49,8 @@ public class ProductQueueListener {
         }else if(type == 2){
             //类型2，产品开枪前五分钟发邮件提醒预约的人
             // todo 还没写完，我先交了
+            System.out.println("收到了-------------------:" + new Date());
+            System.out.println("成功进入发邮件的逻辑");
         }else{
             throw new RuntimeException("消息类型错误");
         }

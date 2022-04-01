@@ -18,4 +18,7 @@ public class FinancialProductEntity extends BaseProduct {
     @TableId(type = IdType.ASSIGN_UUID)
     private String financialProductId;
     private String financialProductName;
+//    private String describe;
+    // 理财产品：利率
+    private Double rate;
 }

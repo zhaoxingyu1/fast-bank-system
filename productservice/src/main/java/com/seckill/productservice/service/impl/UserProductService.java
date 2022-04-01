@@ -40,6 +40,21 @@ public class UserProductService implements IUserProductService {
 
     @Override
     public Boolean userAppointProduct(String userId, String type, String productId) throws Exception{
+        // 先判断在user_product表中是否有符合user_id和product_id的记录
+        UserProductEntity userProductEntity = userProductDao.selectOne(new QueryWrapper<UserProductEntity>()
+                .eq("user_id", userId)
+                .eq("user_product_id", productId));
+        if (userProductEntity != null){
+            // 记录存在，只需要更新booking_status为1即可
+            userProductEntity.setBookingStatus(1);
+            userProductEntity.setMtime(System.currentTimeMillis());
+            int update = userProductDao.updateById(userProductEntity);
+            if (update == 0){
+                throw new DatabaseOperationException("预约失败，可能是数据库操作失败");
+            }
+        }
+
+        // 没有记录，则需要新增一条记录
         if(type.equals("financial")){
             FinancialProductEntity financialProductEntity = financialProductDao.selectById(productId);
             // 更新状态
@@ -74,6 +89,31 @@ public class UserProductService implements IUserProductService {
             }
         }
         return false;
+    }
+
+    @Override
+    public Boolean userCancelAppointment(String userId, String type, String productId) throws Exception {
+        // 在user_product表中查询是否有user_id和product_id都符合的记录
+        UserProductEntity userProductEntity = userProductDao.selectOne(new QueryWrapper<UserProductEntity>()
+                .eq("user_id", userId)
+                .eq("user_product_id", productId));
+        if (userProductEntity == null){
+            throw new NotFoundException("未找到相关记录，可能是这个用户不存在或者产品不存在");
+        }else {
+            // 判断是否已经预约
+            if (userProductEntity.getBookingStatus() == 1){
+                // 将数据库钟这条记录的booking_status改为0
+                userProductEntity.setBookingStatus(0);
+                userProductEntity.setMtime(System.currentTimeMillis());
+                int update = userProductDao.updateById(userProductEntity);
+                if (update == 0){
+                    throw new DatabaseOperationException("取消预约失败，可能是数据库操作失败");
+                }
+            }else {
+                throw new NotFoundException("该用户没有预约这个产品");
+            }
+        }
+        return true;
     }
 
     @Override

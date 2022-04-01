@@ -57,6 +57,32 @@ public class UserProductController {
     }
 
     /**
+     * 用户取消预约产品
+     * 将user_product表中的status改为0
+     */
+    @GetMapping("/userCancelAppointment/{type}/{productId}")
+    public Object userCancelAppointment(HttpServletRequest request,
+                                        @PathVariable("type") String type,
+                                        @PathVariable("productId") String productId) throws Exception {
+        // 从Token中获取用户id
+        String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
+        JwtToken token = TokenUtil.decodeToken(jwtToken);
+        String userId = token.getUserId();
+//        String userId = "test_user_id";
+
+        if (request.getHeader(FeignConsts.HEADER_NAME) != null){
+            return userProductService.userCancelAppointment(userId, type, productId);
+        } else {
+            if(userProductService.userCancelAppointment(userId, type, productId)){
+                return DataFactory.success(SimpleData.class,"ok");
+            }else {
+                return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现了未知错误");
+            }
+        }
+    }
+
+
+    /**
      * 用户购买（秒杀）产品（这个貌似用不到，用户购买商品缓存-1是在订单模块完成，我先不删）
      * @param request 请求
      * @param type 类型
