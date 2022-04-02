@@ -183,4 +183,7 @@ public class UserProductController {
             return DataFactory.success(SimpleData.class, "ok").parseData(userProductService.userIsAppoint(userId, productId));
         }
     }
+
+
+
 }

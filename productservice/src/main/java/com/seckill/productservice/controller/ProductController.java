@@ -12,6 +12,8 @@ import com.seckill.productservice.dao.ProductTypeDao;
 import com.seckill.productservice.service.IFinancialProductService;
 import com.seckill.productservice.service.ILoanProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -39,6 +41,10 @@ public class ProductController {
 
     @Resource
     private ProductTypeDao productTypeDao;
+
+    @Resource
+    private RedisTemplate<String, Object> redis;
+
 
     /**
      * 根据类型新增一个新产品
@@ -264,6 +270,50 @@ public class ProductController {
             return productTypeDao.selectById(id).getType();
         }else {
             return DataFactory.success(ListData.class, "ok").parseData(productTypeDao.selectById(id).getType());
+        }
+    }
+
+    // 传入一个产品id，查询剩余的库存
+
+    /**
+     * 传入一个产品id，查询剩余的库存
+     * @param id 产品id
+     * @param request req
+     * @return 返回数据或者对象
+     * @throws Exception 异常
+     */
+    @GetMapping("/getStockById/{id}")
+    public Object getStockById(@PathVariable("id") String id,
+                               HttpServletRequest request) throws Exception{
+        ValueOperations<String, Object> opsForValue = redis.opsForValue();
+        if (request.getHeader(FeignConsts.HEADER_NAME) != null) {
+            // 先判断是否在缓存中
+            if (opsForValue.get(id) != null) {
+                return opsForValue.get(id);
+            }else{
+                // 如果不在缓存中，则查询数据库
+                if (productTypeDao.selectById(id).getType().equals("financial")) {
+                    return financialProductService.findFinancialProductById(id);
+                }else if (productTypeDao.selectById(id).getType().equals("loan")) {
+                    return loanProductService.findLoanProductById(id);
+                } else {
+                    return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现了未知错误，可能是ID不存在");
+                }
+            }
+        }else {
+            // 先判断是否在缓存中
+            if (opsForValue.get(id) != null) {
+                return DataFactory.success(ListData.class, "ok").parseData(opsForValue.get(id));
+            }else {
+                // 如果不在缓存中，则查询数据库
+                if (productTypeDao.selectById(id).getType().equals("financial")) {
+                    return DataFactory.success(ListData.class, "ok").parseData(financialProductService.findFinancialProductById(id));
+                } else if (productTypeDao.selectById(id).getType().equals("loan")) {
+                    return DataFactory.success(ListData.class, "ok").parseData(loanProductService.findLoanProductById(id));
+                } else {
+                    return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现了未知错误，可能是ID不存在");
+                }
+            }
         }
     }
 }
