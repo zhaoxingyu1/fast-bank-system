@@ -293,9 +293,9 @@ public class ProductController {
             }else{
                 // 如果不在缓存中，则查询数据库
                 if (productTypeDao.selectById(id).getType().equals("financial")) {
-                    return financialProductService.findFinancialProductById(id);
+                    return financialProductService.findFinancialProductById(id).getStock();
                 }else if (productTypeDao.selectById(id).getType().equals("loan")) {
-                    return loanProductService.findLoanProductById(id);
+                    return loanProductService.findLoanProductById(id).getStock();
                 } else {
                     return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现了未知错误，可能是ID不存在");
                 }
@@ -307,9 +307,9 @@ public class ProductController {
             }else {
                 // 如果不在缓存中，则查询数据库
                 if (productTypeDao.selectById(id).getType().equals("financial")) {
-                    return DataFactory.success(ListData.class, "ok").parseData(financialProductService.findFinancialProductById(id));
+                    return DataFactory.success(ListData.class, "ok").parseData(financialProductService.findFinancialProductById(id).getStock());
                 } else if (productTypeDao.selectById(id).getType().equals("loan")) {
-                    return DataFactory.success(ListData.class, "ok").parseData(loanProductService.findLoanProductById(id));
+                    return DataFactory.success(ListData.class, "ok").parseData(loanProductService.findLoanProductById(id).getStock());
                 } else {
                     return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"出现了未知错误，可能是ID不存在");
                 }
