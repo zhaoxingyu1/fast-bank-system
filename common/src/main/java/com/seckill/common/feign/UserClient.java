@@ -16,7 +16,7 @@ public interface UserClient {
 
 
     @PostMapping("user/applicationRecord/insert")
-    Boolean insertApplicationRecord(@RequestParam String userId,@RequestParam String productName,@RequestBody RiskControl riskControl);
+    Boolean insertApplicationRecord(@RequestParam String userId,@RequestParam String productId,@RequestBody RiskControl riskControl);
 
     @PostMapping("/user/admin/getRiskControl")
     RiskControlEntity getRiskControl();

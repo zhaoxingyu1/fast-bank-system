@@ -150,7 +150,6 @@ public class UserService {
         QueryWrapper<UserEntity> wrapper = new QueryWrapper<>();
         wrapper
                 .like("username", name);
-
         Page<UserEntity> page = new Page<>(current - 1, PageConst.PageSize);
 
         Page<UserEntity> userEntityPage = userDao.selectPage(page, wrapper);

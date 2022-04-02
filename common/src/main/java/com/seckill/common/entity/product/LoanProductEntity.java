@@ -3,6 +3,7 @@ package com.seckill.common.entity.product;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -21,4 +22,5 @@ public class LoanProductEntity extends BaseProduct{
 //    private String describe;
     // 贷款产品：利息
     private Double interest;
+
 }

@@ -38,7 +38,7 @@ public class UserInfoEntity {
     private Integer gender;
 
     @NotNull(message = "电话号码不能为空")
-    @Pattern(regexp = "^1[3|4|5|7|8][0-9]{9}$",message = "电话号码格式错误")
+    @Pattern(regexp = "^1[3|4|5|7|8|9][0-9]{9}$",message = "电话号码格式错误")
     private String phone;
 
     @Pattern(regexp = "^\\d{15}|\\d{18}$",message = "身份证号码错误")

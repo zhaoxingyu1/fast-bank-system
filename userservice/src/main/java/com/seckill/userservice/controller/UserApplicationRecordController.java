@@ -34,16 +34,16 @@ public class UserApplicationRecordController {
     /**
      * 购买贷款产品的时候添加申请记录，判断是否有无资格
      * @param userId
-     * @param productName
+     * @param productId
      * @return
      */
     @PostMapping("/applicationRecord/insert")
-    public Object insertApplicationRecord(@RequestParam String userId,@RequestParam String productName,@RequestBody RiskControl riskControl){
+    public Object insertApplicationRecord(@RequestParam String userId,@RequestParam String productId,@RequestBody RiskControl riskControl){
 
 
         UserEntity user = userService.selectUserById(userId);
 
-        return userApplicationRecordService.insert(user, productName,riskControl);
+        return userApplicationRecordService.insert(user, productId,riskControl);
 
     }
 

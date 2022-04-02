@@ -33,7 +33,7 @@ public class UserApplicationRecordService {
     private UserApplicationRecordDao userApplicationRecordDao;
 
 
-    public Object insert(UserEntity user, String productName,RiskControl riskControl) {
+    public Object insert(UserEntity user, String productId,RiskControl riskControl) {
 
         UserApplicationRecordEntity userApplicationRecord = new UserApplicationRecordEntity();
 
@@ -44,7 +44,7 @@ public class UserApplicationRecordService {
         userApplicationRecord.setThroughState(riskControl.getThroughState());
         userApplicationRecord.setCreditStatus(user.getUserInfo().getCreditStatus());
         userApplicationRecord.setCause(riskControl.getCause());
-        userApplicationRecord.setProductName(productName);
+        userApplicationRecord.setProductId(productId);
         // 默认需要控制风险的只有贷款产品
         userApplicationRecord.setProductType("loan");
         int bool = userApplicationRecordDao.insert(userApplicationRecord);

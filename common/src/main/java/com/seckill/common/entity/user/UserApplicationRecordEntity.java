@@ -1,6 +1,7 @@
 package com.seckill.common.entity.user;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.seckill.common.entity.product.LoanProductEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,7 +22,7 @@ public class UserApplicationRecordEntity {
     @TableId(type = IdType.ASSIGN_UUID)
     private String userApplicationRecordId;
 
-    private String productName;
+    private String productId;
     //产品类型：loan：贷款
     private String productType;
 
@@ -40,6 +41,9 @@ public class UserApplicationRecordEntity {
     // 申请时间
     @TableField(fill = FieldFill.INSERT)
     private Long ctime;
+
+    @TableField(exist = false)
+    private LoanProductEntity loanProduct;
 
 
 }
