@@ -117,7 +117,7 @@ public class UserProductController {
      * @return  用户查看已预约的产品
      */
     @GetMapping("/userGetAppointmentProduct")
-    public Object userGetAppointment(HttpServletRequest request){
+    public Object userGetAppointment(HttpServletRequest request) throws Exception {
         // 从Token中获取用户id
         String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
         JwtToken token = TokenUtil.decodeToken(jwtToken);

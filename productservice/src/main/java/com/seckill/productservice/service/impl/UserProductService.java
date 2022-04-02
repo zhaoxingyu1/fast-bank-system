@@ -3,13 +3,18 @@ package com.seckill.productservice.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.seckill.common.entity.product.FinancialProductEntity;
 import com.seckill.common.entity.product.LoanProductEntity;
+import com.seckill.common.entity.product.ProductTypeEntity;
 import com.seckill.common.entity.user.UserEntity;
 import com.seckill.common.entity.user.UserProductEntity;
 import com.seckill.common.exception.DatabaseOperationException;
 import com.seckill.common.exception.NotFoundException;
+import com.seckill.common.feign.UserClient;
 import com.seckill.productservice.dao.FinancialProductDao;
 import com.seckill.productservice.dao.LoanProductDao;
+import com.seckill.productservice.dao.ProductTypeDao;
 import com.seckill.productservice.dao.UserProductDao;
+import com.seckill.productservice.response.AdminGetAppointment;
+import com.seckill.productservice.response.UserGetAppointmentProduct;
 import com.seckill.productservice.service.IUserProductService;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -17,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,6 +43,12 @@ public class UserProductService implements IUserProductService {
 
     @Resource
     private FinancialProductDao financialProductDao;
+
+    @Resource
+    private ProductTypeDao productTypeDao;
+
+    @Resource
+    private UserClient userClient;
 
     @Override
     public Boolean userAppointProduct(String userId, String type, String productId) throws Exception{
@@ -136,17 +148,57 @@ public class UserProductService implements IUserProductService {
     }
 
     @Override
-    public List<UserProductEntity> userGetAppointment(String userId) {
+    public List<Object> userGetAppointment(String userId) throws Exception {
         QueryWrapper<UserProductEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id",userId);
-        return userProductDao.selectList(queryWrapper);
+        List<UserProductEntity> userProductEntities = userProductDao.selectList(queryWrapper);
+        List<Object> responseList = new ArrayList<>();
+        for (UserProductEntity userProductEntity : userProductEntities){
+            // 获取产品类型
+            String type = productTypeDao.selectOne(new QueryWrapper<ProductTypeEntity>()
+                    .eq("product_id",userProductEntity.getUserProductId())).getType();
+            if (type.equals("financial")){
+                // 获取理财产品信息
+                FinancialProductEntity financialProductEntity = financialProductDao.selectOne(new QueryWrapper<FinancialProductEntity>()
+                        .eq("financial_product_id",userProductEntity.getUserProductId()));
+                UserGetAppointmentProduct<FinancialProductEntity> userGetAppointmentProduct = new UserGetAppointmentProduct<>();
+                userGetAppointmentProduct.setUserProductEntity(userProductEntity);
+                userGetAppointmentProduct.setProductEntity(financialProductEntity);
+
+                responseList.add(userGetAppointmentProduct);
+            }else if (type.equals("loan")){
+                // 获取贷款产品信息
+                LoanProductEntity loanProductEntity = loanProductDao.selectOne(new QueryWrapper<LoanProductEntity>()
+                        .eq("loan_product_id",userProductEntity.getUserProductId()));
+                UserGetAppointmentProduct<LoanProductEntity> userGetAppointmentProduct = new UserGetAppointmentProduct<>();
+                userGetAppointmentProduct.setUserProductEntity(userProductEntity);
+                userGetAppointmentProduct.setProductEntity(loanProductEntity);
+
+                responseList.add(userGetAppointmentProduct);
+            }else{
+                throw new NotFoundException("未找到该产品");
+            }
+        }
+        return responseList;
     }
 
     @Override
-    public List<UserProductEntity> adminGetUserByProductId(String productId) {
+    public List<AdminGetAppointment> adminGetUserByProductId(String productId) {
         QueryWrapper<UserProductEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_product_id",productId);
-        return userProductDao.selectList(queryWrapper);
+        List<UserProductEntity> userProductEntities = userProductDao.selectList(queryWrapper);
+        List<AdminGetAppointment> adminGetAppointmentList = new ArrayList<>();
+        for (UserProductEntity userProductEntity : userProductEntities){
+            AdminGetAppointment adminGetAppointment = new AdminGetAppointment();
+            // 获取用户信息，远程调用
+            UserEntity userEntity = userClient.selectUserById(userProductEntity.getUserId());
+            adminGetAppointment.setUserEntity(userEntity);
+            adminGetAppointment.setUserProductEntity(userProductEntity);
+
+            adminGetAppointmentList.add(adminGetAppointment);
+        }
+
+        return adminGetAppointmentList;
     }
 
     @Override
