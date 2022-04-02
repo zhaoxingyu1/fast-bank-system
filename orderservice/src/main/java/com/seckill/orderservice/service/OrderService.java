@@ -152,6 +152,8 @@ public class OrderService {
         UserEntity user = userClient.selectUserById(order.getUserId());
         RiskControlEntity riskControlEntity = userClient.getRiskControl();
         RiskControl riskControl = RiskControlUtils.isQualified(user, riskControlEntity);
+        // 记录用户操作
+        userClient.insertApplicationRecord(order.getUserId(), order.getProductId(), riskControl);
         if (riskControl.getThroughState() == 0) {
             throw new ForbiddenException(riskControl.getCause());
         }
