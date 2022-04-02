@@ -18,4 +18,7 @@ public class LoanProductEntity extends BaseProduct{
     @TableId(type = IdType.ASSIGN_UUID)
     private String loanProductId;
     private String loanProductName;
+//    private String describe;
+    // 贷款产品：利息
+    private Double interest;
 }

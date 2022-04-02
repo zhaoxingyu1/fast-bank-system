@@ -14,6 +14,9 @@ public interface IUserProductService {
     // 用户预约产品
     Boolean userAppointProduct(String userId,String type,String productId) throws Exception;
 
+    // 用户取消预约产品
+    Boolean userCancelAppointment(String userId,String type,String productId) throws Exception;
+
     // 用户购买（秒杀）产品
     Boolean userBuyProduct(String userId,String type,String productId) throws Exception;
 

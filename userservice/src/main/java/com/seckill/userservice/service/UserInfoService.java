@@ -80,5 +80,15 @@ public class UserInfoService {
         return userInfoEntityPage;
     }
 
+    public UserInfoEntity selectByEmail(String email){
+
+        QueryWrapper<UserInfoEntity> wrapper = new QueryWrapper<>();
+
+        wrapper
+                .eq("email",email);
+        UserInfoEntity userInfoEntity = userInfoDao.selectOne(wrapper);
+
+        return userInfoEntity;
+    }
 
 }

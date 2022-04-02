@@ -19,8 +19,6 @@ import com.seckill.userservice.service.UserInfoService;
 import com.seckill.userservice.service.UserService;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
-
-import org.hibernate.validator.constraints.CreditCardNumber;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.mail.MailException;
@@ -33,6 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
+import java.nio.charset.StandardCharsets;
 
 
 /**
@@ -78,7 +77,7 @@ public class UserController {
             UserEntity user = userService.selectUserByUsername(username);
 
             if (user == null) {
-               throw  new UnknownAccountException();
+                throw new UnknownAccountException();
             }
             if (!user.getPassword().equals(DigestUtils.md5DigestAsHex(password.getBytes()))) {
                 throw new IncorrectCredentialsException();
@@ -196,12 +195,20 @@ public class UserController {
 
             UserEntity user = userService.selectUserById(token.getUserId());
 
-            if (!user.getPassword().equals(oldPassword)) {
+            String oldPasswordMD5 = DigestUtils.md5DigestAsHex(oldPassword.getBytes());
+
+            String newPasswordMD5 = DigestUtils.md5DigestAsHex(newPassword.getBytes());
+
+            if (!user.getPassword().equals(oldPasswordMD5)) {
                 return DataFactory.fail(CodeEnum.FORBIDDEN, "密码错误,请重新输入");
             }
 
+            if (user.getPassword().equals(newPasswordMD5)) {
+                return DataFactory.fail(CodeEnum.FORBIDDEN, "新密码不能和旧密码相同");
+            }
+
             user.setUserId(token.getUserId());
-            user.setPassword(DigestUtils.md5DigestAsHex(newPassword.getBytes()));
+            user.setPassword(newPasswordMD5);
 
             Boolean bool = userService.updateUserById(user);
             if (!bool) {
@@ -293,6 +300,30 @@ public class UserController {
         }
 
         return DataFactory.success(SimpleData.class, "ok");
+    }
+
+    @PostMapping("/retrievePassword")
+    public Object retrievePassword(String email,String emailCode,String newPassword){
+
+        ValueOperations<String, Object> opsForValue = redis.opsForValue();
+        Object code = opsForValue.get(email);
+        code = "" + code + "";
+        if (code == null || code.equals("") || !code.equals(emailCode)) {
+            return DataFactory.fail(CodeEnum.FORBIDDEN, "验证码错误,或者验证码已过期");
+        }
+
+        UserInfoEntity userInfoEntity = userInfoService.selectByEmail(email);
+
+        UserEntity user = userService.selectByUserInfoId(userInfoEntity.getUserInfoId());
+
+        user.setPassword(DigestUtils.md5DigestAsHex(newPassword.getBytes()));
+        Boolean bool = userService.updateUserById(user);
+
+        if (!bool) {
+            return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "修改失败,请联系管理员");
+        }
+
+        return DataFactory.success(SimpleData.class, "修改成功");
     }
 
 

@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.HashMap;
+
 /**
- * @author : 陈征
+ * @author : 七画一只妖
  * @date : 2022-02-14 19:13
  */
 
@@ -46,4 +48,45 @@ public class RabbitConfig {
                               @Qualifier("dlxQueue") Queue queue){
         return BindingBuilder.bind(queue).to(exchange).with("routing-key-delay").noargs();
     }
+
+
+
+
+
+//    //交换机
+//    public static final String DELAYED_EXCHANGE ="delayed_exchange";
+//    //队列
+//    public static final String DELAYED_QUEUE ="delayed_queue";
+//    //routeingKey
+//    public static final String DELAYED_ROUTINGKEY ="delayed_routingKey";
+//
+//    //声明延迟交换机
+//    @Bean
+//    public CustomExchange delayedExchange(){
+//        HashMap<String, Object> arguments = new HashMap<>();
+//        //自定义交换机的类型
+//        arguments.put("x-delayed-type", "direct");
+//        /**
+//         * 交换机名
+//         * 交换机类型
+//         * 持久化
+//         * 自动删除
+//         */
+//        return new CustomExchange(DELAYED_EXCHANGE,"x-delayed-message",true,false,arguments);
+//    }
+//
+//    /**
+//     * 声明队列
+//     * @return
+//     */
+//    @Bean
+//    public Queue delayedQueue(){
+//        return new Queue(DELAYED_QUEUE);
+//    }
+//
+//    //延迟交换机和队列绑定
+//    @Bean
+//    public Binding delayedQueueBindingDelayedExchange(Queue delayedQueue,CustomExchange delayedExchange){
+//        return BindingBuilder.bind(delayedQueue).to(delayedExchange).with(DELAYED_ROUTINGKEY).noargs();
+//    }
 }

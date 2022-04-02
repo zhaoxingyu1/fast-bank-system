@@ -1,5 +1,7 @@
 package com.seckill.productservice.queue;
 
+import com.rabbitmq.client.Channel;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,25 +28,42 @@ public class ProductQueueListener {
     private SendUserEmail sendUserEmail;
 
     @RabbitHandler
-    public void receive(Map<String, Object> map){
+    public void receive(Map<String, Object> map) throws Exception {
         System.out.println("收到了-------------------:" + new Date());
         String productId = (String) map.get("product_id");
         Integer count = (Integer) map.get("count");
         Long conTime = Long.valueOf(String.valueOf(map.get("con_time")));
         Integer type = (Integer) map.get("type");
 
+        // 打印属性
+        System.out.println("productId:" + productId);
+        System.out.println("count:" + count);
+        System.out.println("conTime:" + conTime);
+        System.out.println("type:" + type);
+
         if(type == 1){
             //类型1，产品开始抢购的消息
-
             // 推送至缓存
             ValueOperations<String, Object> opsForValue = redis.opsForValue();
             opsForValue.set("pre" + productId,count);
             opsForValue.set(productId,count,conTime, TimeUnit.MILLISECONDS);
         }else if(type == 2){
             //类型2，产品开枪前五分钟发邮件提醒预约的人
-            // todo 还没写完，我先交了
+            System.out.println("收到了-------------------:" + new Date());
+            System.out.println("成功进入发邮件的逻辑");
+            sendUserEmail.sendEmailToUser(productId);
         }else{
             throw new RuntimeException("消息类型错误");
         }
     }
+//    @RabbitListener(queues = "delayed_queue")
+//    public void receiveMessage(Message message, Channel channel){
+//        String msg = new String(message.getBody());
+//        System.out.println("当前时间"+new Date().toString()+"，收到延迟队列的消息："+msg);
+//    }
+//    @RabbitListener(queues = "product-dlx-queue")
+//    @RabbitHandler
+//    public void receiveMessage(Map<String, Object> map){
+//        System.out.println("当前时间"+new Date().toString()+"，收到延迟队列的消息："+ map.toString());
+//    }
 }

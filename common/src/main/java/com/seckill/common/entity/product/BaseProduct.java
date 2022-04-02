@@ -21,5 +21,6 @@ public class BaseProduct {
     private Long startTime;
     private Long endTime;
 
-    // todo 加两个字段 产品描述，和贷款产品的利率
+    //描述
+    private String productDescribe;
 }

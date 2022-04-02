@@ -54,6 +54,7 @@ public class FinancialProductService implements IFinancialProductService {
         // 获取当前时间戳，计算延时时间，判断时间是否合法
         long nowTime = System.currentTimeMillis();
         long delayTime = financialProductEntity.getStartTime() - nowTime;
+
         if (delayTime < 0) {
             throw new DatabaseOperationException("开抢时间不合法");
         }
@@ -61,6 +62,7 @@ public class FinancialProductService implements IFinancialProductService {
         QueryWrapper<FinancialProductEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("financial_product_name",financialProductEntity.getFinancialProductName());
         List<FinancialProductEntity> i = financialProductDao.selectList(queryWrapper);
+//        FinancialProductEntity i = financialProductDao.selectOne(queryWrapper);
         if(i.size() == 0){
             // 插入数据库
             financialProductDao.insert(financialProductEntity);
@@ -68,6 +70,7 @@ public class FinancialProductService implements IFinancialProductService {
             // 计算时间间隔
             Integer count = financialProductEntity.getStock();
             long conTime = financialProductEntity.getEndTime() - financialProductEntity.getStartTime();
+
             if(conTime <= 0){
                 throw new DatabaseOperationException("时间间隔不合法，相隔时间戳必须大于0");
             }
@@ -81,6 +84,23 @@ public class FinancialProductService implements IFinancialProductService {
             productTypeEntity.setType("financial");
             productTypeEntity.setProductId(f.getFinancialProductId());
             productTypeDao.insert(productTypeEntity);
+
+
+            // 2.发送消息至延时队列（产品开抢前五分钟的提醒）
+            if (getTime(delayTime)>0){
+                HashMap<String, Object> productMap2 = new HashMap<>();
+                productMap2.put("product_id", f.getFinancialProductId());
+                productMap2.put("count", count);
+                productMap2.put("con_time", conTime);
+                productMap2.put("type", 2);
+                rabbitTemplate.convertAndSend("delayProductQueue", productMap2, message -> {
+                    String delayTimeStr = String.valueOf(getTime(delayTime));
+                    // 设置延时时间
+                    message.getMessageProperties().setExpiration(delayTimeStr);
+                    return message;
+                });
+            }
+
 
             // 构造消息
             HashMap<String, Object> productMap = new HashMap<>();
@@ -96,20 +116,7 @@ public class FinancialProductService implements IFinancialProductService {
                 return message;
             });
 
-            // 2.发送消息至延时队列（产品开抢前五分钟的提醒）
-            if (getTime(delayTime)>0){
-                HashMap<String, Object> productMap2 = new HashMap<>();
-                productMap.put("product_id", f.getFinancialProductId());
-                productMap.put("count", count);
-                productMap.put("con_time", conTime);
-                productMap.put("type", 2);
-                rabbitTemplate.convertAndSend("delayProductQueue", productMap2, message -> {
-                    String delayTimeStr = String.valueOf(getTime(delayTime));
-                    // 设置延时时间
-                    message.getMessageProperties().setExpiration(delayTimeStr);
-                    return message;
-                });
-            }
+
             // 返回产品ID
             return f.getFinancialProductId();
         }else{
@@ -199,7 +206,7 @@ public class FinancialProductService implements IFinancialProductService {
         // 计算延时时间（邮件提醒消息需要提早五分钟发送给用户）
         long delayTime = time - fiveMinute;
         // 如果延时时间小于五分钟，则延时五分钟
-        if (delayTime < fiveMinute){
+        if (delayTime < 0){
             return 0;
         }
         return delayTime;
