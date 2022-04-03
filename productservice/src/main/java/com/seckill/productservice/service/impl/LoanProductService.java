@@ -167,9 +167,6 @@ public class LoanProductService implements ILoanProductService {
             Integer count = (Integer) opsForValue.get(loanProductEntity.getLoanProductId());
             if (count == null) {
                 count = loanProductDao.selectById(loanProductEntity.getLoanProductId()).getStock();
-            } else {
-                loanProductEntity.setStock(count);
-                loanProductDao.updateById(loanProductEntity);
             }
             // 将数据放入到response中
             FindAllByPage<LoanProductEntity> findAllByPage = new FindAllByPage<>();

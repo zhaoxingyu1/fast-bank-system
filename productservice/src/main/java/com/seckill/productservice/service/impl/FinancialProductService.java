@@ -193,10 +193,6 @@ public class FinancialProductService implements IFinancialProductService {
             if (count == null){
                 // 没在缓存，则查询数据库
                 count = financialProductDao.selectById(financialProductId).getStock();
-            }else{
-                // 在缓存中，则将count更新到数据库对应的记录
-                financialProductEntity.setStock(count);
-                financialProductDao.updateById(financialProductEntity);
             }
             // 加入到返回结果中
             FindAllByPage<FinancialProductEntity> objectFindAllByPage = new FindAllByPage<>();
