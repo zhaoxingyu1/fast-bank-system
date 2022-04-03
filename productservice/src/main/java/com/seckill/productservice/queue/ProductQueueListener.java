@@ -28,7 +28,7 @@ public class ProductQueueListener {
     private SendUserEmail sendUserEmail;
 
     @RabbitHandler
-    public void receive(Map<String, Object> map) throws Exception {
+    public void receive(Map<String, Object> map){
         System.out.println("收到了-------------------:" + new Date());
         String productId = (String) map.get("product_id");
         Integer count = (Integer) map.get("count");
@@ -51,7 +51,11 @@ public class ProductQueueListener {
             //类型2，产品开枪前五分钟发邮件提醒预约的人
             System.out.println("收到了-------------------:" + new Date());
             System.out.println("成功进入发邮件的逻辑");
-            sendUserEmail.sendEmailToUser(productId);
+            try {
+                sendUserEmail.sendEmailToUser(productId);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }else{
             throw new RuntimeException("消息类型错误");
         }

@@ -1,6 +1,7 @@
 package com.seckill.productservice.service;
 
 import com.seckill.common.entity.product.FinancialProductEntity;
+import com.seckill.productservice.response.FindAllByPage;
 
 import java.util.List;
 
@@ -28,7 +29,7 @@ public interface IFinancialProductService{
     List<FinancialProductEntity> findProductByName(String financialProductName);
 
     //分页查询产品
-    List<FinancialProductEntity> getProductById(int page);
+    List<FindAllByPage<FinancialProductEntity>> getProductById(int page);
 
     Object getProductsBatch(List<String> ids);
 }

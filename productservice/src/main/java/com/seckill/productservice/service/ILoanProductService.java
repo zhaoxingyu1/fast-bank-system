@@ -1,6 +1,7 @@
 package com.seckill.productservice.service;
 
 import com.seckill.common.entity.product.LoanProductEntity;
+import com.seckill.productservice.response.FindAllByPage;
 
 import java.util.List;
 
@@ -28,7 +29,7 @@ public interface ILoanProductService{
     List<LoanProductEntity> findProductByName(String loanProductName);
 
     //分页查询
-    List<LoanProductEntity> getProductById(int page);
+    List<FindAllByPage<LoanProductEntity>> getProductById(int page);
 
     Object getProductsBatch(List<String> ids);
 }

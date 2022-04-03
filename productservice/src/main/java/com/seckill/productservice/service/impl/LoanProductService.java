@@ -10,6 +10,7 @@ import com.seckill.common.exception.NotFoundException;
 import com.seckill.productservice.dao.LoanProductDao;
 import com.seckill.common.entity.product.LoanProductEntity;
 import com.seckill.productservice.dao.ProductTypeDao;
+import com.seckill.productservice.response.FindAllByPage;
 import com.seckill.productservice.service.ILoanProductService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -155,10 +156,28 @@ public class LoanProductService implements ILoanProductService {
     }
 
     @Override
-    public List<LoanProductEntity> getProductById(int page) {
+    public List<FindAllByPage<LoanProductEntity>> getProductById(int page) {
         Page<LoanProductEntity> page1 = new Page<>(page, PageConst.PageSize);
         IPage<LoanProductEntity> iPage = loanProductDao.selectPage(page1, null);
-        return iPage.getRecords();
+        ValueOperations<String, Object> opsForValue = redis.opsForValue();
+
+        List<LoanProductEntity> records = iPage.getRecords();
+        List<FindAllByPage<LoanProductEntity>> response = new ArrayList<>();
+        for (LoanProductEntity loanProductEntity : records) {
+            Integer count = (Integer) opsForValue.get(loanProductEntity.getLoanProductId());
+            if (count == null) {
+                count = loanProductDao.selectById(loanProductEntity.getLoanProductId()).getStock();
+            } else {
+                loanProductEntity.setStock(count);
+                loanProductDao.updateById(loanProductEntity);
+            }
+            // 将数据放入到response中
+            FindAllByPage<LoanProductEntity> findAllByPage = new FindAllByPage<>();
+            findAllByPage.setProductEntity(loanProductEntity);
+            findAllByPage.setStock(count);
+            response.add(findAllByPage);
+        }
+        return response;
     }
 
     @Override

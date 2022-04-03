@@ -10,6 +10,7 @@ import com.seckill.common.exception.NotFoundException;
 import com.seckill.productservice.dao.FinancialProductDao;
 import com.seckill.common.entity.product.FinancialProductEntity;
 import com.seckill.productservice.dao.ProductTypeDao;
+import com.seckill.productservice.response.FindAllByPage;
 import com.seckill.productservice.service.IFinancialProductService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.amqp.AmqpException;
@@ -177,12 +178,33 @@ public class FinancialProductService implements IFinancialProductService {
     }
 
     @Override
-    public List<FinancialProductEntity> getProductById(int page) {
+    public List<FindAllByPage<FinancialProductEntity>> getProductById(int page) {
         //设置分页
         Page<FinancialProductEntity> page1 = new Page<>(page,PageConst.PageSize);
         //查询
         IPage<FinancialProductEntity> iPage = financialProductDao.selectPage(page1, null);
-        return iPage.getRecords();
+        ValueOperations<String, Object> opsForValue = redis.opsForValue();
+
+        List<FinancialProductEntity> records = iPage.getRecords();
+        List<FindAllByPage<FinancialProductEntity>> response = new ArrayList<>();
+        for (FinancialProductEntity financialProductEntity : records) {
+            String financialProductId = financialProductEntity.getFinancialProductId();
+            Integer count = (Integer) opsForValue.get(financialProductId);
+            if (count == null){
+                // 没在缓存，则查询数据库
+                count = financialProductDao.selectById(financialProductId).getStock();
+            }else{
+                // 在缓存中，则将count更新到数据库对应的记录
+                financialProductEntity.setStock(count);
+                financialProductDao.updateById(financialProductEntity);
+            }
+            // 加入到返回结果中
+            FindAllByPage<FinancialProductEntity> objectFindAllByPage = new FindAllByPage<>();
+            objectFindAllByPage.setProductEntity(financialProductEntity);
+            objectFindAllByPage.setStock(count);
+            response.add(objectFindAllByPage);
+        }
+        return response;
     }
 
     @Override
