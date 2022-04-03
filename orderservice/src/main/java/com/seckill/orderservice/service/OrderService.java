@@ -85,9 +85,13 @@ public class OrderService {
     }
 
     public Page<OrderEntity> getAll(int page, String productType) {
+        QueryWrapper<OrderEntity> wrapper = new QueryWrapper<OrderEntity>().orderByDesc("ctime");
+        if (productType != null) {
+            wrapper.eq("product_type", productType);
+        }
         return orderDao.selectPage(
                 new Page<>(page, PageConst.PageSize),
-                productType == null ? null : new QueryWrapper<OrderEntity>().eq("product_type", productType)
+                wrapper
         );
     }
 
