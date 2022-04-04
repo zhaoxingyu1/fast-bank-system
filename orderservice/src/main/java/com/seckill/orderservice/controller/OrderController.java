@@ -67,6 +67,15 @@ public class OrderController {
         return DataFactory.success(SimpleData.class, "ok").parseData(all);
     }
 
+    @GetMapping("/getByProduct")
+    public BaseData getByProduct(String id, Integer page) throws Exception {
+        if (page == null) {
+            page = 1;
+        }
+        Page<OrderEntity> byProduct = orderService.getByProduct(page, id);
+        return DataFactory.success(SimpleData.class, "ok").parseData(byProduct);
+    }
+
     @PostMapping("/seckill")
     public BaseData seckill(HttpServletRequest request, OrderEntity order) throws Exception {
         order.setUserId(TokenUtil.decodeToken(request.getHeader(HeaderConsts.JWT_TOKEN)).getUserId());

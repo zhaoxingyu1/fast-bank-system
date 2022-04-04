@@ -95,6 +95,20 @@ public class OrderService {
         );
     }
 
+    public Page<OrderEntity> getByProduct(int page, String id) throws Exception {
+        if (id == null) {
+            throw new NotFoundException("id 为空");
+        }
+        QueryWrapper<OrderEntity> wrapper = new QueryWrapper<OrderEntity>()
+                .orderByDesc("ctime")
+                .eq("product_id", id);
+
+        return orderDao.selectPage(
+                new Page<>(page, PageConst.PageSize),
+                wrapper
+        );
+    }
+
     public String seckill(OrderEntity order) throws Exception {
         if (productClient.getProductType(order.getProductId()).equals("loan")) {
             throw new ForbiddenException("傻逼");
