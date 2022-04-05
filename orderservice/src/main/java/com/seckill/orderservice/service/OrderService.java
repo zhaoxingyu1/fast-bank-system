@@ -7,6 +7,7 @@ import com.seckill.common.consts.HeaderConsts;
 import com.seckill.common.consts.PageConst;
 import com.seckill.common.consts.RedisConsts;
 import com.seckill.common.entity.order.OrderEntity;
+import com.seckill.common.entity.order.OrderUserEntity;
 import com.seckill.common.entity.product.BaseProduct;
 import com.seckill.common.entity.user.RiskControlEntity;
 import com.seckill.common.entity.user.UserEntity;
@@ -103,10 +104,25 @@ public class OrderService {
                 .orderByDesc("ctime")
                 .eq("product_id", id);
 
-        return orderDao.selectPage(
+        Page<OrderEntity> page1 = orderDao.selectPage(
                 new Page<>(page, PageConst.PageSize),
                 wrapper
         );
+//        转成带用户名和是否失信的对象
+        List<OrderEntity> orders = page1.getRecords();
+        for (int i = 0; i < orders.size(); i++) {
+            // 风险控制
+            UserEntity user = userClient.selectUserById(orders.get(i).getUserId());
+            RiskControlEntity riskControlEntity = userClient.getRiskControl();
+            RiskControl riskControl = RiskControlUtils.isQualified(user, riskControlEntity);
+
+            orders.set(i, new OrderUserEntity(
+                    orders.get(i),
+                    riskControl.getThroughState() == 1,
+                    user.getUsername()
+            ));
+        }
+        return page1;
     }
 
     public String seckill(OrderEntity order) throws Exception {

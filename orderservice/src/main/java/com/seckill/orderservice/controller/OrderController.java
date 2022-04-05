@@ -8,6 +8,7 @@ import com.seckill.common.enums.OrderStateEnum;
 import com.seckill.common.jwt.JwtToken;
 import com.seckill.common.jwt.TokenUtil;
 import com.seckill.common.response.BaseData;
+import com.seckill.common.response.ComplexData;
 import com.seckill.common.response.DataFactory;
 import com.seckill.common.response.SimpleData;
 import com.seckill.orderservice.service.OrderService;
@@ -73,7 +74,7 @@ public class OrderController {
             page = 1;
         }
         Page<OrderEntity> byProduct = orderService.getByProduct(page, id);
-        return DataFactory.success(SimpleData.class, "ok").parseData(byProduct);
+        return DataFactory.success(ComplexData.class, "ok").parseData(byProduct);
     }
 
     @PostMapping("/seckill")
