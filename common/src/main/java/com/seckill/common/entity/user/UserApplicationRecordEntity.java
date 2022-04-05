@@ -24,6 +24,9 @@ public class UserApplicationRecordEntity {
 
     private String productId;
     //产品类型：loan：贷款
+
+    private String productName;
+
     private String productType;
 
     private String username;
@@ -42,8 +45,6 @@ public class UserApplicationRecordEntity {
     @TableField(fill = FieldFill.INSERT)
     private Long ctime;
 
-    @TableField(exist = false)
-    private LoanProductEntity loanProduct;
 
 
 }

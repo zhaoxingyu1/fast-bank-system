@@ -69,7 +69,7 @@ public class UserController {
 
 
     @PostMapping("/login")
-    public Object userLogin(HttpServletRequest request, HttpServletResponse response, @NotEmpty(message = "用户名不能为空") String username, @NotEmpty(message = "密码不能为空") String password) {
+    public Object userLogin(HttpServletResponse response, @NotEmpty(message = "用户名不能为空") String username, @NotEmpty(message = "密码不能为空") String password) {
 
         String jwtToken = null;
         try {

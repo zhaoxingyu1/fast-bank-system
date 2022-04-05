@@ -3,20 +3,17 @@ package com.seckill.userservice.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.seckill.common.consts.PageConst;
+import com.seckill.common.entity.product.LoanProductEntity;
 import com.seckill.common.entity.user.UserApplicationRecordEntity;
 import com.seckill.common.entity.user.UserEntity;
-import com.seckill.common.entity.user.UserInfoEntity;
-import com.seckill.common.enums.CodeEnum;
-import com.seckill.common.response.DataFactory;
-import com.seckill.common.response.SimpleData;
+import com.seckill.common.feign.ProductClient;
 import com.seckill.common.utils.RiskControl;
-import com.seckill.common.utils.RiskControlUtils;
 import com.seckill.userservice.dao.UserApplicationRecordDao;
 import com.seckill.userservice.dao.UserInfoDao;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.Date;
 
 /**
  * @author zxy
@@ -28,12 +25,14 @@ public class UserApplicationRecordService {
 
     @Resource
     private UserInfoDao userInfoDao;
+    @Autowired
+    ProductClient productClient;
 
     @Resource
     private UserApplicationRecordDao userApplicationRecordDao;
 
 
-    public Object insert(UserEntity user, String productId,RiskControl riskControl) {
+    public Object insert(UserEntity user, String productId, RiskControl riskControl) {
 
         UserApplicationRecordEntity userApplicationRecord = new UserApplicationRecordEntity();
 
@@ -45,6 +44,11 @@ public class UserApplicationRecordService {
         userApplicationRecord.setCreditStatus(user.getUserInfo().getCreditStatus());
         userApplicationRecord.setCause(riskControl.getCause());
         userApplicationRecord.setProductId(productId);
+
+        LoanProductEntity loanProduct = productClient.getById(productId);
+
+        userApplicationRecord.setProductName(loanProduct.getLoanProductName());
+
         // 默认需要控制风险的只有贷款产品
         userApplicationRecord.setProductType("loan");
         int bool = userApplicationRecordDao.insert(userApplicationRecord);
@@ -78,47 +82,59 @@ public class UserApplicationRecordService {
     }
 
     /**
-     *
      * @param name
      * @param current
      * @return
      */
-    public Page<UserApplicationRecordEntity> selectAllOrByLikeNamePage(String name, Integer current) {
+    public Page<UserApplicationRecordEntity> selectAllOrByLikeNamePage(String name, Integer day, Integer current) {
 
         QueryWrapper<UserApplicationRecordEntity> wrapper = new QueryWrapper<>();
         Page<UserApplicationRecordEntity> page = new Page<>(current - 1, PageConst.PageSize);
         Page<UserApplicationRecordEntity> userApplicationRecordEntityPage;
+
+        Long time1 = System.currentTimeMillis() + day.longValue();
+
         if (name == null) {
             userApplicationRecordEntityPage = userApplicationRecordDao.selectPage(page, null);
         } else {
             wrapper
                     .like("username", name)
                     .or()
-                    .like("product_name", name);
+                    .like("product_name", name)
+                    .func(i -> {
+                        if (day != null && day.equals(0)) i.lt("ctime",time1);
+                    });
             userApplicationRecordEntityPage = userApplicationRecordDao.selectPage(page, wrapper);
         }
+
+
         return userApplicationRecordEntityPage;
     }
+
     /**
-     *
      * 根据多少天以内将记录顺寻查询；
-     * @param time
+     *
+     * @param day
      * @param current
      * @return
      */
-    public Page<UserApplicationRecordEntity> selectByTime(Long time, Integer current){
+    public Page<UserApplicationRecordEntity> selectByUserName(String username, Integer day, Integer current) {
 
         QueryWrapper<UserApplicationRecordEntity> wrapper = new QueryWrapper<>();
         Page<UserApplicationRecordEntity> page = new Page<>(current - 1, PageConst.PageSize);
 
+        Long time1 = System.currentTimeMillis() + day.longValue();
+
         wrapper
-                .lt("ctime",new Date().getTime()+time)
+                .eq("username", username)
+                .func(i -> {
+                    if (day != null && day.equals(0)) i.lt("ctime",time1);
+                })
                 .orderByAsc("ctime");
         Page<UserApplicationRecordEntity> userApplicationRecordEntityPage = userApplicationRecordDao.selectPage(page, wrapper);
 
         return userApplicationRecordEntityPage;
     }
-
 
 
 }

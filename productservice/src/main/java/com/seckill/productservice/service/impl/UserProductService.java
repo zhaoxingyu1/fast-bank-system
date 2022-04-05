@@ -59,7 +59,6 @@ public class UserProductService implements IUserProductService {
         if (userProductEntity != null){
             // 记录存在，只需要更新booking_status为1即可
             userProductEntity.setBookingStatus(1);
-            userProductEntity.setMtime(System.currentTimeMillis());
             int update = userProductDao.updateById(userProductEntity);
             if (update == 0){
                 throw new DatabaseOperationException("预约失败，可能是数据库操作失败");
@@ -74,7 +73,6 @@ public class UserProductService implements IUserProductService {
             i.setUserId(userId);
             i.setProductId(financialProductEntity.getFinancialProductId());
             i.setProductName(financialProductEntity.getFinancialProductName());
-            i.setMtime(System.currentTimeMillis());
             i.setBookingStatus(1);
             i.setPrice(financialProductEntity.getPrice());
             int insert = userProductDao.insert(i);
@@ -90,7 +88,6 @@ public class UserProductService implements IUserProductService {
             i.setUserId(userId);
             i.setProductId(loanProductEntity.getLoanProductId());
             i.setProductName(loanProductEntity.getLoanProductName());
-            i.setMtime(System.currentTimeMillis());
             i.setBookingStatus(1);
             i.setPrice(loanProductEntity.getPrice());
             int insert = userProductDao.insert(i);
@@ -116,7 +113,6 @@ public class UserProductService implements IUserProductService {
             if (userProductEntity.getBookingStatus() == 1){
                 // 将数据库钟这条记录的booking_status改为0
                 userProductEntity.setBookingStatus(0);
-                userProductEntity.setMtime(System.currentTimeMillis());
                 int update = userProductDao.updateById(userProductEntity);
                 if (update == 0){
                     throw new DatabaseOperationException("取消预约失败，可能是数据库操作失败");
