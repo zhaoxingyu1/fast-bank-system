@@ -150,7 +150,8 @@ public class UserProductService implements IUserProductService {
     @Override
     public List<Object> userGetAppointment(String userId) throws Exception {
         QueryWrapper<UserProductEntity> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id",userId);
+        queryWrapper.eq("user_id",userId)
+                    .eq("booking_status",1);
         List<UserProductEntity> userProductEntities = userProductDao.selectList(queryWrapper);
         List<Object> responseList = new ArrayList<>();
         for (UserProductEntity userProductEntity : userProductEntities){
