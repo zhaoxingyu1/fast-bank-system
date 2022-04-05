@@ -55,7 +55,7 @@ public class UserProductService implements IUserProductService {
         // 先判断在user_product表中是否有符合user_id和product_id的记录
         UserProductEntity userProductEntity = userProductDao.selectOne(new QueryWrapper<UserProductEntity>()
                 .eq("user_id", userId)
-                .eq("user_product_id", productId));
+                .eq("product_id", productId));
         if (userProductEntity != null){
             // 记录存在，只需要更新booking_status为1即可
             userProductEntity.setBookingStatus(1);
@@ -72,7 +72,7 @@ public class UserProductService implements IUserProductService {
             // 更新状态
             UserProductEntity i = new UserProductEntity();
             i.setUserId(userId);
-            i.setUserProductId(financialProductEntity.getFinancialProductId());
+            i.setProductId(financialProductEntity.getFinancialProductId());
             i.setProductName(financialProductEntity.getFinancialProductName());
             i.setMtime(System.currentTimeMillis());
             i.setBookingStatus(1);
@@ -88,7 +88,7 @@ public class UserProductService implements IUserProductService {
             // 更新状态
             UserProductEntity i = new UserProductEntity();
             i.setUserId(userId);
-            i.setUserProductId(loanProductEntity.getLoanProductId());
+            i.setProductId(loanProductEntity.getLoanProductId());
             i.setProductName(loanProductEntity.getLoanProductName());
             i.setMtime(System.currentTimeMillis());
             i.setBookingStatus(1);
@@ -108,7 +108,7 @@ public class UserProductService implements IUserProductService {
         // 在user_product表中查询是否有user_id和product_id都符合的记录
         UserProductEntity userProductEntity = userProductDao.selectOne(new QueryWrapper<UserProductEntity>()
                 .eq("user_id", userId)
-                .eq("user_product_id", productId));
+                .eq("product_id", productId));
         if (userProductEntity == null){
             throw new NotFoundException("未找到相关记录，可能是这个用户不存在或者产品不存在");
         }else {
@@ -156,11 +156,11 @@ public class UserProductService implements IUserProductService {
         for (UserProductEntity userProductEntity : userProductEntities){
             // 获取产品类型
             String type = productTypeDao.selectOne(new QueryWrapper<ProductTypeEntity>()
-                    .eq("product_id",userProductEntity.getUserProductId())).getType();
+                    .eq("product_id",userProductEntity.getProductId())).getType();
             if (type.equals("financial")){
                 // 获取理财产品信息
                 FinancialProductEntity financialProductEntity = financialProductDao.selectOne(new QueryWrapper<FinancialProductEntity>()
-                        .eq("financial_product_id",userProductEntity.getUserProductId()));
+                        .eq("financial_product_id",userProductEntity.getProductId()));
                 UserGetAppointmentProduct<FinancialProductEntity> userGetAppointmentProduct = new UserGetAppointmentProduct<>();
                 userGetAppointmentProduct.setUserProductEntity(userProductEntity);
                 userGetAppointmentProduct.setProductEntity(financialProductEntity);
@@ -169,7 +169,7 @@ public class UserProductService implements IUserProductService {
             }else if (type.equals("loan")){
                 // 获取贷款产品信息
                 LoanProductEntity loanProductEntity = loanProductDao.selectOne(new QueryWrapper<LoanProductEntity>()
-                        .eq("loan_product_id",userProductEntity.getUserProductId()));
+                        .eq("loan_product_id",userProductEntity.getProductId()));
                 UserGetAppointmentProduct<LoanProductEntity> userGetAppointmentProduct = new UserGetAppointmentProduct<>();
                 userGetAppointmentProduct.setUserProductEntity(userProductEntity);
                 userGetAppointmentProduct.setProductEntity(loanProductEntity);
@@ -185,7 +185,7 @@ public class UserProductService implements IUserProductService {
     @Override
     public List<AdminGetAppointment> adminGetUserByProductId(String productId) {
         QueryWrapper<UserProductEntity> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_product_id",productId);
+        queryWrapper.eq("product_id",productId);
         List<UserProductEntity> userProductEntities = userProductDao.selectList(queryWrapper);
         List<AdminGetAppointment> adminGetAppointmentList = new ArrayList<>();
         for (UserProductEntity userProductEntity : userProductEntities){
@@ -205,7 +205,7 @@ public class UserProductService implements IUserProductService {
     public Boolean adminDeleteAppointByUserId(String productId, String userId) throws Exception{
         QueryWrapper<UserProductEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id",userId);
-        queryWrapper.eq("user_product_id",productId);
+        queryWrapper.eq("product_id",productId);
         List<UserProductEntity> userProductEntities = userProductDao.selectList(queryWrapper);
         if (userProductEntities.size() != 0){
             int delete = userProductDao.delete(queryWrapper);
@@ -222,7 +222,7 @@ public class UserProductService implements IUserProductService {
     public Boolean userIsAppoint(String userId, String productId) {
         QueryWrapper<UserProductEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id",userId);
-        queryWrapper.eq("user_product_id",productId);
+        queryWrapper.eq("product_id",productId);
         List<UserProductEntity> userProductEntities = userProductDao.selectList(queryWrapper);
         if (userProductEntities.size() != 0){
             return true;
