@@ -150,6 +150,8 @@ public class OrderService {
             ops.increment(order.getProductId());
             throw new ForbiddenException("商品已卖完或者未在抢购期限内");
         }
+//        减少真实库存
+        ops.decrement("pre" + order.getProductId());
 //         分布式锁
 //        Boolean absent = ops.setIfAbsent(
 //                "lock_" + order.getProductId(),
