@@ -1,5 +1,6 @@
 package com.seckill.orderservice.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.seckill.common.consts.HeaderConsts;
 import com.seckill.common.entity.order.OrderEntity;
@@ -74,7 +75,7 @@ public class OrderController {
             page = 1;
         }
         Page<OrderEntity> byProduct = orderService.getByProduct(page, id);
-        return DataFactory.success(ComplexData.class, "ok").parseData(byProduct);
+        return DataFactory.success(SimpleData.class, "ok").parseData(byProduct);
     }
 
     @PostMapping("/seckill")

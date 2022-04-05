@@ -1,5 +1,6 @@
 package com.seckill.orderservice.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -111,8 +112,11 @@ public class OrderService {
 //        转成带用户名和是否失信的对象
         List<OrderEntity> orders = page1.getRecords();
         for (int i = 0; i < orders.size(); i++) {
-            // 风险控制
+            // 风险控制信息
             UserEntity user = userClient.selectUserById(orders.get(i).getUserId());
+            if (user == null) {
+                continue;
+            }
             RiskControlEntity riskControlEntity = userClient.getRiskControl();
             RiskControl riskControl = RiskControlUtils.isQualified(user, riskControlEntity);
 
