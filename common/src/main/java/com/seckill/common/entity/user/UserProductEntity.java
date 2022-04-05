@@ -19,6 +19,9 @@ public class UserProductEntity {
     private String userProductId;
 
     @NotNull(message = "id不能为空")
+    private String productId;
+
+    @NotNull(message = "id不能为空")
     private String userId;
 
     @NotNull(message = "产品名字不能为空")
