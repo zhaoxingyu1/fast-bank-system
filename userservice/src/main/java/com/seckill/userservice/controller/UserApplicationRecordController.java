@@ -61,22 +61,24 @@ public class UserApplicationRecordController {
     }
 
     @PostMapping("/applicationRecord/selectAllOrByLikeNamePage")
-    public Object updateById(@RequestParam(required = false) String name, Integer current){
+    public Object updateById(HttpServletRequest request,@RequestParam(required = false) String name,@RequestParam(required = false) Integer day, Integer current){
 
-        Page<UserApplicationRecordEntity> entityPage = userApplicationRecordService.selectAllOrByLikeNamePage(name, current);
+        String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
 
-        return DataFactory.success(SimpleData.class,"ok").parseData(entityPage);
+        JwtToken token = TokenUtil.decodeToken(jwtToken);
 
-    }
 
-    @PostMapping("/applicationRecord/selectByTime")
-    public Object selectByTime(Integer day, Integer current){
+        if (token.getRole().equals("admin")){
 
-        Long time = Long.valueOf((day * 60*60 *24*1000));
+            Page<UserApplicationRecordEntity> entityPage = userApplicationRecordService.selectAllOrByLikeNamePage(name, day,current);
+            return DataFactory.success(SimpleData.class,"ok").parseData(entityPage);
 
-        Page<UserApplicationRecordEntity> entityPage = userApplicationRecordService.selectByTime(time, current);
+        }else {
 
-        return DataFactory.success(SimpleData.class,"ok").parseData(entityPage);
+            Page<UserApplicationRecordEntity> entityPage = userApplicationRecordService.selectByUserName(token.getUsername(), day, current);
+            return DataFactory.success(SimpleData.class,"ok").parseData(entityPage);
+        }
+
     }
 
 

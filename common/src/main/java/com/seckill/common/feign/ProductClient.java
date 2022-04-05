@@ -1,6 +1,7 @@
 package com.seckill.common.feign;
 
 import com.seckill.common.entity.product.BaseProduct;
+import com.seckill.common.entity.product.LoanProductEntity;
 import com.seckill.common.entity.product.ProductTypeEntity;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,7 @@ import java.util.List;
 public interface ProductClient {
 
     @GetMapping("product/getbyid/{id}")
-    BaseProduct getById(@PathVariable("id") String id);
+    LoanProductEntity getById(@PathVariable("id") String id);
 
     @PostMapping("product/getProductsBatch")
     List<BaseProduct> getProductsBatch(@RequestBody List<String> ids);
