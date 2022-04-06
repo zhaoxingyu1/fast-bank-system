@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 public class UserProductEntity {
 
     @NotNull(message = "id不能为空")
+    @TableId(type = IdType.ASSIGN_UUID)
     private String userProductId;
 
     @NotNull(message = "id不能为空")
