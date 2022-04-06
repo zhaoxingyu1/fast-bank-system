@@ -63,38 +63,39 @@ public class UserProductService implements IUserProductService {
             if (update == 0){
                 throw new DatabaseOperationException("预约失败，可能是数据库操作失败");
             }
-        }
-
-        // 没有记录，则需要新增一条记录
-        if(type.equals("financial")){
-            FinancialProductEntity financialProductEntity = financialProductDao.selectById(productId);
-            // 更新状态
-            UserProductEntity i = new UserProductEntity();
-            i.setUserId(userId);
-            i.setProductId(financialProductEntity.getFinancialProductId());
-            i.setProductName(financialProductEntity.getFinancialProductName());
-            i.setBookingStatus(1);
-            i.setPrice(financialProductEntity.getPrice());
-            int insert = userProductDao.insert(i);
-            if (insert == 0){
-                throw new DatabaseOperationException("添加产品失败");
-            }else{
-                return true;
-            }
-        }else if(type.equals("loan")){
-            LoanProductEntity loanProductEntity = loanProductDao.selectById(productId);
-            // 更新状态
-            UserProductEntity i = new UserProductEntity();
-            i.setUserId(userId);
-            i.setProductId(loanProductEntity.getLoanProductId());
-            i.setProductName(loanProductEntity.getLoanProductName());
-            i.setBookingStatus(1);
-            i.setPrice(loanProductEntity.getPrice());
-            int insert = userProductDao.insert(i);
-            if (insert == 0){
-                throw new DatabaseOperationException("添加产品失败");
-            }else{
-                return true;
+            return true;
+        }else{
+            // 没有记录，则需要新增一条记录
+            if(type.equals("financial")){
+                FinancialProductEntity financialProductEntity = financialProductDao.selectById(productId);
+                // 更新状态
+                UserProductEntity i = new UserProductEntity();
+                i.setUserId(userId);
+                i.setProductId(financialProductEntity.getFinancialProductId());
+                i.setProductName(financialProductEntity.getFinancialProductName());
+                i.setBookingStatus(1);
+                i.setPrice(financialProductEntity.getPrice());
+                int insert = userProductDao.insert(i);
+                if (insert == 0){
+                    throw new DatabaseOperationException("添加产品失败");
+                }else{
+                    return true;
+                }
+            }else if(type.equals("loan")){
+                LoanProductEntity loanProductEntity = loanProductDao.selectById(productId);
+                // 更新状态
+                UserProductEntity i = new UserProductEntity();
+                i.setUserId(userId);
+                i.setProductId(loanProductEntity.getLoanProductId());
+                i.setProductName(loanProductEntity.getLoanProductName());
+                i.setBookingStatus(1);
+                i.setPrice(loanProductEntity.getPrice());
+                int insert = userProductDao.insert(i);
+                if (insert == 0){
+                    throw new DatabaseOperationException("添加产品失败");
+                }else{
+                    return true;
+                }
             }
         }
         return false;
