@@ -8,10 +8,7 @@ import com.seckill.common.consts.FeignConsts;
 import com.seckill.common.enums.OrderStateEnum;
 import com.seckill.common.jwt.JwtToken;
 import com.seckill.common.jwt.TokenUtil;
-import com.seckill.common.response.BaseData;
-import com.seckill.common.response.ComplexData;
-import com.seckill.common.response.DataFactory;
-import com.seckill.common.response.SimpleData;
+import com.seckill.common.response.*;
 import com.seckill.orderservice.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -102,5 +99,20 @@ public class OrderController {
             return null;
         }
         return DataFactory.success(SimpleData.class, "ok");
+    }
+
+    @GetMapping("/oneYear")
+    public BaseData oneYear() {
+        return DataFactory.success(ListData.class, "ok").parseData(orderService.oneYear());
+    }
+
+    @GetMapping("/thisMonthOrder")
+    public BaseData thisMonthOrder() {
+        return DataFactory.success(SimpleData.class, "ok").parseData(orderService.thisMonthOrder());
+    }
+
+    @GetMapping("/thisMonthSell")
+    public BaseData thisMonthSell() {
+        return DataFactory.success(SimpleData.class, "ok").parseData(orderService.thisMonthSell());
     }
 }
