@@ -91,22 +91,25 @@ public class UserApplicationRecordService {
         QueryWrapper<UserApplicationRecordEntity> wrapper = new QueryWrapper<>();
         Page<UserApplicationRecordEntity> page = new Page<>(current - 1, PageConst.PageSize);
         Page<UserApplicationRecordEntity> userApplicationRecordEntityPage;
+        Long time1 = null;
+        if(day!=null){
+            time1 = System.currentTimeMillis() + day.longValue();
+        }
 
-        Long time1 = System.currentTimeMillis() + day.longValue();
 
         if (name == null) {
             userApplicationRecordEntityPage = userApplicationRecordDao.selectPage(page, null);
         } else {
+            Long finalTime = time1;
             wrapper
                     .like("username", name)
                     .or()
                     .like("product_name", name)
                     .func(i -> {
-                        if (day != null && day.equals(0)) i.lt("ctime",time1);
+                        if (day!=null && !day.equals(0)) i.lt("ctime", finalTime);
                     });
             userApplicationRecordEntityPage = userApplicationRecordDao.selectPage(page, wrapper);
         }
-
 
         return userApplicationRecordEntityPage;
     }

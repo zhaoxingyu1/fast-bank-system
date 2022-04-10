@@ -105,6 +105,12 @@ public class UserController {
         response.setHeader(HeaderConsts.JWT_TOKEN, jwtToken);
         response.setHeader("Access-control-Expose-Headers", HeaderConsts.JWT_TOKEN);
 
+        if(redis.opsForValue().get("userFlow")!=null){
+            redis.opsForValue().increment("userFlow");
+        }else{
+            redis.opsForValue().set("userFlow",1);
+        }
+
         return DataFactory.success(SimpleData.class, "登录成功");
     }
 

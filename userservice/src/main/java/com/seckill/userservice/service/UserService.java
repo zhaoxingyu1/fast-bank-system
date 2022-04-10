@@ -226,4 +226,16 @@ public class UserService {
         return user;
     }
 
+
+    public Integer selectUserCountByTime(Integer day){
+
+        QueryWrapper<UserEntity> wrapper = new QueryWrapper<>();
+
+        wrapper
+                .lt("ctime",day.longValue());
+        Integer count = userDao.selectCount(wrapper);
+        return count;
+    }
+
+
 }
