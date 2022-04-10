@@ -131,6 +131,10 @@ public class ProductController {
                                        HttpServletRequest request){
         //使用 productTypeDao 判断id是哪个类型的产品
         ProductTypeEntity productTypeEntity = productTypeDao.selectById(id);
+        if (productTypeEntity == null){
+            return null;
+        }
+
         String type = productTypeEntity.getType();
 
         if (request.getHeader(FeignConsts.HEADER_NAME) != null){
