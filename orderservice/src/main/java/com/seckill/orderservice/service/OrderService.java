@@ -31,9 +31,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author : 陈征
@@ -214,5 +219,59 @@ public class OrderService {
                         .set("state", orderState.name())
                         .eq("order_id", id)
         );
+    }
+
+    public List<BigDecimal> oneYear() {
+        List<BigDecimal> res = new ArrayList<>();
+        Date now = new Date();
+        now.setDate(1);
+        now.setHours(0);
+        now.setMinutes(0);
+        now.setSeconds(0);
+        long thisMonthStart = now.getTime();
+        for (int i = 11; i > 0; i--) {
+            // 按 1 个月 30 天来算
+            long start = thisMonthStart - (30L * 24 * 60 * 60 * 1000) * i;
+            long end = thisMonthStart - (30L * 24 * 60 * 60 * 1000) * (i - 1);
+            QueryWrapper<OrderEntity> wrapper = new QueryWrapper<>();
+            wrapper.ge("ctime", start).le("ctime", end);
+            List<String> ids = orderDao.selectList(wrapper).stream().map(OrderEntity::getProductId).collect(Collectors.toList());
+            Optional<BigDecimal> opt = productClient.getProductsBatch(ids).stream()
+                    .map(BaseProduct::getPrice)
+                    .reduce((a, b) -> a = a.add(b));
+            if (opt.isPresent()) {
+                res.add(opt.get());
+            } else {
+                res.add(new BigDecimal(0));
+            }
+        }
+        res.add(thisMonthSell());
+        return res;
+    }
+
+    public long thisMonthOrder() {
+        Date now = new Date();
+        now.setDate(1);
+        now.setHours(0);
+        now.setMinutes(0);
+        now.setSeconds(0);
+        long time = now.getTime();
+        QueryWrapper<OrderEntity> wrapper = new QueryWrapper<>();
+        wrapper.ge("ctime", time);
+        return orderDao.selectCount(wrapper);
+    }
+
+    public BigDecimal thisMonthSell() {
+        Date now = new Date();
+        now.setDate(1);
+        now.setHours(0);
+        now.setMinutes(0);
+        now.setSeconds(0);
+        long time = now.getTime();
+        QueryWrapper<OrderEntity> wrapper = new QueryWrapper<>();
+        wrapper.ge("ctime", time);
+        List<String> ids = orderDao.selectList(wrapper).stream().map(OrderEntity::getProductId).collect(Collectors.toList());
+        return productClient.getProductsBatch(ids).stream()
+                .map(BaseProduct::getPrice).reduce((a, b) -> a = a.add(b)).get();
     }
 }
