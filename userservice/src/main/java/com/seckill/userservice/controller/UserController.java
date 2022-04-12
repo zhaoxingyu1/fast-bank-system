@@ -6,6 +6,8 @@ import com.seckill.common.entity.user.RoleEntity;
 import com.seckill.common.entity.user.UserEntity;
 import com.seckill.common.entity.user.UserInfoEntity;
 import com.seckill.common.enums.CodeEnum;
+import com.seckill.common.feign.OrderClient;
+import com.seckill.common.feign.UserClient;
 import com.seckill.common.jwt.JwtToken;
 
 import com.seckill.common.jwt.TokenUtil;
@@ -54,6 +56,8 @@ public class UserController {
     private RoleService roleService;
     @Resource
     private RedisTemplate<String, Object> redis;
+    @Resource
+    private OrderClient orderClient;
 
 
     @PostMapping("/sendEmail")
@@ -334,9 +338,14 @@ public class UserController {
     }
 
     @PostMapping("/payment")
-    public Object Payment(@RequestParam String userInfoId,@RequestParam  BigDecimal money) {
+    public Object Payment(HttpServletRequest request,@RequestParam String orderId,@RequestParam  BigDecimal money) {
 
-        UserInfoEntity userInfoEntity = userInfoService.selectUserInfoById(userInfoId);
+
+        String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
+
+        JwtToken token = TokenUtil.decodeToken(jwtToken);
+
+        UserInfoEntity userInfoEntity = userInfoService.selectUserInfoById(token.getUserInfoId());
 
         // -1：小于； 0 ：等于； 1 ：大于；
         if (userInfoEntity.getWalletBalance().compareTo(money)==1 || userInfoEntity.getWalletBalance().compareTo(money)==0 ) {
@@ -346,14 +355,15 @@ public class UserController {
             Boolean bool = userInfoService.updateUserInfo(userInfoEntity);
 
             if(!bool){
-                return false;
+                return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"未知错误,请联系管理员");
             }
-//            return DataFactory.success(SimpleData.class,"ok");
-            return true;
+            orderClient.updateState(orderId,"Fulfilled");
+            return DataFactory.success(SimpleData.class,"ok");
+
         }else {
-            return false;
-//            return DataFctory.fail(CodeEnum.FORBIDDEN,"您的余额不足,请充值");
+            return DataFactory.fail(CodeEnum.FORBIDDEN,"您的余额不足,请充值");
         }
     }
+
 
 }

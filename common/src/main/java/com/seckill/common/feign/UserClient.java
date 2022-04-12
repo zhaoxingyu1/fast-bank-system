@@ -25,6 +25,4 @@ public interface UserClient {
     @PostMapping("/user/admin/getRiskControl")
     RiskControlEntity getRiskControl();
 
-    @PostMapping("/user/payment")
-    Boolean Payment(@RequestParam String userInfoId,@RequestParam BigDecimal money);
 }
