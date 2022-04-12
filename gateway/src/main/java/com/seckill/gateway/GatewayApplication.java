@@ -11,10 +11,8 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  * @Classname GatewayApplication
  * @Date 2022/2/11 13:24
  */
-@EnableFeignClients(basePackages = "com.seckill.common.feign")
 @SpringBootApplication
 public class GatewayApplication {
-
     public static void main(String[] args) {
     SpringApplication.run(GatewayApplication.class, args);
 }

@@ -17,6 +17,7 @@ import com.seckill.userservice.service.UserInfoService;
 import com.seckill.userservice.service.UserService;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.apache.shiro.authz.annotation.RequiresUser;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -40,6 +41,8 @@ public class AdminController {
     private RoleService roleService;
     @Resource
     private RiskControlService riskControlService;
+    @Resource
+    private RedisTemplate<String, Object> redis;
 
     /**
      * 分页查询全部用户
@@ -122,6 +125,35 @@ public class AdminController {
             return riskControl;
         }
 
+    }
+
+    @PostMapping("/admin/openScriptControl")
+    public Object openScriptControl(){
+
+        redis.opsForValue().set("switch","true");
+        return DataFactory.success(SimpleData.class,"ok");
+    }
+
+    @PostMapping("/admin/closeScriptControl")
+    public Object closeScriptControl(){
+
+        redis.opsForValue().set("switch","false");
+        return DataFactory.success(SimpleData.class,"ok");
+    }
+
+    @PostMapping("/admin/userCount")
+    public Object userCountByTime(Integer day){
+
+        Integer count = userService.selectUserCountByTime(day);
+
+        return DataFactory.success(SimpleData.class,"ok").parseData(count);
+    }
+
+    @PostMapping("/admin/getUserFlow")
+    public Object getUserFlow(){
+
+        Integer userFlow = (Integer)redis.opsForValue().get("userFlow");
+        return DataFactory.success(SimpleData.class,"ok").parseData(userFlow);
     }
 
 }
