@@ -11,6 +11,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import java.math.BigDecimal;
 
 /**
  * @author zxy
@@ -43,6 +44,8 @@ public class UserInfoEntity {
 
     @Pattern(regexp = "^\\d{15}|\\d{18}$",message = "身份证号码错误")
     private String idCard;
+    // 钱包余额
+    private BigDecimal walletBalance;
 
     @Email(message = "邮箱格式错误")
     private String email;

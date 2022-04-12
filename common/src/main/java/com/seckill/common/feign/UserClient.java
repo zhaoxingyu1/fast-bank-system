@@ -2,11 +2,15 @@ package com.seckill.common.feign;
 
 import com.seckill.common.entity.user.RiskControlEntity;
 import com.seckill.common.entity.user.UserEntity;
+import com.seckill.common.response.BaseData;
+import com.seckill.common.response.DataFactory;
+import com.seckill.common.response.SimpleData;
 import com.seckill.common.utils.RiskControl;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 
 @FeignClient("userservice")
 public interface UserClient {
@@ -20,4 +24,7 @@ public interface UserClient {
 
     @PostMapping("/user/admin/getRiskControl")
     RiskControlEntity getRiskControl();
+
+    @PostMapping("/user/payment")
+    Boolean Payment(@RequestParam String userInfoId,@RequestParam BigDecimal money);
 }

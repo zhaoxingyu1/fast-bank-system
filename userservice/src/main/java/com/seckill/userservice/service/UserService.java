@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -56,6 +57,8 @@ public class UserService {
     public Boolean insertUser(UserEntity user, UserInfoEntity userInfo, RoleEntity role) throws Exception {
 
         userInfo.setCreditStatus(1);
+        // 默认每个账户100万元
+        userInfo.setWalletBalance(new BigDecimal("1000000.00"));
         int i = userInfoDao.insert(userInfo);
         int i1 = roleDao.insert(role);
 

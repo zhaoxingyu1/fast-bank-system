@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 
 
@@ -105,10 +106,10 @@ public class UserController {
         response.setHeader(HeaderConsts.JWT_TOKEN, jwtToken);
         response.setHeader("Access-control-Expose-Headers", HeaderConsts.JWT_TOKEN);
 
-        if(redis.opsForValue().get("userFlow")!=null){
+        if (redis.opsForValue().get("userFlow") != null) {
             redis.opsForValue().increment("userFlow");
-        }else{
-            redis.opsForValue().set("userFlow",1);
+        } else {
+            redis.opsForValue().set("userFlow", 1);
         }
 
         return DataFactory.success(SimpleData.class, "登录成功");
@@ -309,7 +310,7 @@ public class UserController {
     }
 
     @PostMapping("/retrievePassword")
-    public Object retrievePassword(String email,String emailCode,String newPassword){
+    public Object retrievePassword(String email, String emailCode, String newPassword) {
 
         ValueOperations<String, Object> opsForValue = redis.opsForValue();
         Object code = opsForValue.get(email);
@@ -332,5 +333,27 @@ public class UserController {
         return DataFactory.success(SimpleData.class, "修改成功");
     }
 
+    @PostMapping("/payment")
+    public Object Payment(@RequestParam String userInfoId,@RequestParam  BigDecimal money) {
+
+        UserInfoEntity userInfoEntity = userInfoService.selectUserInfoById(userInfoId);
+
+        // -1：小于； 0 ：等于； 1 ：大于；
+        if (userInfoEntity.getWalletBalance().compareTo(money)==1 || userInfoEntity.getWalletBalance().compareTo(money)==0 ) {
+
+            userInfoEntity.setWalletBalance(userInfoEntity.getWalletBalance().subtract(money));
+
+            Boolean bool = userInfoService.updateUserInfo(userInfoEntity);
+
+            if(!bool){
+                return false;
+            }
+//            return DataFactory.success(SimpleData.class,"ok");
+            return true;
+        }else {
+            return false;
+//            return DataFctory.fail(CodeEnum.FORBIDDEN,"您的余额不足,请充值");
+        }
+    }
 
 }
