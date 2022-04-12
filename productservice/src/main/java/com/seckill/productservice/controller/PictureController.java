@@ -1,6 +1,9 @@
 package com.seckill.productservice.controller;
 
 import com.netflix.ribbon.proxy.annotation.Http;
+import com.seckill.common.enums.CodeEnum;
+import com.seckill.common.response.DataFactory;
+import com.seckill.common.response.ListData;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,11 +22,11 @@ import java.util.UUID;
 public class PictureController {
 
     @PostMapping("/uploads/{id}")
-    public String uploads(@RequestParam("image") MultipartFile[] files,
+    public Object uploads(@RequestParam("image") MultipartFile[] files,
                           @PathVariable("id") String id,
                           HttpServletRequest request) {
 //        String realPath = request.getSession().getServletContext().getRealPath("/product_images/");
-        String realPath = System.getProperty("user.dir")+"\\productservice\\src\\main\\resources\\product_images\\";
+        String realPath = System.getProperty("user.dir")+"\\productservice\\src\\main\\resources\\static\\";
         System.out.println(realPath);
         File folder = new File(realPath);
         if (!folder.exists()) {
@@ -34,18 +37,19 @@ public class PictureController {
         int i = 1;
         ArrayList<String> urlList = new ArrayList<>();
         for (MultipartFile file : files) {
-            String fileName = id + "--" + i + ".jpg";
+            String fileName = id + "-" + i + ".jpg";
             try {
                 file.transferTo(new File(realPath + fileName));
-                String url = "不会写";
+                String url = realPath + fileName;
                 urlList.add(url);
                 System.out.println(realPath + fileName);
             } catch (Exception e) {
                 e.printStackTrace();
+                return DataFactory.fail(CodeEnum.UNAUTHORIZED, "上传失败");
             }
             i++;
         }
         System.out.println(urlList);
-        return "ok";
+        return DataFactory.success(ListData.class, "上传成功").parseData(urlList);
     }
 }
