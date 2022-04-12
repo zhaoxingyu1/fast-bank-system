@@ -126,13 +126,16 @@ public class UserApplicationRecordService {
         QueryWrapper<UserApplicationRecordEntity> wrapper = new QueryWrapper<>();
         Page<UserApplicationRecordEntity> page = new Page<>(current - 1, PageConst.PageSize);
 
+
+        if(day==null){
+            day = 0 ;
+        }
         Long time1 = System.currentTimeMillis() + day.longValue();
+
 
         wrapper
                 .eq("username", username)
-                .func(i -> {
-                    if (day != null && day.equals(0)) i.lt("ctime",time1);
-                })
+                .lt("ctime",time1)
                 .orderByAsc("ctime");
         Page<UserApplicationRecordEntity> userApplicationRecordEntityPage = userApplicationRecordDao.selectPage(page, wrapper);
 
