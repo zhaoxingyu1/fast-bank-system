@@ -146,6 +146,18 @@ public class OrderService {
 
         ValueOperations<String, Object> ops = redis.opsForValue();
 
+//         分布式锁
+        Boolean absent = ops.setIfAbsent(
+                "lock_" + order.getProductId(),
+                "KANO",
+                RedisConsts.ORDER_WAITING_TIME,
+                TimeUnit.MILLISECONDS
+        );
+        assert absent != null;
+        if (!absent) {
+            throw new NotFoundException("晚了一步");
+        }
+
         OrderEntity entity = orderDao.selectOne(
                 new QueryWrapper<OrderEntity>()
                         .eq("user_id", order.getUserId())
@@ -161,17 +173,6 @@ public class OrderService {
         }
 //        减少真实库存
         ops.decrement("pre" + order.getProductId());
-//         分布式锁
-//        Boolean absent = ops.setIfAbsent(
-//                "lock_" + order.getProductId(),
-//                "KANO",
-//                RedisConsts.ORDER_WAITING_TIME,
-//                TimeUnit.MILLISECONDS
-//        );
-//        assert absent != null;
-//        if (!absent) {
-//            throw new NotFoundException("晚了一步");
-//        }
 
         order.setState(OrderStateEnum.PENDING.name());
         order.setProductType(ProductTypeEnum.financial.name());
@@ -185,7 +186,7 @@ public class OrderService {
                 TimeUnit.MILLISECONDS
         );
 //        解锁
-//        redis.unlink("lock_" + order.getProductId());
+        redis.unlink("lock_" + order.getProductId());
         return order.getOrderId();
     }
 
