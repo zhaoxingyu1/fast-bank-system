@@ -13,9 +13,6 @@ import com.seckill.productservice.dao.ProductTypeDao;
 import com.seckill.productservice.response.FindAllByPage;
 import com.seckill.productservice.service.IFinancialProductService;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -24,10 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author zxy
@@ -95,9 +90,8 @@ public class FinancialProductService implements IFinancialProductService {
                 productMap2.put("con_time", conTime);
                 productMap2.put("type", 2);
                 rabbitTemplate.convertAndSend("delayProductQueue", productMap2, message -> {
-                    String delayTimeStr = String.valueOf(getTime(delayTime));
                     // 设置延时时间
-                    message.getMessageProperties().setExpiration(delayTimeStr);
+                    message.getMessageProperties().setDelay((int)getTime(delayTime));
                     return message;
                 });
             }
@@ -216,6 +210,7 @@ public class FinancialProductService implements IFinancialProductService {
 
     /**
      * 计算这个时间前5分钟的时间
+     * @return
      */
     private long getTime(long time){
         // 五分钟的毫秒数

@@ -93,9 +93,8 @@ public class LoanProductService implements ILoanProductService {
             productMap2.put("type", 1);
             rabbitTemplate.convertAndSend("delayProductQueue", productMap2, message -> {
                 // 将delayTime转换为毫秒，并转换为字符串
-                String delayTimeStr = String.valueOf(delayTime);
                 // 设置延时时间
-                message.getMessageProperties().setExpiration(delayTimeStr);
+                message.getMessageProperties().setDelay((int)getTime(delayTime));
                 return message;
             });
             return l.getLoanProductId();
