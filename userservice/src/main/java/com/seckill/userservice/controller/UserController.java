@@ -273,37 +273,17 @@ public class UserController {
      * 修改用户信息
      *
      * @param request
-     * @param nickname
-     * @param email
-     * @param phone
-     * @param bankCard
-     * @param workingState
      * @return
      * @throws Exception
      */
     @PostMapping("/updateUserInfo")
-    public Object updateUserInfo(HttpServletRequest request, @RequestParam(required = false) String nickname, @Email @RequestParam(required = false) String email, @Pattern(regexp = "^1[3|4|5|7|8][0-9]{9}$", message = "电话号码格式错误") @RequestParam(required = false) String phone, @RequestParam(required = false) String bankCard, @RequestParam(required = false) Integer workingState) throws Exception {
+    public Object updateUserInfo(HttpServletRequest request,@Valid UserInfoEntity userInfo) throws Exception {
 
         String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
 
         JwtToken token = TokenUtil.decodeToken(jwtToken);
-        UserInfoEntity userInfo = userInfoService.selectUserInfoById(token.getUserInfoId());
+        userInfo.setUserInfoId(token.getUserInfoId());
 
-        if (nickname != null && !nickname.equals("")) {
-            userInfo.setNickname(nickname);
-        }
-        if (email != null && !email.equals("")) {
-            userInfo.setEmail(email);
-        }
-        if (phone != null && !phone.equals("")) {
-            userInfo.setPhone(phone);
-        }
-        if (bankCard != null && !bankCard.equals("")) {
-            userInfo.setBankCard(bankCard);
-        }
-        if (workingState != null && !workingState.equals("")) {
-            userInfo.setWorkingState(workingState);
-        }
         Boolean bool = userInfoService.updateUserInfo(userInfo);
 
         if (!bool) {
@@ -337,8 +317,9 @@ public class UserController {
         return DataFactory.success(SimpleData.class, "修改成功");
     }
 
+    // Todo 加分布式锁
     @PostMapping("/payment")
-    public Object Payment(HttpServletRequest request,@RequestParam String orderId,@RequestParam  BigDecimal money) {
+    public Object Payment(HttpServletRequest request, @RequestParam String orderId, @RequestParam BigDecimal money) {
 
 
         String jwtToken = request.getHeader(HeaderConsts.JWT_TOKEN);
@@ -348,20 +329,19 @@ public class UserController {
         UserInfoEntity userInfoEntity = userInfoService.selectUserInfoById(token.getUserInfoId());
 
         // -1：小于； 0 ：等于； 1 ：大于；
-        if (userInfoEntity.getWalletBalance().compareTo(money)==1 || userInfoEntity.getWalletBalance().compareTo(money)==0 ) {
+        if (userInfoEntity.getWalletBalance().compareTo(money) == 1 || userInfoEntity.getWalletBalance().compareTo(money) == 0) {
 
             userInfoEntity.setWalletBalance(userInfoEntity.getWalletBalance().subtract(money));
 
             Boolean bool = userInfoService.updateUserInfo(userInfoEntity);
-
-            if(!bool){
-                return DataFactory.fail(CodeEnum.INTERNAL_ERROR,"未知错误,请联系管理员");
+            if (!bool) {
+                return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "未知错误,请联系管理员");
             }
-            orderClient.updateState(orderId,"Fulfilled");
-            return DataFactory.success(SimpleData.class,"ok");
+            orderClient.updateState(orderId, "Fulfilled");
+            return DataFactory.success(SimpleData.class, "ok");
 
-        }else {
-            return DataFactory.fail(CodeEnum.FORBIDDEN,"您的余额不足,请充值");
+        } else {
+            return DataFactory.fail(CodeEnum.FORBIDDEN, "您的余额不足,请充值");
         }
     }
 

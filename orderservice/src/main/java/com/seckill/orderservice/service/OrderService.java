@@ -147,8 +147,9 @@ public class OrderService {
         ValueOperations<String, Object> ops = redis.opsForValue();
 
 //         分布式锁
+        String lockKey = "lock_" + order.getProductId() + order.getUserId();
         Boolean absent = ops.setIfAbsent(
-                "lock_" + order.getProductId(),
+                lockKey,
                 "KANO",
                 RedisConsts.ORDER_WAITING_TIME,
                 TimeUnit.MILLISECONDS
@@ -164,10 +165,14 @@ public class OrderService {
                         .eq("product_id", order.getProductId())
         );
         if (entity != null) {
+//        解锁
+            redis.unlink(lockKey);
             throw new ForbiddenException("不能对同一产品重复下单哦");
         }
         Long decrement = ops.decrement(order.getProductId());
         if (decrement < 0) {
+//        解锁
+            redis.unlink(lockKey);
             ops.increment(order.getProductId());
             throw new ForbiddenException("商品已卖完或者未在抢购期限内");
         }
@@ -186,7 +191,7 @@ public class OrderService {
                 TimeUnit.MILLISECONDS
         );
 //        解锁
-        redis.unlink("lock_" + order.getProductId());
+        redis.unlink(lockKey);
         return order.getOrderId();
     }
 
