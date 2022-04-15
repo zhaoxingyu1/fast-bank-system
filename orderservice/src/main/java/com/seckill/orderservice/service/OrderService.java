@@ -165,10 +165,14 @@ public class OrderService {
                         .eq("product_id", order.getProductId())
         );
         if (entity != null) {
+//        解锁
+            redis.unlink(lockKey);
             throw new ForbiddenException("不能对同一产品重复下单哦");
         }
         Long decrement = ops.decrement(order.getProductId());
         if (decrement < 0) {
+//        解锁
+            redis.unlink(lockKey);
             ops.increment(order.getProductId());
             throw new ForbiddenException("商品已卖完或者未在抢购期限内");
         }
