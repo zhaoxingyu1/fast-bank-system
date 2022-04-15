@@ -89,7 +89,7 @@ public class FinancialProductService implements IFinancialProductService {
                 productMap2.put("count", count);
                 productMap2.put("con_time", conTime);
                 productMap2.put("type", 2);
-                rabbitTemplate.convertAndSend("delayProductQueue", productMap2, message -> {
+                rabbitTemplate.convertAndSend("delayed_exchange","routinkey", productMap2, message -> {
                     // 设置延时时间
                     message.getMessageProperties().setDelay((int)getTime(delayTime));
                     return message;
@@ -104,10 +104,9 @@ public class FinancialProductService implements IFinancialProductService {
             productMap.put("con_time", conTime);
             productMap.put("type", 1);
             // 1.发送消息至延时队列（产品的抢购开始）
-            rabbitTemplate.convertAndSend("delayProductQueue", productMap, message -> {
+            rabbitTemplate.convertAndSend("delayed_exchange","routinkey", productMap, message -> {
                 // 设置消息队列延时时间
-                String delayTimeStr = String.valueOf(delayTime);
-                message.getMessageProperties().setExpiration(delayTimeStr);
+                message.getMessageProperties().setDelay((int)delayTime);
                 return message;
             });
 

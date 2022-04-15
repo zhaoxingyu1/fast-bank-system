@@ -78,10 +78,8 @@ public class LoanProductService implements ILoanProductService {
             productMap1.put("count", stock);
             productMap1.put("con_time", interval);
             productMap1.put("type", 2);
-            rabbitTemplate.convertAndSend("delayProductQueue", productMap1, message -> {
-                String delayTimeStr = String.valueOf(getTime(delayTime));
-                // 设置延时时间
-                message.getMessageProperties().setExpiration(delayTimeStr);
+            rabbitTemplate.convertAndSend("delayed_exchange","routinkey", productMap1, message -> {
+                message.getMessageProperties().setDelay((int)getTime(delayTime));
                 return message;
             });
 
@@ -91,10 +89,10 @@ public class LoanProductService implements ILoanProductService {
             productMap2.put("count", stock);
             productMap2.put("con_time", interval);
             productMap2.put("type", 1);
-            rabbitTemplate.convertAndSend("delayProductQueue", productMap2, message -> {
+            rabbitTemplate.convertAndSend("delayed_exchange","routinkey", productMap2, message -> {
                 // 将delayTime转换为毫秒，并转换为字符串
                 // 设置延时时间
-                message.getMessageProperties().setDelay((int)getTime(delayTime));
+                message.getMessageProperties().setDelay((int)delayTime);
                 return message;
             });
             return l.getLoanProductId();
