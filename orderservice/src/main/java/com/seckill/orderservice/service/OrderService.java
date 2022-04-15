@@ -147,8 +147,9 @@ public class OrderService {
         ValueOperations<String, Object> ops = redis.opsForValue();
 
 //         分布式锁
+        String lockKey = "lock_" + order.getProductId() + order.getUserId();
         Boolean absent = ops.setIfAbsent(
-                "lock_" + order.getProductId(),
+                lockKey,
                 "KANO",
                 RedisConsts.ORDER_WAITING_TIME,
                 TimeUnit.MILLISECONDS
@@ -186,7 +187,7 @@ public class OrderService {
                 TimeUnit.MILLISECONDS
         );
 //        解锁
-        redis.unlink("lock_" + order.getProductId());
+        redis.unlink(lockKey);
         return order.getOrderId();
     }
 
