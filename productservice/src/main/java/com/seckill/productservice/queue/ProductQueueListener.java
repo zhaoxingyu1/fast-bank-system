@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  * @Date: 2022/3/12 13:12
  */
 @Component
-@RabbitListener(queues = "product-dlx-queue")
+@RabbitListener(queues = "delayed_queue")
 public class ProductQueueListener {
     @Resource
     private RedisTemplate<String, Object> redis;
@@ -30,10 +30,20 @@ public class ProductQueueListener {
     @RabbitHandler
     public void receive(Map<String, Object> map){
         System.out.println("收到了-------------------:" + new Date());
-        String productId = (String) map.get("product_id");
-        Integer count = (Integer) map.get("count");
-        Long conTime = Long.valueOf(String.valueOf(map.get("con_time")));
-        Integer type = (Integer) map.get("type");
+
+        String productId = null;
+        Integer count = null;
+        Long conTime = null;
+        Integer type = null;
+
+        try{
+            productId = (String) map.get("product_id");
+            count = (Integer) map.get("count");
+            conTime = Long.valueOf(String.valueOf(map.get("con_time")));
+            type = (Integer) map.get("type");
+        } catch (Exception e){
+            e.printStackTrace();
+        }
 
         // 打印属性
         System.out.println("productId:" + productId);
@@ -41,33 +51,32 @@ public class ProductQueueListener {
         System.out.println("conTime:" + conTime);
         System.out.println("type:" + type);
 
-        if(type == 1){
-            //类型1，产品开始抢购的消息
-            // 推送至缓存
-            ValueOperations<String, Object> opsForValue = redis.opsForValue();
-            opsForValue.set("pre" + productId,count);
-            opsForValue.set(productId,count,conTime, TimeUnit.MILLISECONDS);
-        }else if(type == 2){
-            //类型2，产品开枪前五分钟发邮件提醒预约的人
-            System.out.println("收到了-------------------:" + new Date());
-            System.out.println("成功进入发邮件的逻辑");
-            try {
-                sendUserEmail.sendEmailToUser(productId);
-            } catch (Exception e) {
-                e.printStackTrace();
+        // 判断这四个属性是否为空，只要有一个为空，就不执行下面的代码
+        if(productId == null || count == null || conTime == null || type == null){
+            throw new RuntimeException("消息队列在进行推送时，消息中的属性有空值，请检查");
+        }
+
+        try{
+            if(type == 1){
+                //类型1，产品开始抢购的消息
+                // 推送至缓存
+                ValueOperations<String, Object> opsForValue = redis.opsForValue();
+                opsForValue.set("pre" + productId,count);
+                opsForValue.set(productId,count,conTime, TimeUnit.MILLISECONDS);
+            }else if(type == 2){
+                //类型2，产品开枪前五分钟发邮件提醒预约的人
+                System.out.println("收到了-------------------:" + new Date());
+                System.out.println("成功进入发邮件的逻辑");
+                try {
+                    sendUserEmail.sendEmailToUser(productId);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }else{
+                throw new RuntimeException("消息类型错误");
             }
-        }else{
-            throw new RuntimeException("消息类型错误");
+        } catch (Exception e){
+            e.printStackTrace();
         }
     }
-//    @RabbitListener(queues = "delayed_queue")
-//    public void receiveMessage(Message message, Channel channel){
-//        String msg = new String(message.getBody());
-//        System.out.println("当前时间"+new Date().toString()+"，收到延迟队列的消息："+msg);
-//    }
-//    @RabbitListener(queues = "product-dlx-queue")
-//    @RabbitHandler
-//    public void receiveMessage(Map<String, Object> map){
-//        System.out.println("当前时间"+new Date().toString()+"，收到延迟队列的消息："+ map.toString());
-//    }
 }

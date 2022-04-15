@@ -26,23 +26,23 @@ public class UserInfoEntity {
     @TableId(type = IdType.ASSIGN_UUID)
     private String userInfoId;
 
-    @Length(min = 2 ,max = 30,message = "昵称长度为2-20个字符以内")
+    @Length(min = 2, max = 30, message = "昵称长度为2-20个字符以内")
     private String nickname;
 
     @NotNull(message = "真实名字不能为空")
     private String realName;
 
-    @Range(min = 0,max = 100,message = "年龄必须大于等于0，小于等于100")
+    @Range(min = 0, max = 100, message = "年龄必须大于等于0，小于等于100")
     private Integer age;
 
     @NotNull(message = "性别不能为空")
     private Integer gender;
 
     @NotNull(message = "电话号码不能为空")
-    @Pattern(regexp = "^1[3|4|5|7|8|9][0-9]{9}$",message = "电话号码格式错误")
+    @Pattern(regexp = "^1[3|4|5|7|8|9][0-9]{9}$", message = "电话号码格式错误")
     private String phone;
 
-    @Pattern(regexp = "^\\d{15}|\\d{18}$",message = "身份证号码错误")
+    @Pattern(regexp = "^\\d{15}|\\d{18}$", message = "身份证号码错误")
     private String idCard;
     // 钱包余额
     private BigDecimal walletBalance;
