@@ -78,6 +78,6 @@ public class SendUserEmail {
         // 查询user_product表中符合productId且status为1的数据
         return userProductDao.selectList(new QueryWrapper<>(new UserProductEntity())
         .eq("product_id", productId)
-        .eq("status", 1));
+        .eq("booking_status", 1));
     }
 }
