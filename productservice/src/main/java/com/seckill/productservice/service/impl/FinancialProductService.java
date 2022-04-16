@@ -123,6 +123,7 @@ public class FinancialProductService implements IFinancialProductService {
         FinancialProductEntity re = financialProductDao.selectById(financialProductId);
         if (re != null){
             int delete = financialProductDao.deleteById(financialProductId);
+            productTypeDao.deleteById(financialProductId);
             if(delete == 0){
                 throw new DatabaseOperationException("删除产品失败");
             } else {

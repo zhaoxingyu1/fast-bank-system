@@ -104,6 +104,7 @@ public class LoanProductService implements ILoanProductService {
     @Override
     public void deleteLoanProduct(String loanProductId) throws Exception{
         LoanProductEntity re = loanProductDao.selectById(loanProductId);
+        productTypeDao.deleteById(loanProductId);
         if(re != null){
             int delete = loanProductDao.deleteById(loanProductId);
             if(delete == 0){
