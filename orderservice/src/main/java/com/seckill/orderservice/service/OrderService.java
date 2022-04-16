@@ -32,10 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -245,11 +242,7 @@ public class OrderService {
             Optional<BigDecimal> opt = productClient.getProductsBatch(ids).stream()
                     .map(BaseProduct::getPrice)
                     .reduce((a, b) -> a = a.add(b));
-            if (opt.isPresent()) {
-                res.add(opt.get());
-            } else {
-                res.add(new BigDecimal(0));
-            }
+            res.add(opt.orElseGet(() -> new BigDecimal(0)));
         }
         res.add(thisMonthSell());
         return res;
@@ -277,7 +270,8 @@ public class OrderService {
         QueryWrapper<OrderEntity> wrapper = new QueryWrapper<>();
         wrapper.ge("ctime", time);
         List<String> ids = orderDao.selectList(wrapper).stream().map(OrderEntity::getProductId).collect(Collectors.toList());
-        return productClient.getProductsBatch(ids).stream()
-                .map(BaseProduct::getPrice).reduce((a, b) -> a = a.add(b)).get();
+        Optional<BigDecimal> reduce = productClient.getProductsBatch(ids).stream().filter(Objects::nonNull)
+                .map(BaseProduct::getPrice).reduce((a, b) -> a = a.add(b));
+        return reduce.orElseGet(() -> new BigDecimal(0));
     }
 }
