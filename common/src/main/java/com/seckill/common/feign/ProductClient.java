@@ -30,4 +30,9 @@ public interface ProductClient {
     @GetMapping("product/userProduct/isReserved/{userId}/{productId}")
     Boolean isReserved(@PathVariable("userId") String userId,
                        @PathVariable("productId") String productId);
+
+    //传入一个贷款产品ID，对其库存减一
+    @GetMapping("product/userProduct/userProductStock/{productId}")
+    Object loanProductStockReduce(HttpServletRequest request,
+                                  @PathVariable("productId")String productId);
 }

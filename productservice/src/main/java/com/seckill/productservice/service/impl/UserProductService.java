@@ -125,23 +125,44 @@ public class UserProductService implements IUserProductService {
         return true;
     }
 
-    @Override
-    public Boolean userBuyProduct(String userId, String type, String productId) throws Exception {
-        ValueOperations<String, Object> ops = redis.opsForValue();
-        Integer count = (Integer) ops.get(productId);
-        if (count != null && count > 0){
-            // 用户购买成功，缓存减一
-            Integer newCount = count - 1;
-            ops.set(productId,newCount);
-        }else {
-            throw new NotFoundException("未找到这个产品");
-        }
 
-        // todo 用户抢购成功，调用订单模块生成订单
-        if(type.equals("financial")){
-        }else if(type.equals("loan")){
+    /**
+     * 只对贷款产品进行减库存操作，无需判断类型
+     * @param productId
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public Boolean reduceProductStock(String productId) throws Exception {
+        // 缓存中获取产品库存
+        Integer stock = (Integer) redis.opsForValue().get(productId);
+        if (stock == null){
+            // 缓存中没有，从数据库中对于这个产品的库存进行自减
+            LoanProductEntity loanProductEntity = loanProductDao.selectById(productId);
+            if (loanProductEntity == null){
+                throw new NotFoundException("未找到相关记录，可能是这个产品不存在");
+            } else {
+                // 判断库存是否大于0
+                if (loanProductEntity.getStock() <= 0){
+                    throw new NotFoundException("该产品已经售罄");
+                } else {
+                    // 减库存
+                    loanProductEntity.setStock(loanProductEntity.getStock() - 1);
+                    int update = loanProductDao.updateById(loanProductEntity);
+                    if (update == 0){
+                        throw new DatabaseOperationException("减库存失败，可能是数据库操作失败");
+                    }
+                }
+            }
+        }else {
+            if(stock <= 0){
+                throw new NotFoundException("该产品已经售罄");
+            }else {
+                Integer newStock = stock - 1;
+                redis.opsForValue().set(productId, newStock);
+            }
         }
-        return null;
+        return true;
     }
 
     @Override
