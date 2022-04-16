@@ -187,6 +187,11 @@ public class OrderService {
                 RedisConsts.ORDER_WAITING_TIME,
                 TimeUnit.MILLISECONDS
         );
+//        过期键对应的产品id
+        ops.set(
+                RedisConsts.ORDER_KEY_PREFIX_EXPIRED + order.getOrderId() + "wuhu",
+                order.getProductId()
+        );
 //        解锁
         redis.unlink(lockKey);
         return order.getOrderId();
