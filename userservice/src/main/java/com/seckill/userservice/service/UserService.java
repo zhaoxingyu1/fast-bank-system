@@ -57,6 +57,8 @@ public class UserService {
     public Boolean insertUser(UserEntity user, UserInfoEntity userInfo, RoleEntity role) throws Exception {
 
         userInfo.setCreditStatus(1);
+        userInfo.setWorkingState(1);
+        userInfo.setOverdueNumber(0);
         // 默认每个账户100万元
         userInfo.setWalletBalance(new BigDecimal("1000000.00"));
         int i = userInfoDao.insert(userInfo);

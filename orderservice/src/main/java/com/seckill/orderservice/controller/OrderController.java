@@ -11,10 +11,7 @@ import com.seckill.common.jwt.TokenUtil;
 import com.seckill.common.response.*;
 import com.seckill.orderservice.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -92,7 +89,7 @@ public class OrderController {
     }
 
     @PostMapping("/updateState")
-    public Object updateState(HttpServletRequest request, String id, String state) {
+    public Object updateState(HttpServletRequest request, @RequestParam String id,@RequestParam String state) {
         orderService.updateState(id, OrderStateEnum.valueOf(state));
         if (request.getHeader(FeignConsts.HEADER_NAME) != null) {
             log.info("------------ feign 调用!");

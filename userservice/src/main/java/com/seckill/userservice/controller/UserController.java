@@ -317,7 +317,6 @@ public class UserController {
         return DataFactory.success(SimpleData.class, "修改成功");
     }
 
-    // Todo 加分布式锁
     @PostMapping("/payment")
     public Object Payment(HttpServletRequest request, @RequestParam String orderId, @RequestParam BigDecimal money) {
 
@@ -337,7 +336,7 @@ public class UserController {
             if (!bool) {
                 return DataFactory.fail(CodeEnum.INTERNAL_ERROR, "未知错误,请联系管理员");
             }
-            orderClient.updateState(orderId, "Fulfilled");
+            orderClient.updateState(orderId, "FULFILLED");
             return DataFactory.success(SimpleData.class, "ok");
 
         } else {

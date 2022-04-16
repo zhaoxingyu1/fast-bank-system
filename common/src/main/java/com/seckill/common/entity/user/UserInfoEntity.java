@@ -59,5 +59,4 @@ public class UserInfoEntity {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long mtime;
 
-
 }
