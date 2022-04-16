@@ -210,6 +210,7 @@ public class OrderService {
         order.setProductType(ProductTypeEnum.loan.name());
         orderDao.insert(order);
         log.info("created loan order: " + order.getOrderId());
+        productClient.loanProductStockReduce(order.getProductId());
         return order.getOrderId();
     }
 

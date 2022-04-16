@@ -33,6 +33,5 @@ public interface ProductClient {
 
     //传入一个贷款产品ID，对其库存减一
     @GetMapping("product/userProduct/userProductStock/{productId}")
-    Object loanProductStockReduce(HttpServletRequest request,
-                                  @PathVariable("productId")String productId);
+    Object loanProductStockReduce(@PathVariable("productId")String productId);
 }
