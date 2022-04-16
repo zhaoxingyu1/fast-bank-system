@@ -6,6 +6,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * @author : 陈征
@@ -19,5 +20,5 @@ public interface OrderClient {
     OrderEntity getById(String id);
 
     @PostMapping("order/updateState")
-    void updateState(@PathVariable String id, @PathVariable String state);
+    void updateState(@RequestParam String id, @RequestParam String state);
 }
