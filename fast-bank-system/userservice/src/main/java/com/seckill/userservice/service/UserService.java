@@ -42,7 +42,7 @@ public class UserService {
     @Resource
     private RoleDao roleDao;
 
-    @Autowired
+    @Resource
     private JavaMailSender mailSender;
 
     @Value("${spring.mail.username}")

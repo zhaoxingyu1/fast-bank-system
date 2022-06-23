@@ -16,6 +16,9 @@
           </a-typography-title>
           <a-typography-title :heading="6">
             输入你的个人资料，开始与我们的旅程！
+            <br>
+            <p style="color: red">管理员账号：admin&emsp;&emsp;密码 123456</p>
+            <p style="color: red">普通用户账号：user&emsp;&emsp;密码 123456</p>
           </a-typography-title>
         </a-typography>
         <a-button type="primary" @click="loginState = 'register'" style="margin-top: 20px">注 册</a-button>

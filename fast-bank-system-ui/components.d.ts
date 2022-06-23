@@ -61,7 +61,6 @@ declare module 'vue' {
     ATypographyTitle: typeof import('@arco-design/web-vue')['TypographyTitle']
     DeleteButton: typeof import('./src/components/DeleteButton.vue')['default']
     IconSelector: typeof import('./src/components/IconSelector.vue')['default']
-    MarkdownEditor: typeof import('./src/components/MarkdownEditor.vue')['default']
     MessageContent: typeof import('./src/components/MessageContent.vue')['default']
     ModalDialog: typeof import('./src/components/ModalDialog.vue')['default']
     PasswordStrong: typeof import('./src/components/PasswordStrong.vue')['default']
