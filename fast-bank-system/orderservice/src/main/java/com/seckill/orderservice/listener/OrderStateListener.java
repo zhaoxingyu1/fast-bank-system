@@ -35,7 +35,7 @@ public class OrderStateListener implements MessageListener {
             log.info("order key expired: " + key);
             ValueOperations<String, Object> ops = redis.opsForValue();
             String o = (String) ops.get(key + "wuhu");
-            ops.increment(o);
+            ops.increment("pre" + o);
             redis.unlink(o);
             orderClient.updateState(
                     key.substring(RedisConsts.ORDER_KEY_PREFIX_EXPIRED.length()),

@@ -156,6 +156,7 @@ public class OrderService {
             throw new NotFoundException("晚了一步");
         }
 
+        // 订单去重
         OrderEntity entity = orderDao.selectOne(
                 new QueryWrapper<OrderEntity>()
                         .eq("user_id", order.getUserId())
@@ -166,6 +167,8 @@ public class OrderService {
             redis.unlink(lockKey);
             throw new ForbiddenException("不能对同一产品重复下单哦");
         }
+
+        // 减少 redis 库存
         Long decrement = ops.decrement(order.getProductId());
         if (decrement < 0) {
 //        解锁
